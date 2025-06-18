@@ -7,8 +7,37 @@ class survey_processor:
     def __init__(self, csv_file):
         self.parsed_data = pd.read_csv(csv_file)
         self.transformed_data = []    
+
+    def process_questions(self):
+            # Define the mapping of questions to their corresponding keys
+        self.questions = {
+            "id": "Id",
+            "professional_role": "How would you primarily describe your professional role?",
+            "years_experience": "How many years of experience do you have in game development?",
+            "level_generation_frequency": "How frequently do you incorporate procedural level generation (not just world building) in your design workflow?",
+            "tool_view": "Which statement best describes your view on procedural level generation tools?",            
+            "realtime_feedback_importance": "How important is real-time feedback when configuring a procedural level generator?",
+            "preferred_approach": "Which approach to creating procedural generators would you prefer?",
+            "integration_preference": "What level of integration would you prefer for a PCG level generation tool?",
+            "most_useful_approach": "Which of these approaches to level generation would be most useful to your workflow? (Select one)",
+            "most_important_problem": "What is the single most important problem you would want a procedural level generation tool to solve in your workflow?"
+        }
+
+
+        # Get all the unique answers options for each question 
+        #self.answers = {}
+        #for key, question in self.questions.items():
+        #    for index, row in self.parsed_data.iterrows():
+        #        if question in row:
+        #            answer = row[question]
+        #            if pd.notna(answer):
+                
+            
             
     def process_data(self):
+        # init the sets of answers options per question 
+        self.answers = {key: set() for key in self.questions.keys()}
+
         self.transformed_data = []
         for index, row in self.parsed_data.iterrows():
             transformed_row = {}
@@ -23,32 +52,14 @@ class survey_processor:
                         transformed_row[key] = None
                     else:
                         transformed_row[key] = value
+
+                    # Collect unique answers for each question
+                    if pd.notna(value):
+                        self.answers[key].add(value)
                 else:
                     transformed_row[key] = None
             
             self.transformed_data.append(transformed_row)
-
-    def process_questions(self):
-            # Define the mapping of questions to their corresponding keys
-        self.questions = {
-            "id": "Id",
-            "professional_role": "How would you primarily describe your professional role?",
-            "years_experience": "How many years of experience do you have in game development?",
-            "level_generation_frequency": "How frequently do you incorporate procedural level generation (not just worldbuilding) in your design workflow?",
-            "tool_view": "Which statement best describes your view on procedural level generation tools?",            
-            "realtime_feedback_importance": "How important is real-time feedback when configuring a procedural level generator?",
-            "preferred_approach": "Which approach to creating procedural generators would you prefer?",
-            "integration_preference": "What level of integration would you prefer for a PCG level generation tool?",
-            "most_useful_approach": "Which of these approaches to level generation would be most useful to your workflow? (Select one)",
-            "most_important_problem": "What is the single most important problem you would want a procedural level generation tool to solve in your workflow?"
-        }
-
-        # Get all the possble answers to per question and store them in another dictionary
-#        self.answers = {}
-#        for key, question in self.questions.items():
-#            # Get unique answers for each question
-#            unique_answers = self.parsed_data[question].dropna().unique().tolist()
-#            self.answers[key] = unique_answers
 
 
     def process(self):
