@@ -1,0 +1,14 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+        "name": "Launch Edge with Live Server",
+            "request": "launch",
+            "type": "msedge",
+            "url": "http://localhost:5500",
+            "webRoot": "${workspaceFolder}",
+            "sourceMaps": true,
+            "userDataDir": "${workspaceFolder}/.vscode/edge-debug-userdatadir"
+        }
+    ]
+}
