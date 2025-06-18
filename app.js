@@ -4,6 +4,23 @@ let headers = [];
 let currentChart = null;
 let questionCategoriesData = {};
 let showingFullData = false;
+let matrixQuestions = {};
+let processedQuestions = [];
+
+// Define matrix question patterns
+const matrixPatterns = {
+    'Tool Experience Rating': {
+        columns: ['Houdini', 'Unreal Engine PCG tools', 'Blender Geometry Nodes', 
+                 'Plugins/Tools that use Wave Function Collapse', 
+                 'Plugins/Tools that use other methods', 'Custom code-based PCG solutions'],
+        originalQuestion: 'How would you rate your current experience with the following procedural tools?'
+    },
+    'Genre Interest Rating': {
+        columns: ['Action/Adventure', 'First-person Shooters', 'Platformers', 
+                 'Racing games', 'Puzzle games', 'RPGs', 'Strategy games', 'Roguelikes / Roguelites'],
+        originalQuestion: 'If your project were of the following game genre, how interested would you be in using procedural level generation?'
+    }
+};
 
 // DOM elements
 const statusDiv = document.getElementById('status');
@@ -83,6 +100,45 @@ function processAndDisplayData() {
     hideStatus();
 }
 
+// Reconstruct matrix questions from exploded columns
+function reconstructMatrixQuestions() {
+    matrixQuestions = {};
+    processedQuestions = [...headers]; // Start with all original headers
+    
+    // Process each matrix pattern
+    Object.entries(matrixPatterns).forEach(([matrixName, pattern]) => {
+        const { columns, originalQuestion } = pattern;
+        
+        // Check if all columns exist in our data
+        const existingColumns = columns.filter(col => headers.includes(col));
+        
+        if (existingColumns.length > 0) {
+            // Create the matrix question
+            matrixQuestions[matrixName] = {
+                originalQuestion,
+                columns: existingColumns,
+                data: csvData.map(row => {
+                    const matrixData = {};
+                    existingColumns.forEach(col => {
+                        matrixData[col] = row[col];
+                    });
+                    return matrixData;
+                })
+            };
+            
+            // Remove the individual columns from processed questions
+            // and add the matrix question
+            processedQuestions = processedQuestions.filter(h => !existingColumns.includes(h));
+            processedQuestions.push(matrixName);
+            
+            console.log(`Reconstructed matrix question: ${matrixName} with ${existingColumns.length} items`);
+        }
+    });
+    
+    console.log(`Total questions after reconstruction: ${processedQuestions.length}`);
+    console.log('Matrix questions created:', Object.keys(matrixQuestions));
+}
+// Categorize questions based on their content and type
 // Categorize questions based on their content and type
 function categorizeQuestions() {
     questionCategoriesData = {
@@ -94,14 +150,29 @@ function categorizeQuestions() {
         'Other': []
     };
     
-    headers.forEach(header => {
-        const lowerHeader = header.toLowerCase();
-        
-        if (lowerHeader.includes('email') || lowerHeader.includes('name') || 
-            lowerHeader.includes('time') || lowerHeader.includes('id')) {
-            return; // Skip metadata fields
+    // Define metadata fields to exclude
+    const metadataFields = ['ID', 'Start time', 'Completion time', 'Email', 'Name', 'Last modified time'];
+    
+    // Process both regular questions and matrix questions
+    processedQuestions.forEach(header => {
+        // Skip metadata fields
+        if (metadataFields.includes(header)) {
+            return;
         }
         
+        const lowerHeader = header.toLowerCase();
+        
+        // Special handling for matrix questions
+        if (matrixQuestions[header]) {
+            if (header === 'Tool Experience Rating') {
+                questionCategoriesData['Experience & Tools'].push(header);
+            } else if (header === 'Genre Interest Rating') {
+                questionCategoriesData['Game Development'].push(header);
+            }
+            return;
+        }
+        
+        // Regular question categorization
         if (lowerHeader.includes('role') || lowerHeader.includes('experience')) {
             questionCategoriesData['Demographics'].push(header);
         } else if (lowerHeader.includes('engine') || lowerHeader.includes('tool') || 
@@ -124,6 +195,8 @@ function categorizeQuestions() {
             questionCategoriesData['Other'].push(header);
         }
     });
+    
+    console.log('Question categories:', questionCategoriesData);
 }
 
 // Display summary overview statistics
@@ -132,10 +205,10 @@ function displaySummaryOverview() {
     
     // Calculate key statistics
     const totalResponses = csvData.length;
-    const totalQuestions = headers.filter(h => !h.toLowerCase().includes('time') && 
-                                          !h.toLowerCase().includes('email') && 
-                                          !h.toLowerCase().includes('name') && 
-                                          !h.toLowerCase().includes('id')).length;
+    
+    // Count actual survey questions (exclude only metadata, not matrix questions)
+    const metadataFields = ['ID', 'Start time', 'Completion time', 'Email', 'Name', 'Last modified time'];
+    const totalQuestions = processedQuestions.filter(h => !metadataFields.includes(h)).length;
     
     // Calculate completion rate (responses with substantial data)
     const completeResponses = csvData.filter(row => {
@@ -223,8 +296,36 @@ function displayKeyInsights() {
     showElement(insightsSection);
 }
 
-// Analyze top responses for a question
+// Analyze top responses for a question (handles both regular and matrix questions)
 function analyzeTopResponses(questionName, topN = 5) {
+    // Handle matrix questions
+    if (matrixQuestions[questionName]) {
+        const matrixData = matrixQuestions[questionName];
+        const allRatings = {};
+        
+        // Collect all ratings across all tools/genres
+        matrixData.columns.forEach(column => {
+            csvData.forEach(row => {
+                const rating = row[column];
+                if (rating && rating.trim()) {
+                    const key = `${column}: ${rating}`;
+                    allRatings[key] = (allRatings[key] || 0) + 1;
+                }
+            });
+        });
+        
+        const sortedEntries = Object.entries(allRatings)
+            .sort(([,a], [,b]) => b - a)
+            .slice(0, topN);
+        
+        return {
+            total: Object.values(allRatings).reduce((sum, count) => sum + count, 0),
+            top: sortedEntries.map(([value, count]) => ({ value, count })),
+            isMatrix: true
+        };
+    }
+    
+    // Handle regular questions (existing logic)
     const responses = csvData.map(row => row[questionName]).filter(response => response && response.trim());
     
     if (responses.length === 0) return null;
@@ -256,7 +357,8 @@ function analyzeTopResponses(questionName, topN = 5) {
     
     return {
         total: responses.length,
-        top: sortedEntries.map(([value, count]) => ({ value, count }))
+        top: sortedEntries.map(([value, count]) => ({ value, count })),
+        isMatrix: false
     };
 }
 
@@ -302,6 +404,38 @@ window.showCategory = function(categoryName) {
     
     const questionList = questions.map(question => {
         const analysis = analyzeTopResponses(question, 3);
+        
+        // Handle matrix questions differently
+        if (matrixQuestions[question]) {
+            const matrixData = matrixQuestions[question];
+            const responseCount = matrixData.data.reduce((count, row) => {
+                return count + Object.values(row).filter(val => val && val.trim()).length;
+            }, 0);
+            
+            let summary = `${responseCount} total ratings across ${matrixData.columns.length} items`;
+            let preview = `<div class="response-preview">
+                <strong>Matrix Question:</strong> ${matrixData.originalQuestion}<br>
+                <strong>Items:</strong> ${matrixData.columns.join(', ')}
+            </div>`;
+            
+            if (analysis && analysis.top.length > 0) {
+                preview += `<div class="response-preview">
+                    <strong>Most common ratings:</strong> ${analysis.top.map(item => 
+                        `${item.value} (${item.count})`
+                    ).join(', ')}
+                </div>`;
+            }
+            
+            return `
+                <div class="question-item">
+                    <div class="question-title">${question} <span style="color: #667eea; font-size: 0.8em;">[Matrix]</span></div>
+                    <div class="question-summary">${summary}</div>
+                    ${preview}
+                </div>
+            `;
+        }
+        
+        // Regular questions
         const responseCount = csvData.filter(row => row[question] && row[question].trim()).length;
         
         let summary = `${responseCount} responses`;
