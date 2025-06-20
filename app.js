@@ -17,16 +17,12 @@ const SurveyApp = {
     init() {
         console.log('Initializing Survey Analysis Tool...');
         this.setupEventListeners();
+        // Auto-load data on startup
+        this.loadData();
     },
     
     // Set up event listeners
     setupEventListeners() {
-        // Add load data button listener
-        const loadBtn = document.getElementById('loadDataBtn');
-        if (loadBtn) {
-            loadBtn.addEventListener('click', () => this.loadData());
-        }
-
         // Add question selector listener
         const questionSelect = document.getElementById('questionSelect');
         if (questionSelect) {
@@ -37,12 +33,10 @@ const SurveyApp = {
     // Load survey data and schema
     async loadData() {
         const statusDiv = document.getElementById('dataStatus');
-        const loadBtn = document.getElementById('loadDataBtn');
         
         try {
             // Show loading state
             this.showStatus('loading', 'Loading survey data and schema...');
-            loadBtn.disabled = true;
             
             // Load both files concurrently
             const [responsesResponse, schemaResponse] = await Promise.all([
@@ -74,7 +68,6 @@ const SurveyApp = {
         } catch (error) {
             console.error('Error loading data:', error);
             this.showStatus('error', `Failed to load data: ${error.message}`);
-            loadBtn.disabled = false;
         }
     },
     
@@ -110,7 +103,6 @@ const SurveyApp = {
     // Show data summary
     showDataSummary() {
         const { responses, schema } = this.data;
-        const loadBtn = document.getElementById('loadDataBtn');
         
         // Count unique roles
         const roles = responses.map(r => r.professional_role).filter(Boolean);
@@ -126,15 +118,19 @@ const SurveyApp = {
             <br><strong>${Object.keys(schema.questions).length}</strong> question types in schema
             <br><strong>${uniqueRoles}</strong> different professional roles
             <br><strong>${uniqueExperience}</strong> experience level categories
-            <br><br>Data is ready for analysis and visualization.
         `;
         
         this.showStatus('success', summaryText);
-        loadBtn.textContent = 'Data Loaded ✓';
-        loadBtn.disabled = true;
         
-        // Show analysis section and populate question dropdown
-        this.showAnalysisSection();
+        // Hide status after 3 seconds
+        setTimeout(() => {
+            const statusDiv = document.getElementById('dataStatus');
+            if (statusDiv) {
+                statusDiv.classList.add('hidden');
+            }
+        }, 3000);
+        
+        // Populate question dropdown
         this.populateQuestionDropdown();
         
         console.log('Survey data loaded successfully:', {
@@ -145,12 +141,9 @@ const SurveyApp = {
         });
     },
 
-    // Show the analysis section
+    // Show the analysis section (no longer needed as it's always visible)
     showAnalysisSection() {
-        const analysisSection = document.getElementById('analysisSection');
-        if (analysisSection) {
-            analysisSection.classList.remove('hidden');
-        }
+        // Legacy method - analysis section is now always visible
     },
 
     // Populate the question dropdown with single choice questions
@@ -180,6 +173,7 @@ const SurveyApp = {
     analyzeQuestion(questionKey) {
         if (!questionKey || !this.data.loaded) {
             this.clearChart();
+            this.clearOtherAnswers();
             return;
         }
         
@@ -189,6 +183,7 @@ const SurveyApp = {
         if (!question || question.type !== 'single_choice') {
             console.log('Question not found or not single choice');
             this.clearChart();
+            this.clearOtherAnswers();
             return;
         }
         
@@ -197,14 +192,29 @@ const SurveyApp = {
         // Get response data for this question
         const responseData = responses.map(r => r[questionKey]).filter(Boolean);
         
-        // Count responses
+        // Count responses and separate "other" answers
         const counts = {};
+        const otherAnswers = [];
+        
         responseData.forEach(response => {
-            counts[response] = (counts[response] || 0) + 1;
+            // Check if this is an "other" type answer (not in predefined options)
+            const isOtherAnswer = question.options && !question.options.includes(response);
+            
+            if (isOtherAnswer) {
+                otherAnswers.push(response);
+            } else {
+                counts[response] = (counts[response] || 0) + 1;
+            }
         });
         
-        // Create pie chart
+        // If there are "other" answers, group them
+        if (otherAnswers.length > 0) {
+            counts['Other'] = otherAnswers.length;
+        }
+        
+        // Create pie chart and show other answers
         this.createPieChart(question.question, counts);
+        this.showOtherAnswers(otherAnswers);
     },
 
     // Create a pie chart
@@ -230,8 +240,7 @@ const SurveyApp = {
                 datasets: [{
                     data: values,
                     backgroundColor: colors.background,
-                    borderColor: colors.border,
-                    borderWidth: 2
+                    borderWidth: 0  // Remove border/outline
                 }]
             },
             options: {
@@ -280,15 +289,42 @@ const SurveyApp = {
         ];
         
         const background = [];
-        const border = [];
         
         for (let i = 0; i < count; i++) {
             const color = colors[i % colors.length];
             background.push(color + '80'); // Add transparency
-            border.push(color);
         }
         
-        return { background, border };
+        return { background };
+    },
+
+    // Show other answers below the chart
+    showOtherAnswers(otherAnswers) {
+        const otherContainer = document.getElementById('otherAnswers');
+        if (!otherContainer) return;
+        
+        if (otherAnswers.length === 0) {
+            otherContainer.classList.add('hidden');
+            return;
+        }
+        
+        otherContainer.innerHTML = `
+            <h3>Other Responses (${otherAnswers.length}):</h3>
+            <ul>
+                ${otherAnswers.map(answer => `<li>"${answer}"</li>`).join('')}
+            </ul>
+        `;
+        
+        otherContainer.classList.remove('hidden');
+    },
+
+    // Clear other answers display
+    clearOtherAnswers() {
+        const otherContainer = document.getElementById('otherAnswers');
+        if (otherContainer) {
+            otherContainer.classList.add('hidden');
+            otherContainer.innerHTML = '';
+        }
     },
 
     // Clear the chart
