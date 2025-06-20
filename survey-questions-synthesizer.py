@@ -27,7 +27,7 @@ class survey_questions_synthesizer:
                 "type": "single_choice",
                 "options": [
                     "Level Designer",
-                    "Game Designer"
+                    "Game Designer",
                     "Technical Artist",
                     "Environment Artist",
                     "Programmer/Technical Designer",
@@ -123,8 +123,9 @@ class survey_questions_synthesizer:
                     "I'm satisfied with the current PCG tools available",
                     "Existing PCG tools are too limited in what they can generate",
                     "I prefer handcrafting levels and don't see benefits in PCG tools",
-                    "I'm interested but haven't found the right tool yet",
-                    
+                    "Most PCG tools are built for programmers, not designers",
+                    "PCG tools don't give me enough control over the final output",
+                    "PCG tools are too complex to integrate into my workflow"
                 ],
                 "has_other": True
             },

@@ -24,6 +24,17 @@ class survey_transformer:
             # Map key to question text for all question types
             self.questions[key] = question_info.get('question', '')
     
+    def _clean_value(self, value):
+        """Clean value by removing escape sequences and extra whitespace"""
+        if pd.isna(value):
+            return None
+        
+        cleaned = str(value).strip()
+        # Remove escape sequences like \"
+        cleaned = cleaned.replace('"', '')
+        
+        return cleaned
+    
     def _get_question_info(self, key):
         """Get question info from schema"""
         return self.schema.get('questions', {}).get(key, {})
@@ -60,10 +71,8 @@ class survey_transformer:
                         for item, column_name in matrix_columns.items():
                             if column_name in row:
                                 value = row[column_name]
-                                if pd.isna(value): # type: ignore
-                                    matrix_data[item] = None
-                                else:
-                                    matrix_data[item] = value
+                                cleaned_value = self._clean_value(value)
+                                matrix_data[item] = cleaned_value
                             else:
                                 matrix_data[item] = None
                         
@@ -75,15 +84,18 @@ class survey_transformer:
                     # Handle regular questions (identifier, single_choice, multiple_choice, ranking, open_text)
                     if question in row:
                         value = row[question]
-                        # Convert NaN to None (which becomes null in JSON)
-                        if pd.isna(value): # type: ignore
+                        cleaned_value = self._clean_value(value)
+                        
+                        if cleaned_value is None:
                             transformed_row[key] = None
                         else:
                             # Handle multiple choice and ranking questions (semicolon-separated values)
-                            if question_type in ['multiple_choice', 'ranking'] and ';' in str(value):
-                                transformed_row[key] = [part.strip() for part in str(value).split(';') if part.strip()]
+                            if question_type in ['multiple_choice', 'ranking'] and ';' in cleaned_value:
+                                # Clean each part of the semicolon-separated list
+                                parts = [self._clean_value(part) for part in cleaned_value.split(';')]
+                                transformed_row[key] = [part for part in parts if part]  # Remove empty parts
                             else:
-                                transformed_row[key] = value
+                                transformed_row[key] = cleaned_value
                     else:
                         transformed_row[key] = None
             
