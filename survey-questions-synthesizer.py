@@ -60,7 +60,7 @@ class survey_questions_synthesizer:
             "procedural_tools_experience": {
                 "question": "How would you rate your current experience with the following procedural tools?",
                 "type": "matrix",
-                "tools": [
+                "items": [
                     "Houdini",
                     "Unreal Engine PCG tools", 
                     "Blender Geometry Nodes",
@@ -68,7 +68,7 @@ class survey_questions_synthesizer:
                     "Plugins/Tools that use other methods",
                     "Custom code-based PCG solutions"
                 ],
-                "rating_scale": ["No Experience", "Limited Experience", "Moderate Experience", "Extensive Experience"]
+                "scale": ["No Experience", "Limited Experience", "Moderate Experience", "Extensive Experience"]
             },
             
             # 5
@@ -208,7 +208,7 @@ class survey_questions_synthesizer:
             "genre_interest": {
                 "question": "If your project were of the following game genre, how interested would you be in using procedural level generation?",
                 "type": "matrix",
-                "genres": [
+                "items": [
                     "Action/Adventure",
                     "First-person Shooters", 
                     "Platformers",
@@ -218,7 +218,7 @@ class survey_questions_synthesizer:
                     "Strategy games",
                     "Roguelikes / Roguelites"
                 ],
-                "interest_scale": ["Not Interested", "Somewhat Interested", "Interested", "Very Interested"]
+                "scale": ["Not Interested", "Somewhat Interested", "Interested", "Very Interested"]
             },
             
             # 15
@@ -359,7 +359,7 @@ class survey_questions_synthesizer:
                 print(f"   {qtype}: {count}")
             
         print(f"📊 Total questions: {len(questions)}")
-        print(f"📋 Questions schema saved to {output_file}")
+        print(f"💾 Questions schema saved to {output_file}")
         
 
 def main():
