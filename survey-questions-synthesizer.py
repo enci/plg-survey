@@ -304,13 +304,15 @@ class survey_questions_synthesizer:
             # 20
             "desired_solutions": {
                 "question": "Which problems do you wish a procedural level generation tool could solve for you?",
-                "type": "open_text",
-                "common_themes": [
-                    "Better integration with existing workflows",
-                    "Improved iteration speed on level designs", 
+                "type": "multiple_choice",
+                "options": [
+                    "Time savings compared to manual design",
                     "Ability to create more content variations with consistent quality",
+                    "Improved iteration speed on level designs",
+                    "Reduced technical barriers to procedural generation",
+                    "Better integration with existing workflows",
                     "Community/marketplace of shareable generator components",
-                    "Better debugging and visualization tools"
+                    "Learning resources and examples for different game genres"
                 ]
             },
             
