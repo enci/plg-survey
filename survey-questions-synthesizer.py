@@ -5,19 +5,22 @@ import json
 import re
 
 class survey_questions_synthesizer:
-    def __init__(self, csv_file):
-        self.parsed_data = pd.read_csv(csv_file)
+    def __init__(self):
         self.questions_schema = {}
-    
-    def has_other_option(self, answers):
-        """Check if the answers include an 'other' option for free text"""
-        return any('other' in answer.lower() for answer in answers)
     
     def synthesize_questions(self):
         """Create comprehensive questions schema from CSV structure"""
         
         # Define the questions structure
         questions = {    
+
+            # 0 - Identifier
+            "id": {
+                "question": "Id",
+                "type": "identifier",
+                "required": True
+            },
+
             # 1        
             "professional_role": {
                 "question": "How would you primarily describe your professional role?",
@@ -54,10 +57,9 @@ class survey_questions_synthesizer:
             },
             
             # 4
-            # Procedural Tools Experience Matrix
             "procedural_tools_experience": {
                 "question": "How would you rate your current experience with the following procedural tools?",
-                "type": "matrix_rating",
+                "type": "matrix",
                 "tools": [
                     "Houdini",
                     "Unreal Engine PCG tools", 
@@ -77,7 +79,7 @@ class survey_questions_synthesizer:
                     "Terrain generation", "Decorative prop placement", "Enemy/NPC placement",
                     "City models", "Vegetation/foliage", "Mission/quest generation",
                     "Level layouts", "Texture generation", "Asset variations",
-                    "Other"
+                    
                 ],
                 "has_other": True
             },
@@ -98,7 +100,7 @@ class survey_questions_synthesizer:
             # 7
             "primary_concerns": {
                 "question": "What are your primary concerns when considering procedural level generation? (Select up to 3)",
-                "type": "multiple_choice_limited",
+                "type": "multiple_choice",
                 "max_selections": 3,
                 "options": [
                     "Difficulty in debugging unexpected outputs",
@@ -108,7 +110,7 @@ class survey_questions_synthesizer:
                     "Technical complexity/learning curve",
                     "Performance impact",
                     "Limited control over final output",
-                    "Other"
+                    
                 ],
                 "has_other": True
             },
@@ -122,7 +124,7 @@ class survey_questions_synthesizer:
                     "Existing PCG tools are too limited in what they can generate",
                     "I prefer handcrafting levels and don't see benefits in PCG tools",
                     "I'm interested but haven't found the right tool yet",
-                    "Other"
+                    
                 ],
                 "has_other": True
             },
@@ -130,7 +132,7 @@ class survey_questions_synthesizer:
             # 9
             "critical_factors": {
                 "question": "What do you consider the most critical factor when evaluating a new design tool? (Select up to 3)",
-                "type": "multiple_choice_limited",
+                "type": "multiple_choice",
                 "max_selections": 3,
                 "options": [
                     "Flexibility (ability to adapt to various use cases)",
@@ -141,7 +143,7 @@ class survey_questions_synthesizer:
                     "Documentation and learning resources",
                     "Integration with existing workflows",
                     "Community support",
-                    "Other"
+                    
 
                 ],
                 "has_other": True
@@ -181,7 +183,7 @@ class survey_questions_synthesizer:
                     "Using templates with limited parameters to adjust (simpler, less flexible)",
                     "Mixed-initiative approach where the tool learns from my examples",
                     "Assembling generators from pre-built components, with the option to write custom components",
-                    "Other"
+                    
                 ],
                 "has_other": True
             },
@@ -196,7 +198,7 @@ class survey_questions_synthesizer:
                     "Standalone application that exports to various formats",
                     "Web-based tool with export capabilities",
                     "Any of the above works for me as long as the tool works",
-                    "Other"
+                    
                 ],
                 "has_other": True
             },
@@ -205,7 +207,7 @@ class survey_questions_synthesizer:
             # Genre Interest Matrix
             "genre_interest": {
                 "question": "If your project were of the following game genre, how interested would you be in using procedural level generation?",
-                "type": "matrix_interest",
+                "type": "matrix",
                 "genres": [
                     "Action/Adventure",
                     "First-person Shooters", 
@@ -234,7 +236,7 @@ class survey_questions_synthesizer:
                     "Navigation mesh",
                     "Constraint-based representations (is this a known term)",
                     "Voxel-based",
-                    "Other"
+                    
                 ],
                 "has_other": True
             },
@@ -255,7 +257,7 @@ class survey_questions_synthesizer:
             # 17
             "ai_role_preference": {
                 "question": "What role would you prefer AI to play in your procedural level generation workflow? (Select up to 2)",
-                "type": "multiple_choice_limited",
+                "type": "multiple_choice",
                 "max_selections": 2,
                 "options": [
                     "Assistant-based (AI helps implement your design intentions)",
@@ -272,7 +274,7 @@ class survey_questions_synthesizer:
             # 18
             "ai_importance_factors": {
                 "question": "When considering AI-assisted procedural level design, which is most important to you? (Select up to 2)",
-                "type": "multiple_choice_limited",
+                "type": "multiple_choice",
                 "max_selections": 2,
                 "options": [
                     "Maintaining creative control over the final output",
@@ -287,7 +289,7 @@ class survey_questions_synthesizer:
             # 19
             "ai_concerns": {
                 "question": "What concerns you most about using AI in procedural level generation? (Select up to 2)",
-                "type": "multiple_choice_limited", 
+                "type": "multiple_choice", 
                 "max_selections": 2,
                 "options": [
                     "Unpredictable or inconsistent results",
@@ -305,7 +307,7 @@ class survey_questions_synthesizer:
             "desired_solutions": {
                 "question": "Which problems do you wish a procedural level generation tool could solve for you?",
                 "type": "multiple_choice",
-                "options": [
+                "common_themes": [
                     "Time savings compared to manual design",
                     "Ability to create more content variations with consistent quality",
                     "Improved iteration speed on level designs",
@@ -335,16 +337,13 @@ class survey_questions_synthesizer:
             "survey_metadata": {
                 "title": "Procedural Level Generation Survey",
                 "total_questions": len(questions),
-                "total_responses": len(self.parsed_data),
                 "question_types": {
+                    "identifier": len([q for q in questions.values() if q.get('type') == 'identifier']),
                     "single_choice": len([q for q in questions.values() if q.get('type') == 'single_choice']),
                     "multiple_choice": len([q for q in questions.values() if q.get('type') == 'multiple_choice']),
-                    "multiple_choice_limited": len([q for q in questions.values() if q.get('type') == 'multiple_choice_limited']),
-                    "matrix_rating": len([q for q in questions.values() if q.get('type') == 'matrix_rating']),
-                    "matrix_interest": len([q for q in questions.values() if q.get('type') == 'matrix_interest']),
+                    "matrix": len([q for q in questions.values() if q.get('type') == 'matrix']),
                     "ranking": len([q for q in questions.values() if q.get('type') == 'ranking']),
-                    "open_text": len([q for q in questions.values() if q.get('type') == 'open_text']),
-                    "identifier": len([q for q in questions.values() if q.get('type') == 'identifier'])
+                    "open_text": len([q for q in questions.values() if q.get('type') == 'open_text'])                  
                 }
             },
             "questions": questions
@@ -352,24 +351,21 @@ class survey_questions_synthesizer:
         
         with open(output_file, 'w') as f:
             json.dump(schema, f, indent=2)
-        
-        print(f"📋 Questions schema saved to {output_file}")
-        print(f"📊 Total questions: {len(questions)}")
-        print(f"📈 Response count: {len(self.parsed_data)}")
-        
+                        
         # Print question type summary
-        print("\n📋 Question Types:")
+        print("📋 Question Types:")
         for qtype, count in schema["survey_metadata"]["question_types"].items():
             if count > 0:
                 print(f"   {qtype}: {count}")
+            
+        print(f"📊 Total questions: {len(questions)}")
+        print(f"📋 Questions schema saved to {output_file}")
+        
 
 def main():
-    print("📊 Survey Questions Synthesizer v1.0\n")
-    
-    input_file = "procedural-level-generation-survey.csv"  
-    output_file = "survey-questions-schema.json"
-    
-    synthesizer = survey_questions_synthesizer(input_file)
+    print("📊 Survey Questions Synthesizer 2.0\n")    
+    output_file = "survey-questions-schema.json"    
+    synthesizer = survey_questions_synthesizer()
     synthesizer.save_questions_schema(output_file)
 
 if __name__ == "__main__":
