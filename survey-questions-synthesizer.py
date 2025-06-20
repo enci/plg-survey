@@ -195,11 +195,9 @@ class survey_questions_synthesizer:
                 "type": "single_choice",
                 "options": [
                     "Deep integration within existing engine (like Unreal Blueprint)",
-                    "Core plugin that works across engines, with deep UI integrations for particular engines",
-                    "Standalone application that exports to various formats",
-                    "Web-based tool with export capabilities",
-                    "Any of the above works for me as long as the tool works",
-                    
+                    "Plugin that works across multiple engines",            
+                    "Standalone application that exports to game engines",
+                    "Web-based tool accessible from anywhere",                    
                 ],
                 "has_other": True
             },

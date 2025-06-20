@@ -32,6 +32,7 @@ class survey_transformer:
         cleaned = str(value).strip()
         # Remove escape sequences like \"
         cleaned = cleaned.replace('"', '')
+        cleaned = cleaned.replace('(not as well-known term) ', '')
         
         return cleaned
     
