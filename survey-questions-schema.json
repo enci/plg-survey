@@ -22,7 +22,8 @@
       "type": "single_choice",
       "options": [
         "Level Designer",
-        "Game DesignerTechnical Artist",
+        "Game Designer",
+        "Technical Artist",
         "Environment Artist",
         "Programmer/Technical Designer",
         "Academic/Researcher"
@@ -117,7 +118,9 @@
         "I'm satisfied with the current PCG tools available",
         "Existing PCG tools are too limited in what they can generate",
         "I prefer handcrafting levels and don't see benefits in PCG tools",
-        "I'm interested but haven't found the right tool yet"
+        "Most PCG tools are built for programmers, not designers",
+        "PCG tools don't give me enough control over the final output",
+        "PCG tools are too complex to integrate into my workflow"
       ],
       "has_other": true
     },
@@ -179,10 +182,9 @@
       "type": "single_choice",
       "options": [
         "Deep integration within existing engine (like Unreal Blueprint)",
-        "Core plugin that works across engines, with deep UI integrations for particular engines",
-        "Standalone application that exports to various formats",
-        "Web-based tool with export capabilities",
-        "Any of the above works for me as long as the tool works"
+        "Plugin that works across multiple engines",
+        "Standalone application that exports to game engines",
+        "Web-based tool accessible from anywhere"
       ],
       "has_other": true
     },

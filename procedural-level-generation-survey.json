@@ -1,6 +1,6 @@
 [
     {
-        "id": 2,
+        "id": "2",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "6-10 years",
         "game_engines": [
@@ -26,7 +26,7 @@
             "Difficulty in debugging unexpected outputs",
             "Unpredictable results affecting game balance"
         ],
-        "tool_view": "\"I'm satisfied with the current PCG tools available\"",
+        "tool_view": "I'm satisfied with the current PCG tools available",
         "critical_factors": [
             "Flexibility (ability to adapt to various use cases)",
             "Familiarity (resemblance to tools you already know)",
@@ -49,7 +49,7 @@
         "level_representation": [
             "Scene graph/hierarchical structure"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Not sure/would need to experiment",
         "ai_role_preference": [
             "Suggestion-based (AI proposes level designs for you to select and modify)",
             "Assistant-based (AI helps implement your design intentions)"
@@ -70,7 +70,7 @@
         "most_important_problem": null
     },
     {
-        "id": 3,
+        "id": "3",
         "professional_role": "Technical Artist",
         "years_experience": "6-10 years",
         "game_engines": [
@@ -93,7 +93,7 @@
             "Lack of precise artistic control",
             "Technical complexity/steep learning curve"
         ],
-        "tool_view": "\"Existing PCG tools are too limited in what they can generate\"",
+        "tool_view": "Existing PCG tools are too limited in what they can generate",
         "critical_factors": null,
         "node_tool_features": [
             "Visual previews of generation steps",
@@ -118,7 +118,7 @@
         "most_important_problem": null
     },
     {
-        "id": 4,
+        "id": "4",
         "professional_role": "Environment Artist",
         "years_experience": "0-2 years",
         "game_engines": [
@@ -144,7 +144,7 @@
             "Unclear design methodology for procedural systems",
             "Unpredictable results affecting game balance"
         ],
-        "tool_view": "\"I'm satisfied with the current PCG tools available\"",
+        "tool_view": "I'm satisfied with the current PCG tools available",
         "critical_factors": [
             "Flexibility (ability to adapt to various use cases)",
             "Simplicity (low barrier to entry)",
@@ -169,7 +169,7 @@
             "Free-form geometry",
             "Navigation mesh"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Balanced approach (iterative refinement between mission and space)",
         "ai_role_preference": [
             "Suggestion-based (AI proposes level designs for you to select and modify)",
             "Assistant-based (AI helps implement your design intentions)"
@@ -179,7 +179,7 @@
             "Learning from my design preferences over time"
         ],
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "Loss of designer agency/control"
         ],
         "desired_solutions": [
@@ -187,10 +187,10 @@
             "Reduced technical barriers to procedural generation",
             "Time savings compared to manual design"
         ],
-        "most_important_problem": "It always look very repeated. "
+        "most_important_problem": "It always look very repeated."
     },
     {
-        "id": 5,
+        "id": "5",
         "professional_role": "Technical Artist",
         "years_experience": "3-5 years",
         "game_engines": [
@@ -217,7 +217,7 @@
             "Integration with existing workflows",
             "Time investment to set up compared to potential benefits"
         ],
-        "tool_view": "\"I prefer handcrafting levels and don't see benefits in PCG tools\"",
+        "tool_view": "I prefer handcrafting levels and don't see benefits in PCG tools",
         "critical_factors": [
             "Flexibility (ability to adapt to various use cases)",
             "Reliability (predictable, stable results)",
@@ -234,7 +234,7 @@
             "Support for mission/gameplay integration"
         ],
         "realtime_feedback_importance": "Very important",
-        "preferred_approach": "Mixed-initiative (not as well-known term) approach where the tool learns from my examples",
+        "preferred_approach": "Mixed-initiative approach where the tool learns from my examples",
         "integration_preference": "Standalone application that exports to game engines",
         "genre_interest": {},
         "level_representation": [
@@ -242,7 +242,7 @@
             "Rectangular grid/tile-based",
             "Voxel-based"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Space-driven generation (spatial layout determines gameplay possibilities)",
         "ai_role_preference": [
             "Suggestion-based (AI proposes level designs for you to select and modify)"
         ],
@@ -250,7 +250,7 @@
             "Speed of generation compared to traditional methods"
         ],
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "Unpredictable or inconsistent results"
         ],
         "desired_solutions": [
@@ -261,7 +261,7 @@
         "most_important_problem": "Time saving"
     },
     {
-        "id": 6,
+        "id": "6",
         "professional_role": "Technical Artist",
         "years_experience": "3-5 years",
         "game_engines": [
@@ -285,7 +285,7 @@
             "Technical complexity/steep learning curve",
             "Time investment to set up compared to potential benefits"
         ],
-        "tool_view": "\"Most PCG tools are built for programmers, not designers\"",
+        "tool_view": "Most PCG tools are built for programmers, not designers",
         "critical_factors": [
             "Flexibility (ability to adapt to various use cases)",
             "Feature completeness (comprehensive capabilities)",
@@ -311,7 +311,7 @@
             "Navigation mesh",
             "Hexagonal grid/tile-based"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Space-driven generation (spatial layout determines gameplay possibilities)",
         "ai_role_preference": [
             "I have no opinion/not sure"
         ],
@@ -320,7 +320,7 @@
             "Maintaining creative control over the final output"
         ],
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "Unpredictable or inconsistent results"
         ],
         "desired_solutions": [
@@ -331,7 +331,7 @@
         "most_important_problem": "Large scale level production speed"
     },
     {
-        "id": 7,
+        "id": "7",
         "professional_role": "Environment Artist",
         "years_experience": "6-10 years",
         "game_engines": [
@@ -354,7 +354,7 @@
             "Lack of precise artistic control",
             "Difficulty in debugging unexpected outputs"
         ],
-        "tool_view": "\"PCG tools don't give me enough control over the final output\"",
+        "tool_view": "PCG tools don't give me enough control over the final output",
         "critical_factors": [
             "Reliability (predictable, stable results)",
             "Documentation and learning resources",
@@ -377,7 +377,7 @@
         "level_representation": [
             "Free-form geometry"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Context-dependent (different approaches for different game sections)",
         "ai_role_preference": [
             "Tool-based (AI enhances specific components of your manual design process)",
             "I prefer traditional rule-based PCG without AI involvement"
@@ -398,7 +398,7 @@
         "most_important_problem": null
     },
     {
-        "id": 8,
+        "id": "8",
         "professional_role": "Technical Artist",
         "years_experience": "3-5 years",
         "game_engines": [
@@ -422,7 +422,7 @@
             "Lack of precise artistic control",
             "Unclear design methodology for procedural systems"
         ],
-        "tool_view": "\"Existing PCG tools are too limited in what they can generate\"",
+        "tool_view": "Existing PCG tools are too limited in what they can generate",
         "critical_factors": [
             "Flexibility (ability to adapt to various use cases)",
             "Simplicity (low barrier to entry)",
@@ -447,7 +447,7 @@
             "Scene graph/hierarchical structure",
             "Free-form geometry"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Space-driven generation (spatial layout determines gameplay possibilities)",
         "ai_role_preference": [
             "Tool-based (AI enhances specific components of your manual design process)",
             "Assistant-based (AI helps implement your design intentions)"
@@ -457,7 +457,7 @@
             "Speed of generation compared to traditional methods"
         ],
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "Unpredictable or inconsistent results"
         ],
         "desired_solutions": [
@@ -468,7 +468,7 @@
         "most_important_problem": "Solve the medial tasks and maximize time spent on creative work"
     },
     {
-        "id": 10,
+        "id": "10",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "3-5 years",
         "game_engines": [
@@ -493,7 +493,7 @@
             "Time investment to set up compared to potential benefits",
             "Technical complexity/steep learning curve"
         ],
-        "tool_view": "\"PCG tools don't give me enough control over the final output\"",
+        "tool_view": "PCG tools don't give me enough control over the final output",
         "critical_factors": [
             "Flexibility (ability to adapt to various use cases)",
             "Reliability (predictable, stable results)",
@@ -518,7 +518,7 @@
             "Node-based graphs (mission/flow graphs)",
             "Free-form geometry"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Space-driven generation (spatial layout determines gameplay possibilities)",
         "ai_role_preference": [
             "Suggestion-based (AI proposes level designs for you to select and modify)",
             "Tool-based (AI enhances specific components of your manual design process)"
@@ -529,7 +529,7 @@
         ],
         "ai_concerns": [
             "Unpredictable or inconsistent results",
-            "Potential \"black box\" nature (lack of transparency)"
+            "Potential black box nature (lack of transparency)"
         ],
         "desired_solutions": [
             "Time savings compared to manual design",
@@ -539,7 +539,7 @@
         "most_important_problem": "Reduce time and resources spent in Content Creation as a small Indie Dev"
     },
     {
-        "id": 11,
+        "id": "11",
         "professional_role": "Technical Artist",
         "years_experience": "6-10 years",
         "game_engines": [
@@ -562,7 +562,7 @@
             "Unpredictable results affecting game balance",
             "Lack of precise artistic control"
         ],
-        "tool_view": "\"I'm satisfied with the current PCG tools available\"",
+        "tool_view": "I'm satisfied with the current PCG tools available",
         "critical_factors": [
             "Flexibility (ability to adapt to various use cases)",
             "Reliability (predictable, stable results)",
@@ -587,7 +587,7 @@
             "Rectangular grid/tile-based",
             "Navigation mesh"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Context-dependent (different approaches for different game sections)",
         "ai_role_preference": [
             "Tool-based (AI enhances specific components of your manual design process)",
             "Assistant-based (AI helps implement your design intentions)"
@@ -608,7 +608,7 @@
         "most_important_problem": "Iteration times"
     },
     {
-        "id": 13,
+        "id": "13",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "3-5 years",
         "game_engines": [
@@ -632,7 +632,7 @@
             "Time investment to set up compared to potential benefits",
             "Unclear design methodology for procedural systems"
         ],
-        "tool_view": "\"Most PCG tools are built for programmers, not designers\"",
+        "tool_view": "Most PCG tools are built for programmers, not designers",
         "critical_factors": [
             "Integration with existing workflows",
             "Reliability (predictable, stable results)",
@@ -658,7 +658,7 @@
             "Rectangular grid/tile-based",
             "Constraint-based representations (is this a known term)"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Space-driven generation (spatial layout determines gameplay possibilities)",
         "ai_role_preference": [
             "I prefer traditional rule-based PCG without AI involvement"
         ],
@@ -666,7 +666,7 @@
             "Understanding how the AI makes its decisions"
         ],
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "Intellectual property/ownership concerns"
         ],
         "desired_solutions": [
@@ -674,10 +674,10 @@
             "Improved iteration speed on level designs",
             "Reduced technical barriers to procedural generation"
         ],
-        "most_important_problem": "Platform and Environment Agnosticism "
+        "most_important_problem": "Platform and Environment Agnosticism"
     },
     {
-        "id": 14,
+        "id": "14",
         "professional_role": "Technical Artist",
         "years_experience": "10+ years",
         "game_engines": [
@@ -702,7 +702,7 @@
             "Difficulty in debugging unexpected outputs",
             "Lack of precise artistic control"
         ],
-        "tool_view": "\"PCG tools don't give me enough control over the final output\"",
+        "tool_view": "PCG tools don't give me enough control over the final output",
         "critical_factors": [
             "Flexibility (ability to adapt to various use cases)",
             "Feature completeness (comprehensive capabilities)",
@@ -726,7 +726,7 @@
             "Hexagonal grid/tile-based",
             "Free-form geometry"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Space-driven generation (spatial layout determines gameplay possibilities)",
         "ai_role_preference": [
             "Assistant-based (AI helps implement your design intentions)",
             "Tool-based (AI enhances specific components of your manual design process)"
@@ -736,7 +736,7 @@
             "Understanding how the AI makes its decisions"
         ],
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "Intellectual property/ownership concerns"
         ],
         "desired_solutions": [
@@ -747,7 +747,7 @@
         "most_important_problem": null
     },
     {
-        "id": 15,
+        "id": "15",
         "professional_role": "Technical Artist",
         "years_experience": "0-2 years",
         "game_engines": [
@@ -771,7 +771,7 @@
             "Unpredictable results affecting game balance",
             "Time investment to set up compared to potential benefits"
         ],
-        "tool_view": "\"PCG tools don't give me enough control over the final output\"",
+        "tool_view": "PCG tools don't give me enough control over the final output",
         "critical_factors": [
             "Flexibility (ability to adapt to various use cases)",
             "Documentation and learning resources",
@@ -792,7 +792,7 @@
         "integration_preference": "Standalone application that exports to game engines",
         "genre_interest": {},
         "level_representation": null,
-        "most_useful_approach": null,
+        "most_useful_approach": "Balanced approach (iterative refinement between mission and space)",
         "ai_role_preference": [
             "Assistant-based (AI helps implement your design intentions)",
             "Tool-based (AI enhances specific components of your manual design process)"
@@ -802,7 +802,7 @@
             "Consistency with existing game assets and style"
         ],
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "Loss of designer agency/control"
         ],
         "desired_solutions": [
@@ -810,10 +810,10 @@
             "Improved iteration speed on level designs",
             "Reduced technical barriers to procedural generation"
         ],
-        "most_important_problem": "time and iteration "
+        "most_important_problem": "time and iteration"
     },
     {
-        "id": 16,
+        "id": "16",
         "professional_role": "Game Design Student",
         "years_experience": "0-2 years",
         "game_engines": [
@@ -836,7 +836,7 @@
             "Unpredictable results affecting game balance",
             "Unclear design methodology for procedural systems"
         ],
-        "tool_view": "\"Most PCG tools are built for programmers, not designers\"",
+        "tool_view": "Most PCG tools are built for programmers, not designers",
         "critical_factors": [
             "Reliability (predictable, stable results)",
             "Flexibility (ability to adapt to various use cases)",
@@ -859,7 +859,7 @@
         "level_representation": [
             "Hexagonal grid/tile-based"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Balanced approach (iterative refinement between mission and space)",
         "ai_role_preference": [
             "Suggestion-based (AI proposes level designs for you to select and modify)",
             "I have no opinion/not sure"
@@ -880,7 +880,7 @@
         "most_important_problem": "Time"
     },
     {
-        "id": 17,
+        "id": "17",
         "professional_role": "Technical Artist",
         "years_experience": "6-10 years",
         "game_engines": [
@@ -903,7 +903,7 @@
             "Technical complexity/steep learning curve",
             "Time investment to set up compared to potential benefits"
         ],
-        "tool_view": "\"PCG tools don't give me enough control over the final output\"",
+        "tool_view": "PCG tools don't give me enough control over the final output",
         "critical_factors": [
             "Flexibility (ability to adapt to various use cases)",
             "Simplicity (low barrier to entry)",
@@ -920,14 +920,14 @@
             "Limited or no programming required"
         ],
         "realtime_feedback_importance": "Very important",
-        "preferred_approach": "Mixed-initiative (not as well-known term) approach where the tool learns from my examples",
+        "preferred_approach": "Mixed-initiative approach where the tool learns from my examples",
         "integration_preference": "Deep integration within existing engine (like Unreal Blueprint)",
         "genre_interest": {},
         "level_representation": [
             "Rectangular grid/tile-based",
             "Voxel-based"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Balanced approach (iterative refinement between mission and space)",
         "ai_role_preference": [
             "Tool-based (AI enhances specific components of your manual design process)",
             "Assistant-based (AI helps implement your design intentions)"
@@ -948,7 +948,7 @@
         "most_important_problem": "Help speed up the design of large worlds."
     },
     {
-        "id": 18,
+        "id": "18",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "6-10 years",
         "game_engines": [
@@ -997,7 +997,7 @@
             "Scene graph/hierarchical structure",
             "Navigation mesh"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Space-driven generation (spatial layout determines gameplay possibilities)",
         "ai_role_preference": [
             "Suggestion-based (AI proposes level designs for you to select and modify)",
             "Tool-based (AI enhances specific components of your manual design process)"
@@ -1007,7 +1007,7 @@
             "Understanding how the AI makes its decisions"
         ],
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "Unpredictable or inconsistent results"
         ],
         "desired_solutions": [
@@ -1018,7 +1018,7 @@
         "most_important_problem": "democratize PCG"
     },
     {
-        "id": 19,
+        "id": "19",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "10+ years",
         "game_engines": [
@@ -1067,7 +1067,7 @@
             "No stored levels",
             "all generated at runtime (including level parameters)"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Balanced approach (iterative refinement between mission and space)",
         "ai_role_preference": [
             "I prefer traditional rule-based PCG without AI involvement"
         ],
@@ -1075,7 +1075,7 @@
             "Understanding how the AI makes its decisions"
         ],
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "Intellectual property/ownership concerns"
         ],
         "desired_solutions": [
@@ -1086,7 +1086,7 @@
         "most_important_problem": null
     },
     {
-        "id": 20,
+        "id": "20",
         "professional_role": "Game Designer",
         "years_experience": "6-10 years",
         "game_engines": [
@@ -1110,7 +1110,7 @@
             "Difficulty in debugging unexpected outputs",
             "Unpredictable results affecting game balance"
         ],
-        "tool_view": "\"I'm satisfied with the current PCG tools available\"",
+        "tool_view": "I'm satisfied with the current PCG tools available",
         "critical_factors": [
             "Simplicity (low barrier to entry)",
             "Feature completeness (comprehensive capabilities)",
@@ -1136,13 +1136,13 @@
             "Scene graph/hierarchical structure",
             "Node-based graphs (mission/flow graphs)"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Space-driven generation (spatial layout determines gameplay possibilities)",
         "ai_role_preference": [
             "I prefer traditional rule-based PCG without AI involvement"
         ],
         "ai_importance_factors": null,
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "Loss of designer agency/control"
         ],
         "desired_solutions": [
@@ -1153,7 +1153,7 @@
         "most_important_problem": null
     },
     {
-        "id": 21,
+        "id": "21",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "10+ years",
         "game_engines": [
@@ -1177,7 +1177,7 @@
             "Integration with existing workflows",
             "Time investment to set up compared to potential benefits"
         ],
-        "tool_view": "\"I'm satisfied with the current PCG tools available\"",
+        "tool_view": "I'm satisfied with the current PCG tools available",
         "critical_factors": [
             "Flexibility (ability to adapt to various use cases)",
             "Reliability (predictable, stable results)",
@@ -1203,7 +1203,7 @@
             "Free-form geometry",
             "Scene graph/hierarchical structure"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Context-dependent (different approaches for different game sections)",
         "ai_role_preference": [
             "I prefer traditional rule-based PCG without AI involvement"
         ],
@@ -1223,7 +1223,7 @@
         "most_important_problem": "Parameterisation of structure for exploration of variation space"
     },
     {
-        "id": 22,
+        "id": "22",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "10+ years",
         "game_engines": [
@@ -1248,7 +1248,7 @@
             "Difficulty in debugging unexpected outputs",
             "Integration with existing workflows"
         ],
-        "tool_view": "\"Most PCG tools are built for programmers, not designers\"",
+        "tool_view": "Most PCG tools are built for programmers, not designers",
         "critical_factors": [
             "Flexibility (ability to adapt to various use cases)",
             "Reliability (predictable, stable results)",
@@ -1272,7 +1272,7 @@
             "Rectangular grid/tile-based",
             "Free-form geometry"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Context-dependent (different approaches for different game sections)",
         "ai_role_preference": [
             "Tool-based (AI enhances specific components of your manual design process)"
         ],
@@ -1292,7 +1292,7 @@
         "most_important_problem": "Less grinding for artists, keep artists in the flow, more time to focus on actual creativity"
     },
     {
-        "id": 23,
+        "id": "23",
         "professional_role": "Technical Artist",
         "years_experience": "10+ years",
         "game_engines": [
@@ -1327,7 +1327,7 @@
         "critical_factors": [
             "Flexibility (ability to adapt to various use cases)",
             "Feature completeness (comprehensive capabilities)",
-            "I like to see a tool with regular updates of exciting new features from the devs, like Blender's GNs have, or something like Voxel Plugin which regularly has big \"breaking change\" updates.  I worry more about the lack of progress on something like UE's PCGs as a red flag of future development."
+            "I like to see a tool with regular updates of exciting new features from the devs, like Blender's GNs have, or something like Voxel Plugin which regularly has big breaking change updates.  I worry more about the lack of progress on something like UE's PCGs as a red flag of future development."
         ],
         "node_tool_features": [
             "Runtime vs. offline generation options",
@@ -1352,7 +1352,7 @@
             "Node-based graphs (mission/flow graphs)",
             "For bigger things, typically any kind of accelerated hierarchical structure, like Quadtree/Octree (gridded) but within that is freeform."
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Space-driven generation (spatial layout determines gameplay possibilities)",
         "ai_role_preference": [
             "I prefer traditional rule-based PCG without AI involvement",
             "Suggestion-based (AI proposes level designs for you to select and modify)"
@@ -1373,7 +1373,7 @@
         "most_important_problem": "Mentioned above, the time-saving of exponentially larger games.  I might use it as a novelty for smaller projects, but for something with eg big cities or just anything with a smaller team, there is no alternative."
     },
     {
-        "id": 25,
+        "id": "25",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "6-10 years",
         "game_engines": [
@@ -1419,7 +1419,7 @@
         "level_representation": [
             "Rectangular grid/tile-based"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Mission-driven generation (gameplay goals determine level structure)",
         "ai_role_preference": [
             "I prefer traditional rule-based PCG without AI involvement"
         ],
@@ -1427,7 +1427,7 @@
             "Maintaining creative control over the final output"
         ],
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "Unpredictable or inconsistent results"
         ],
         "desired_solutions": [
@@ -1438,7 +1438,7 @@
         "most_important_problem": "Having to hardcode your PLG, which will be much less flexible to change. Also, when it is coded designers won't be able to play with it as easily. Having an external tool that exports (customizable) level data would be great. Especially if designers are able to work with it more easily."
     },
     {
-        "id": 26,
+        "id": "26",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "6-10 years",
         "game_engines": [
@@ -1477,14 +1477,14 @@
             "Limited or no programming required"
         ],
         "realtime_feedback_importance": "Very important",
-        "preferred_approach": "Mixed-initiative (not as well-known term) approach where the tool learns from my examples",
+        "preferred_approach": "Mixed-initiative approach where the tool learns from my examples",
         "integration_preference": "Plugin that works across multiple engines",
         "genre_interest": {},
         "level_representation": [
             "Rectangular grid/tile-based",
             "Scene graph/hierarchical structure"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Context-dependent (different approaches for different game sections)",
         "ai_role_preference": [
             "I prefer traditional rule-based PCG without AI involvement",
             "Tool-based (AI enhances specific components of your manual design process)"
@@ -1505,7 +1505,7 @@
         "most_important_problem": "Being able to have more content in my game"
     },
     {
-        "id": 27,
+        "id": "27",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "3-5 years",
         "game_engines": [
@@ -1555,7 +1555,7 @@
             "Scene graph/hierarchical structure",
             "Node-based graphs (mission/flow graphs)"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Not sure/would need to experiment",
         "ai_role_preference": [
             "Tool-based (AI enhances specific components of your manual design process)",
             "Suggestion-based (AI proposes level designs for you to select and modify)"
@@ -1565,7 +1565,7 @@
             "Maintaining creative control over the final output"
         ],
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "Unpredictable or inconsistent results"
         ],
         "desired_solutions": [
@@ -1576,7 +1576,7 @@
         "most_important_problem": null
     },
     {
-        "id": 28,
+        "id": "28",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "10+ years",
         "game_engines": [
@@ -1602,7 +1602,7 @@
             "Time investment to set up compared to potential benefits",
             "Unpredictable results affecting game balance"
         ],
-        "tool_view": "\"Existing PCG tools are too limited in what they can generate\"",
+        "tool_view": "Existing PCG tools are too limited in what they can generate",
         "critical_factors": [
             "Flexibility (ability to adapt to various use cases)",
             "Integration with existing workflows",
@@ -1619,7 +1619,7 @@
             "Pre-built common PCG patterns/techniques (WFC, graph grammars, etc.)"
         ],
         "realtime_feedback_importance": "Very important",
-        "preferred_approach": "Mixed-initiative (not as well-known term) approach where the tool learns from my examples",
+        "preferred_approach": "Mixed-initiative approach where the tool learns from my examples",
         "integration_preference": "Deep integration within existing engine (like Unreal Blueprint)",
         "genre_interest": {},
         "level_representation": [
@@ -1628,7 +1628,7 @@
             "Node-based graphs (mission/flow graphs)",
             "Scene graph/hierarchical structure"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Balanced approach (iterative refinement between mission and space)",
         "ai_role_preference": [
             "Assistant-based (AI helps implement your design intentions)",
             "Tool-based (AI enhances specific components of your manual design process)"
@@ -1638,7 +1638,7 @@
             "Learning from my design preferences over time"
         ],
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "Intellectual property/ownership concerns"
         ],
         "desired_solutions": [
@@ -1649,7 +1649,7 @@
         "most_important_problem": "Assist with level design and generation with linking story and quest content with environment"
     },
     {
-        "id": 29,
+        "id": "29",
         "professional_role": "Academic/Researcher",
         "years_experience": "0-2 years",
         "game_engines": [
@@ -1694,7 +1694,7 @@
             "Scene graph/hierarchical structure",
             "Free-form geometry"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Not sure/would need to experiment",
         "ai_role_preference": [
             "I have no opinion/not sure"
         ],
@@ -1702,7 +1702,7 @@
             "Maintaining creative control over the final output"
         ],
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "Loss of designer agency/control"
         ],
         "desired_solutions": [
@@ -1713,7 +1713,7 @@
         "most_important_problem": "Do quick defaults&templates to be edited later, but not in a game context *I do computational urban design"
     },
     {
-        "id": 30,
+        "id": "30",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "6-10 years",
         "game_engines": [
@@ -1738,7 +1738,7 @@
             "Time investment to set up compared to potential benefits",
             "Unpredictable results affecting game balance"
         ],
-        "tool_view": "\"PCG tools don't give me enough control over the final output\"",
+        "tool_view": "PCG tools don't give me enough control over the final output",
         "critical_factors": [
             "Familiarity (resemblance to tools you already know)",
             "Simplicity (low barrier to entry)",
@@ -1763,7 +1763,7 @@
             "Scene graph/hierarchical structure",
             "Voxel-based"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Context-dependent (different approaches for different game sections)",
         "ai_role_preference": [
             "Tool-based (AI enhances specific components of your manual design process)",
             "I prefer traditional rule-based PCG without AI involvement"
@@ -1773,7 +1773,7 @@
             "Learning from my design preferences over time"
         ],
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "Unpredictable or inconsistent results"
         ],
         "desired_solutions": [
@@ -1784,7 +1784,7 @@
         "most_important_problem": null
     },
     {
-        "id": 31,
+        "id": "31",
         "professional_role": "Technical Artist",
         "years_experience": "0-2 years",
         "game_engines": [
@@ -1810,7 +1810,7 @@
             "Difficulty in debugging unexpected outputs",
             "Time investment to set up compared to potential benefits"
         ],
-        "tool_view": "\"Most PCG tools are built for programmers, not designers\"",
+        "tool_view": "Most PCG tools are built for programmers, not designers",
         "critical_factors": [
             "Flexibility (ability to adapt to various use cases)",
             "Simplicity (low barrier to entry)",
@@ -1839,7 +1839,7 @@
         "most_important_problem": null
     },
     {
-        "id": 32,
+        "id": "32",
         "professional_role": "Academic/Researcher",
         "years_experience": "6-10 years",
         "game_engines": [
@@ -1862,7 +1862,7 @@
             "Technical complexity/steep learning curve",
             "Integration with existing workflows"
         ],
-        "tool_view": "\"PCG tools are too complex to integrate into my workflow\"",
+        "tool_view": "PCG tools are too complex to integrate into my workflow",
         "critical_factors": [
             "Simplicity (low barrier to entry)",
             "Documentation and learning resources",
@@ -1888,7 +1888,7 @@
             "Node-based graphs (mission/flow graphs)",
             "Constraint-based representations (is this a known term)"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Context-dependent (different approaches for different game sections)",
         "ai_role_preference": [
             "Assistant-based (AI helps implement your design intentions)",
             "Tool-based (AI enhances specific components of your manual design process)"
@@ -1898,7 +1898,7 @@
             "Understanding how the AI makes its decisions"
         ],
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "Loss of designer agency/control"
         ],
         "desired_solutions": [
@@ -1909,7 +1909,7 @@
         "most_important_problem": null
     },
     {
-        "id": 33,
+        "id": "33",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "6-10 years",
         "game_engines": [
@@ -1933,7 +1933,7 @@
             "Difficulty in debugging unexpected outputs",
             "Lack of precise artistic control"
         ],
-        "tool_view": "\"I'm satisfied with the current PCG tools available\"",
+        "tool_view": "I'm satisfied with the current PCG tools available",
         "critical_factors": [
             "Flexibility (ability to adapt to various use cases)",
             "Reliability (predictable, stable results)",
@@ -1957,7 +1957,7 @@
             "Rectangular grid/tile-based",
             "Node-based graphs (mission/flow graphs)"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Mission-driven generation (gameplay goals determine level structure)",
         "ai_role_preference": [
             "Suggestion-based (AI proposes level designs for you to select and modify)"
         ],
@@ -1966,7 +1966,7 @@
             "Novelty/uniqueness of the generated content"
         ],
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "Intellectual property/ownership concerns"
         ],
         "desired_solutions": [
@@ -1977,7 +1977,7 @@
         "most_important_problem": null
     },
     {
-        "id": 34,
+        "id": "34",
         "professional_role": "Level Designer",
         "years_experience": "3-5 years",
         "game_engines": [
@@ -2000,7 +2000,7 @@
             "Time investment to set up compared to potential benefits",
             "Lack of precise artistic control"
         ],
-        "tool_view": "\"I prefer handcrafting levels and don't see benefits in PCG tools\"",
+        "tool_view": "I prefer handcrafting levels and don't see benefits in PCG tools",
         "critical_factors": [
             "Simplicity (low barrier to entry)",
             "Documentation and learning resources",
@@ -2023,7 +2023,7 @@
         "level_representation": [
             "Rectangular grid/tile-based"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Balanced approach (iterative refinement between mission and space)",
         "ai_role_preference": [
             "Suggestion-based (AI proposes level designs for you to select and modify)"
         ],
@@ -2032,7 +2032,7 @@
             "Maintaining creative control over the final output"
         ],
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "Loss of designer agency/control"
         ],
         "desired_solutions": [
@@ -2043,7 +2043,7 @@
         "most_important_problem": "Populating a world with content (quests, encounters, side activities etc.)"
     },
     {
-        "id": 35,
+        "id": "35",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "0-2 years",
         "game_engines": [
@@ -2065,7 +2065,7 @@
             "Lack of precise artistic control",
             "Unpredictable results affecting game balance"
         ],
-        "tool_view": "\"Existing PCG tools are too limited in what they can generate\"",
+        "tool_view": "Existing PCG tools are too limited in what they can generate",
         "critical_factors": [
             "Flexibility (ability to adapt to various use cases)",
             "Documentation and learning resources",
@@ -2090,7 +2090,7 @@
             "Hexagonal grid/tile-based",
             "Rectangular grid/tile-based"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Context-dependent (different approaches for different game sections)",
         "ai_role_preference": [
             "I have no opinion/not sure",
             "Tool-based (AI enhances specific components of your manual design process)"
@@ -2100,7 +2100,7 @@
             "Novelty/uniqueness of the generated content"
         ],
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "Loss of designer agency/control"
         ],
         "desired_solutions": [
@@ -2111,7 +2111,7 @@
         "most_important_problem": "If I need a diverse and rich world"
     },
     {
-        "id": 36,
+        "id": "36",
         "professional_role": "Game Designer",
         "years_experience": "10+ years",
         "game_engines": [
@@ -2157,7 +2157,7 @@
         "level_representation": [
             "Rectangular grid/tile-based"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Balanced approach (iterative refinement between mission and space)",
         "ai_role_preference": [
             "Suggestion-based (AI proposes level designs for you to select and modify)"
         ],
@@ -2166,7 +2166,7 @@
             "Consistency with existing game assets and style"
         ],
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "Loss of designer agency/control"
         ],
         "desired_solutions": [
@@ -2177,7 +2177,7 @@
         "most_important_problem": "Creating more content of the same quality in the same time as handcrafted"
     },
     {
-        "id": 37,
+        "id": "37",
         "professional_role": "Level Designer",
         "years_experience": "0-2 years",
         "game_engines": [
@@ -2226,7 +2226,7 @@
             "Scene graph/hierarchical structure",
             "Navigation mesh"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Balanced approach (iterative refinement between mission and space)",
         "ai_role_preference": [
             "Tool-based (AI enhances specific components of your manual design process)",
             "I prefer traditional rule-based PCG without AI involvement"
@@ -2247,7 +2247,7 @@
         "most_important_problem": null
     },
     {
-        "id": 38,
+        "id": "38",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "6-10 years",
         "game_engines": [
@@ -2270,7 +2270,7 @@
             "Unpredictable results affecting game balance",
             "Unpredictable results affecting game accessibility and content rating (Mostly AI-based procedural generation)"
         ],
-        "tool_view": "\"Most PCG tools are built for programmers, not designers\"",
+        "tool_view": "Most PCG tools are built for programmers, not designers",
         "critical_factors": [
             "Simplicity (low barrier to entry)",
             "Familiarity (resemblance to tools you already know)",
@@ -2294,7 +2294,7 @@
             "Scene graph/hierarchical structure",
             "Constraint-based representations (is this a known term)"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Context-dependent (different approaches for different game sections)",
         "ai_role_preference": [
             "Suggestion-based (AI proposes level designs for you to select and modify)",
             "Tool-based (AI enhances specific components of your manual design process)"
@@ -2314,7 +2314,7 @@
         "most_important_problem": "It is very genre-dependent, but procedural live generation can help keep games balanced during gameplay. Essentially, in what I do, it'd be extremely helpful to have procedural generation support subtle rubber-banding"
     },
     {
-        "id": 39,
+        "id": "39",
         "professional_role": "Most of the above because indie :(",
         "years_experience": "0-2 years",
         "game_engines": [
@@ -2359,7 +2359,7 @@
         "level_representation": [
             "Rectangular grid/tile-based"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Space-driven generation (spatial layout determines gameplay possibilities)",
         "ai_role_preference": [
             "I prefer traditional rule-based PCG without AI involvement"
         ],
@@ -2376,10 +2376,10 @@
             "Improved iteration speed on level designs",
             "Better integration with existing workflows"
         ],
-        "most_important_problem": "I design games where the level is \"consumed\" once. I would like the level generation to alter the existing and designed by hand level to introduce variability with playthrough/player excursion in the level"
+        "most_important_problem": "I design games where the level is consumed once. I would like the level generation to alter the existing and designed by hand level to introduce variability with playthrough/player excursion in the level"
     },
     {
-        "id": 40,
+        "id": "40",
         "professional_role": "Game Designer",
         "years_experience": "6-10 years",
         "game_engines": [
@@ -2398,7 +2398,7 @@
         ],
         "level_generation_frequency": "Never",
         "primary_concerns": null,
-        "tool_view": "\"PCG tools are too complex to integrate into my workflow\"",
+        "tool_view": "PCG tools are too complex to integrate into my workflow",
         "critical_factors": [
             "Flexibility (ability to adapt to various use cases)",
             "Simplicity (low barrier to entry)",
@@ -2419,7 +2419,7 @@
         "integration_preference": "Deep integration within existing engine (like Unreal Blueprint)",
         "genre_interest": {},
         "level_representation": null,
-        "most_useful_approach": null,
+        "most_useful_approach": "Not sure/would need to experiment",
         "ai_role_preference": [
             "Full automation (AI generates complete levels with minimal input)",
             "Tool-based (AI enhances specific components of your manual design process)"
@@ -2429,7 +2429,7 @@
             "Consistency with existing game assets and style"
         ],
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "Loss of designer agency/control"
         ],
         "desired_solutions": [
@@ -2440,7 +2440,7 @@
         "most_important_problem": null
     },
     {
-        "id": 41,
+        "id": "41",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "6-10 years",
         "game_engines": [
@@ -2464,7 +2464,7 @@
             "Time investment to set up compared to potential benefits",
             "Lack of precise artistic control"
         ],
-        "tool_view": "\"PCG tools are too complex to integrate into my workflow\"",
+        "tool_view": "PCG tools are too complex to integrate into my workflow",
         "critical_factors": [
             "Feature completeness (comprehensive capabilities)",
             "Documentation and learning resources",
@@ -2490,7 +2490,7 @@
             "Node-based graphs (mission/flow graphs)",
             "Free-form geometry"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Balanced approach (iterative refinement between mission and space)",
         "ai_role_preference": [
             "Tool-based (AI enhances specific components of your manual design process)",
             "Assistant-based (AI helps implement your design intentions)"
@@ -2500,7 +2500,7 @@
             "Maintaining creative control over the final output"
         ],
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "Unpredictable or inconsistent results"
         ],
         "desired_solutions": [
@@ -2511,7 +2511,7 @@
         "most_important_problem": null
     },
     {
-        "id": 42,
+        "id": "42",
         "professional_role": "Game Designer",
         "years_experience": "10+ years",
         "game_engines": [
@@ -2534,7 +2534,7 @@
             "Technical complexity/steep learning curve",
             "Difficulty in debugging unexpected outputs"
         ],
-        "tool_view": "\"PCG tools don't give me enough control over the final output\"",
+        "tool_view": "PCG tools don't give me enough control over the final output",
         "critical_factors": [
             "Reliability (predictable, stable results)",
             "Documentation and learning resources",
@@ -2557,7 +2557,7 @@
         "level_representation": [
             "Rectangular grid/tile-based"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Balanced approach (iterative refinement between mission and space)",
         "ai_role_preference": [
             "Tool-based (AI enhances specific components of your manual design process)",
             "I prefer traditional rule-based PCG without AI involvement"
@@ -2578,7 +2578,7 @@
         "most_important_problem": "Accelerating my workflow"
     },
     {
-        "id": 43,
+        "id": "43",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "6-10 years",
         "game_engines": [
@@ -2602,7 +2602,7 @@
             "Time investment to set up compared to potential benefits",
             "Technical complexity/steep learning curve"
         ],
-        "tool_view": "\"PCG tools are too complex to integrate into my workflow\"",
+        "tool_view": "PCG tools are too complex to integrate into my workflow",
         "critical_factors": [
             "Flexibility (ability to adapt to various use cases)",
             "Reliability (predictable, stable results)",
@@ -2626,7 +2626,7 @@
             "Rectangular grid/tile-based",
             "Navigation mesh"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Balanced approach (iterative refinement between mission and space)",
         "ai_role_preference": [
             "Tool-based (AI enhances specific components of your manual design process)",
             "Assistant-based (AI helps implement your design intentions)"
@@ -2646,7 +2646,7 @@
         "most_important_problem": "Ease of integration to game engines"
     },
     {
-        "id": 44,
+        "id": "44",
         "professional_role": "Game Designer",
         "years_experience": "3-5 years",
         "game_engines": [
@@ -2670,7 +2670,7 @@
         "primary_concerns": [
             "Time investment to set up compared to potential benefits"
         ],
-        "tool_view": "\"PCG tools don't give me enough control over the final output\"",
+        "tool_view": "PCG tools don't give me enough control over the final output",
         "critical_factors": [
             "Simplicity (low barrier to entry)",
             "Familiarity (resemblance to tools you already know)",
@@ -2694,7 +2694,7 @@
             "Rectangular grid/tile-based",
             "Free-form geometry"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Space-driven generation (spatial layout determines gameplay possibilities)",
         "ai_role_preference": [
             "I have no opinion/not sure"
         ],
@@ -2713,7 +2713,7 @@
         "most_important_problem": null
     },
     {
-        "id": 45,
+        "id": "45",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "3-5 years",
         "game_engines": [
@@ -2741,7 +2741,7 @@
             "Difficulty in debugging unexpected outputs",
             "Technical complexity/steep learning curve"
         ],
-        "tool_view": "\"Most PCG tools are built for programmers, not designers\"",
+        "tool_view": "Most PCG tools are built for programmers, not designers",
         "critical_factors": [
             "Simplicity (low barrier to entry)",
             "Documentation and learning resources",
@@ -2762,7 +2762,7 @@
         "integration_preference": "Any of the above works for me as long as the tool works",
         "genre_interest": {},
         "level_representation": null,
-        "most_useful_approach": null,
+        "most_useful_approach": "Context-dependent (different approaches for different game sections)",
         "ai_role_preference": [
             "Assistant-based (AI helps implement your design intentions)",
             "Tool-based (AI enhances specific components of your manual design process)"
@@ -2772,7 +2772,7 @@
             "Maintaining creative control over the final output"
         ],
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "Loss of designer agency/control"
         ],
         "desired_solutions": [
@@ -2783,7 +2783,7 @@
         "most_important_problem": "time Saver : boiler code already done (don't want to implement known algorithms), fast, saves time for polish balancing etc"
     },
     {
-        "id": 46,
+        "id": "46",
         "professional_role": "Level Designer",
         "years_experience": "0-2 years",
         "game_engines": [
@@ -2806,7 +2806,7 @@
             "Lack of precise artistic control",
             "Integration with existing workflows"
         ],
-        "tool_view": "\"PCG tools don't give me enough control over the final output\"",
+        "tool_view": "PCG tools don't give me enough control over the final output",
         "critical_factors": [
             "Flexibility (ability to adapt to various use cases)",
             "Simplicity (low barrier to entry)",
@@ -2832,7 +2832,7 @@
             "Free-form geometry",
             "Scene graph/hierarchical structure"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Context-dependent (different approaches for different game sections)",
         "ai_role_preference": [
             "Tool-based (AI enhances specific components of your manual design process)",
             "I prefer traditional rule-based PCG without AI involvement"
@@ -2853,7 +2853,7 @@
         "most_important_problem": null
     },
     {
-        "id": 47,
+        "id": "47",
         "professional_role": "Academic/Researcher",
         "years_experience": "10+ years",
         "game_engines": [
@@ -2881,7 +2881,7 @@
             "Integration with existing workflows",
             "Time investment to set up compared to potential benefits"
         ],
-        "tool_view": "Most PCG tools are bullshit ",
+        "tool_view": "Most PCG tools are bullshit",
         "critical_factors": [
             "Community support",
             "Documentation and learning resources",
@@ -2905,7 +2905,7 @@
             "Rectangular grid/tile-based",
             "Scene graph/hierarchical structure"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Mission-driven generation (gameplay goals determine level structure)",
         "ai_role_preference": [
             "Suggestion-based (AI proposes level designs for you to select and modify)",
             "Full automation (AI generates complete levels with minimal input)"
@@ -2916,17 +2916,17 @@
         ],
         "ai_concerns": [
             "Unpredictable or inconsistent results",
-            "Potential \"black box\" nature (lack of transparency)"
+            "Potential black box nature (lack of transparency)"
         ],
         "desired_solutions": [
             "Time savings compared to manual design",
             "Improved iteration speed on level designs",
             "Ability to create more content variations with consistent quality"
         ],
-        "most_important_problem": "Creativity "
+        "most_important_problem": "Creativity"
     },
     {
-        "id": 48,
+        "id": "48",
         "professional_role": "Game Designer",
         "years_experience": "10+ years",
         "game_engines": [
@@ -2952,7 +2952,7 @@
             "Unclear design methodology for procedural systems",
             "Lack of precise artistic control"
         ],
-        "tool_view": "\"Most PCG tools are built for programmers, not designers\"",
+        "tool_view": "Most PCG tools are built for programmers, not designers",
         "critical_factors": [
             "Flexibility (ability to adapt to various use cases)",
             "Reliability (predictable, stable results)",
@@ -2975,7 +2975,7 @@
         "level_representation": [
             "Rectangular grid/tile-based"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Context-dependent (different approaches for different game sections)",
         "ai_role_preference": [
             "I prefer traditional rule-based PCG without AI involvement"
         ],
@@ -2995,7 +2995,7 @@
         "most_important_problem": "Generating meaningful content which can engage users while maintaining an authored feel"
     },
     {
-        "id": 50,
+        "id": "50",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "3-5 years",
         "game_engines": [
@@ -3020,7 +3020,7 @@
             "Unclear design methodology for procedural systems",
             "Lack of precise artistic control"
         ],
-        "tool_view": "\"Existing PCG tools are too limited in what they can generate\"",
+        "tool_view": "Existing PCG tools are too limited in what they can generate",
         "critical_factors": [
             "Flexibility (ability to adapt to various use cases)",
             "Documentation and learning resources",
@@ -3045,7 +3045,7 @@
             "Scene graph/hierarchical structure",
             "Free-form geometry"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Context-dependent (different approaches for different game sections)",
         "ai_role_preference": [
             "I prefer traditional rule-based PCG without AI involvement",
             "Assistant-based (AI helps implement your design intentions)"
@@ -3055,7 +3055,7 @@
             "Consistency with existing game assets and style"
         ],
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "Loss of designer agency/control"
         ],
         "desired_solutions": [
@@ -3066,7 +3066,7 @@
         "most_important_problem": null
     },
     {
-        "id": 52,
+        "id": "52",
         "professional_role": "Academic/Researcher",
         "years_experience": "10+ years",
         "game_engines": [
@@ -3091,7 +3091,7 @@
             "Time investment to set up compared to potential benefits",
             "Unpredictable results affecting game balance"
         ],
-        "tool_view": "\"Most PCG tools are built for programmers, not designers\"",
+        "tool_view": "Most PCG tools are built for programmers, not designers",
         "critical_factors": [
             "Reliability (predictable, stable results)",
             "Simplicity (low barrier to entry)",
@@ -3116,7 +3116,7 @@
             "Hexagonal grid/tile-based",
             "Navigation mesh"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Not sure/would need to experiment",
         "ai_role_preference": [
             "I prefer traditional rule-based PCG without AI involvement"
         ],
@@ -3124,7 +3124,7 @@
             "Consistency with existing game assets and style"
         ],
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "Loss of designer agency/control"
         ],
         "desired_solutions": [
@@ -3135,7 +3135,7 @@
         "most_important_problem": null
     },
     {
-        "id": 53,
+        "id": "53",
         "professional_role": "Level Designer",
         "years_experience": "0-2 years",
         "game_engines": [
@@ -3181,7 +3181,7 @@
         "level_representation": [
             "Rectangular grid/tile-based"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Balanced approach (iterative refinement between mission and space)",
         "ai_role_preference": [
             "Suggestion-based (AI proposes level designs for you to select and modify)"
         ],
@@ -3201,7 +3201,7 @@
         "most_important_problem": "Timesaving for repetitive and time consuming tasks such as set dressing which unlocks more scope possibilities"
     },
     {
-        "id": 54,
+        "id": "54",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "10+ years",
         "game_engines": [
@@ -3224,7 +3224,7 @@
             "Difficulty in debugging unexpected outputs",
             "Unpredictable results affecting game balance"
         ],
-        "tool_view": "\"PCG tools are too complex to integrate into my workflow\"",
+        "tool_view": "PCG tools are too complex to integrate into my workflow",
         "critical_factors": [
             "Documentation and learning resources",
             "Reliability (predictable, stable results)",
@@ -3248,13 +3248,13 @@
             "Hexagonal grid/tile-based",
             "Voxel-based"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Not sure/would need to experiment",
         "ai_role_preference": [
             "I prefer traditional rule-based PCG without AI involvement"
         ],
         "ai_importance_factors": null,
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "paying for tokens every time player generates a map"
         ],
         "desired_solutions": [
@@ -3265,7 +3265,7 @@
         "most_important_problem": "a new random map being generated for every play customised to specific settings"
     },
     {
-        "id": 55,
+        "id": "55",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "3-5 years",
         "game_engines": [
@@ -3288,7 +3288,7 @@
             "Unclear design methodology for procedural systems",
             "Unpredictable results affecting game balance"
         ],
-        "tool_view": "\"PCG tools don't give me enough control over the final output\"",
+        "tool_view": "PCG tools don't give me enough control over the final output",
         "critical_factors": [
             "Feature completeness (comprehensive capabilities)",
             "Documentation and learning resources",
@@ -3312,7 +3312,7 @@
             "Rectangular grid/tile-based",
             "Hexagonal grid/tile-based"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Mission-driven generation (gameplay goals determine level structure)",
         "ai_role_preference": [
             "I prefer traditional rule-based PCG without AI involvement"
         ],
@@ -3326,7 +3326,7 @@
         "most_important_problem": "Provide infinite levels that retain the 'essence' of what makes a level fun/interesting in the first place."
     },
     {
-        "id": 56,
+        "id": "56",
         "professional_role": "Technical Artist",
         "years_experience": "10+ years",
         "game_engines": [
@@ -3351,7 +3351,7 @@
             "People, Convincing other depts.",
             "Lack of precise artistic control"
         ],
-        "tool_view": "\"Existing PCG tools are too limited in what they can generate\"",
+        "tool_view": "Existing PCG tools are too limited in what they can generate",
         "critical_factors": [
             "Flexibility (ability to adapt to various use cases)",
             "Simplicity (low barrier to entry)",
@@ -3368,14 +3368,14 @@
             "Runtime vs. offline generation options"
         ],
         "realtime_feedback_importance": "Somewhat important",
-        "preferred_approach": "Mixed-initiative (not as well-known term) approach where the tool learns from my examples",
+        "preferred_approach": "Mixed-initiative approach where the tool learns from my examples",
         "integration_preference": "Deep integration within existing engine (like Unreal Blueprint)",
         "genre_interest": {},
         "level_representation": [
             "Rectangular grid/tile-based",
             "Node-based graphs (mission/flow graphs)"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Balanced approach (iterative refinement between mission and space)",
         "ai_role_preference": [
             "Assistant-based (AI helps implement your design intentions)"
         ],
@@ -3384,7 +3384,7 @@
             "Learning from my design preferences over time"
         ],
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "Unpredictable or inconsistent results"
         ],
         "desired_solutions": [
@@ -3395,7 +3395,7 @@
         "most_important_problem": "Make lots of unique fun levels"
     },
     {
-        "id": 57,
+        "id": "57",
         "professional_role": "Game Designer",
         "years_experience": "10+ years",
         "game_engines": [
@@ -3422,7 +3422,7 @@
             "Time investment to set up compared to potential benefits",
             "Unpredictable results affecting game balance"
         ],
-        "tool_view": "\"I'm satisfied with the current PCG tools available\"",
+        "tool_view": "I'm satisfied with the current PCG tools available",
         "critical_factors": [
             "Flexibility (ability to adapt to various use cases)",
             "Documentation and learning resources",
@@ -3446,7 +3446,7 @@
             "Rectangular grid/tile-based",
             "Scene graph/hierarchical structure"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Balanced approach (iterative refinement between mission and space)",
         "ai_role_preference": [
             "Tool-based (AI enhances specific components of your manual design process)"
         ],
@@ -3465,7 +3465,7 @@
         "most_important_problem": "Reduce development cost ($) to create content."
     },
     {
-        "id": 58,
+        "id": "58",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "6-10 years",
         "game_engines": [
@@ -3489,7 +3489,7 @@
             "Difficulty in debugging unexpected outputs",
             "Integration with existing workflows"
         ],
-        "tool_view": "\"Existing PCG tools are too limited in what they can generate\"",
+        "tool_view": "Existing PCG tools are too limited in what they can generate",
         "critical_factors": [
             "Flexibility (ability to adapt to various use cases)",
             "Feature completeness (comprehensive capabilities)",
@@ -3512,7 +3512,7 @@
         "level_representation": [
             "Scene graph/hierarchical structure"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Context-dependent (different approaches for different game sections)",
         "ai_role_preference": [
             "I prefer traditional rule-based PCG without AI involvement"
         ],
@@ -3532,7 +3532,7 @@
         "most_important_problem": null
     },
     {
-        "id": 59,
+        "id": "59",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "3-5 years",
         "game_engines": [
@@ -3556,7 +3556,7 @@
             "Technical complexity/steep learning curve",
             "Unclear design methodology for procedural systems"
         ],
-        "tool_view": "\"PCG tools don't give me enough control over the final output\"",
+        "tool_view": "PCG tools don't give me enough control over the final output",
         "critical_factors": [
             "Feature completeness (comprehensive capabilities)",
             "Integration with existing workflows",
@@ -3580,7 +3580,7 @@
             "Rectangular grid/tile-based",
             "Scene graph/hierarchical structure"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Not sure/would need to experiment",
         "ai_role_preference": [
             "Suggestion-based (AI proposes level designs for you to select and modify)"
         ],
@@ -3589,7 +3589,7 @@
             "Consistency with existing game assets and style"
         ],
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "Loss of designer agency/control"
         ],
         "desired_solutions": [
@@ -3600,7 +3600,7 @@
         "most_important_problem": null
     },
     {
-        "id": 60,
+        "id": "60",
         "professional_role": "Technical Artist",
         "years_experience": "6-10 years",
         "game_engines": [
@@ -3626,7 +3626,7 @@
             "Difficulty in debugging unexpected outputs",
             "Unpredictable results affecting game balance"
         ],
-        "tool_view": "\"Most PCG tools are built for programmers, not designers\"",
+        "tool_view": "Most PCG tools are built for programmers, not designers",
         "critical_factors": [
             "Simplicity (low barrier to entry)",
             "Integration with existing workflows",
@@ -3650,7 +3650,7 @@
             "Free-form geometry",
             "Point cloud"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Mission-driven generation (gameplay goals determine level structure)",
         "ai_role_preference": [
             "Full automation (AI generates complete levels with minimal input)",
             "Suggestion-based (AI proposes level designs for you to select and modify)"
@@ -3660,7 +3660,7 @@
             "Understanding how the AI makes its decisions"
         ],
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "Difficulty integrating with existing tools/workflows"
         ],
         "desired_solutions": [
@@ -3671,7 +3671,7 @@
         "most_important_problem": "Avoid manually placed objects"
     },
     {
-        "id": 61,
+        "id": "61",
         "professional_role": "Academic/Researcher",
         "years_experience": "10+ years",
         "game_engines": [
@@ -3699,7 +3699,7 @@
             "Time investment to set up compared to potential benefits",
             "Integration with existing workflows"
         ],
-        "tool_view": "\"I prefer handcrafting levels and don't see benefits in PCG tools\"",
+        "tool_view": "I prefer handcrafting levels and don't see benefits in PCG tools",
         "critical_factors": [
             "Documentation and learning resources",
             "Simplicity (low barrier to entry)",
@@ -3723,7 +3723,7 @@
             "Rectangular grid/tile-based",
             "Hexagonal grid/tile-based"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Space-driven generation (spatial layout determines gameplay possibilities)",
         "ai_role_preference": [
             "Suggestion-based (AI proposes level designs for you to select and modify)",
             "Assistant-based (AI helps implement your design intentions)"
@@ -3744,7 +3744,7 @@
         "most_important_problem": null
     },
     {
-        "id": 62,
+        "id": "62",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "10+ years",
         "game_engines": [
@@ -3769,7 +3769,7 @@
             "Unpredictable results affecting game balance",
             "Integration with existing workflows"
         ],
-        "tool_view": "\"PCG tools are too complex to integrate into my workflow\"",
+        "tool_view": "PCG tools are too complex to integrate into my workflow",
         "critical_factors": [
             "Reliability (predictable, stable results)",
             "Integration with existing workflows",
@@ -3786,14 +3786,14 @@
             "Limited or no programming required"
         ],
         "realtime_feedback_importance": "Very important",
-        "preferred_approach": "Mixed-initiative (not as well-known term) approach where the tool learns from my examples",
+        "preferred_approach": "Mixed-initiative approach where the tool learns from my examples",
         "integration_preference": "Deep integration within existing engine (like Unreal Blueprint)",
         "genre_interest": {},
         "level_representation": [
             "Scene graph/hierarchical structure",
             "Node-based graphs (mission/flow graphs)"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Context-dependent (different approaches for different game sections)",
         "ai_role_preference": [
             "Assistant-based (AI helps implement your design intentions)",
             "Tool-based (AI enhances specific components of your manual design process)"
@@ -3814,7 +3814,7 @@
         "most_important_problem": "Consistent asset quality that makes sense in the rest of the artistic context"
     },
     {
-        "id": 63,
+        "id": "63",
         "professional_role": "Level Designer",
         "years_experience": "0-2 years",
         "game_engines": [
@@ -3838,7 +3838,7 @@
             "Difficulty in debugging unexpected outputs",
             "Time investment to set up compared to potential benefits"
         ],
-        "tool_view": "\"PCG tools are too complex to integrate into my workflow\"",
+        "tool_view": "PCG tools are too complex to integrate into my workflow",
         "critical_factors": [
             "Familiarity (resemblance to tools you already know)",
             "Simplicity (low barrier to entry)",
@@ -3863,7 +3863,7 @@
             "Free-form geometry",
             "Scene graph/hierarchical structure"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Mission-driven generation (gameplay goals determine level structure)",
         "ai_role_preference": [
             "Suggestion-based (AI proposes level designs for you to select and modify)",
             "Assistant-based (AI helps implement your design intentions)"
@@ -3884,7 +3884,7 @@
         "most_important_problem": null
     },
     {
-        "id": 64,
+        "id": "64",
         "professional_role": "Level Designer",
         "years_experience": "6-10 years",
         "game_engines": [
@@ -3932,7 +3932,7 @@
         "level_representation": [
             "In my last project, as progression is made in one direction, I always have the exit of a room in the middle, and the info I store is the distance between begginign and end to then spawn connections. But shape around entry and exit is free"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Balanced approach (iterative refinement between mission and space)",
         "ai_role_preference": [
             "Suggestion-based (AI proposes level designs for you to select and modify)"
         ],
@@ -3950,7 +3950,7 @@
         "most_important_problem": "More freedom in the level sections, so I could set the exit and have more organic results with the tool"
     },
     {
-        "id": 66,
+        "id": "66",
         "professional_role": "Character / General Artist",
         "years_experience": "6-10 years",
         "game_engines": [
@@ -3973,7 +3973,7 @@
             "Unpredictable results affecting game balance",
             "Lack of precise artistic control"
         ],
-        "tool_view": "\"Most PCG tools are built for programmers, not designers\"",
+        "tool_view": "Most PCG tools are built for programmers, not designers",
         "critical_factors": [
             "Flexibility (ability to adapt to various use cases)",
             "Familiarity (resemblance to tools you already know)",
@@ -3996,7 +3996,7 @@
         "level_representation": [
             "Free-form geometry"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Balanced approach (iterative refinement between mission and space)",
         "ai_role_preference": [
             "I prefer traditional rule-based PCG without AI involvement",
             "Tool-based (AI enhances specific components of your manual design process)"
@@ -4017,7 +4017,7 @@
         "most_important_problem": "To save time, that way we can work on more assets to add additional variation."
     },
     {
-        "id": 67,
+        "id": "67",
         "professional_role": "Technical Artist",
         "years_experience": "0-2 years",
         "game_engines": [
@@ -4041,7 +4041,7 @@
             "Integration with existing workflows",
             "Creating variation"
         ],
-        "tool_view": "\"I'm satisfied with the current PCG tools available\"",
+        "tool_view": "I'm satisfied with the current PCG tools available",
         "critical_factors": [
             "Flexibility (ability to adapt to various use cases)",
             "Simplicity (low barrier to entry)",
@@ -4062,7 +4062,7 @@
         "integration_preference": "Deep integration within existing engine (like Unreal Blueprint)",
         "genre_interest": {},
         "level_representation": null,
-        "most_useful_approach": null,
+        "most_useful_approach": "Context-dependent (different approaches for different game sections)",
         "ai_role_preference": [
             "I have no opinion/not sure"
         ],
@@ -4082,7 +4082,7 @@
         "most_important_problem": null
     },
     {
-        "id": 68,
+        "id": "68",
         "professional_role": "Game Designer",
         "years_experience": "0-2 years",
         "game_engines": [
@@ -4107,7 +4107,7 @@
             "Technical complexity/steep learning curve",
             "Unpredictable results affecting game balance"
         ],
-        "tool_view": "\"I prefer handcrafting levels and don't see benefits in PCG tools\"",
+        "tool_view": "I prefer handcrafting levels and don't see benefits in PCG tools",
         "critical_factors": [
             "Documentation and learning resources",
             "Simplicity (low barrier to entry)",
@@ -4128,7 +4128,7 @@
         "integration_preference": "Standalone application that exports to game engines",
         "genre_interest": {},
         "level_representation": null,
-        "most_useful_approach": null,
+        "most_useful_approach": "Balanced approach (iterative refinement between mission and space)",
         "ai_role_preference": [
             "I prefer traditional rule-based PCG without AI involvement",
             "Tool-based (AI enhances specific components of your manual design process)"
@@ -4147,7 +4147,7 @@
         "most_important_problem": null
     },
     {
-        "id": 69,
+        "id": "69",
         "professional_role": "Level Designer",
         "years_experience": "3-5 years",
         "game_engines": [
@@ -4171,7 +4171,7 @@
             "Time investment to set up compared to potential benefits",
             "Unclear design methodology for procedural systems"
         ],
-        "tool_view": "\"I prefer handcrafting levels and don't see benefits in PCG tools\"",
+        "tool_view": "I prefer handcrafting levels and don't see benefits in PCG tools",
         "critical_factors": [
             "Flexibility (ability to adapt to various use cases)",
             "Integration with existing workflows",
@@ -4197,7 +4197,7 @@
             "Navigation mesh",
             "Free-form geometry"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Not sure/would need to experiment",
         "ai_role_preference": [
             "I prefer traditional rule-based PCG without AI involvement"
         ],
@@ -4217,7 +4217,7 @@
         "most_important_problem": "To get some base or groundwork to start from, or ideate from"
     },
     {
-        "id": 70,
+        "id": "70",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "3-5 years",
         "game_engines": [
@@ -4262,7 +4262,7 @@
         "integration_preference": "Plugin that works across multiple engines",
         "genre_interest": {},
         "level_representation": null,
-        "most_useful_approach": null,
+        "most_useful_approach": "Balanced approach (iterative refinement between mission and space)",
         "ai_role_preference": [
             "I prefer traditional rule-based PCG without AI involvement"
         ],
@@ -4282,7 +4282,7 @@
         "most_important_problem": null
     },
     {
-        "id": 71,
+        "id": "71",
         "professional_role": "Technical Artist",
         "years_experience": "3-5 years",
         "game_engines": [
@@ -4306,7 +4306,7 @@
             "Integration with existing workflows",
             "Time investment to set up compared to potential benefits"
         ],
-        "tool_view": "\"I'm satisfied with the current PCG tools available\"",
+        "tool_view": "I'm satisfied with the current PCG tools available",
         "critical_factors": [
             "Reliability (predictable, stable results)",
             "Integration with existing workflows",
@@ -4330,7 +4330,7 @@
             "Navigation mesh",
             "Rectangular grid/tile-based"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Context-dependent (different approaches for different game sections)",
         "ai_role_preference": [
             "I prefer traditional rule-based PCG without AI involvement"
         ],
@@ -4339,7 +4339,7 @@
             "Understanding how the AI makes its decisions"
         ],
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "Intellectual property/ownership concerns"
         ],
         "desired_solutions": [
@@ -4350,7 +4350,7 @@
         "most_important_problem": "Quickly adding variation to similar assets and easily populating a scene."
     },
     {
-        "id": 9,
+        "id": "9",
         "professional_role": "Technical Artist",
         "years_experience": "6-10 years",
         "game_engines": [
@@ -4373,7 +4373,7 @@
             "Time investment to set up compared to potential benefits",
             "Integration with existing workflows"
         ],
-        "tool_view": "\"Most PCG tools are built for programmers, not designers\"",
+        "tool_view": "Most PCG tools are built for programmers, not designers",
         "critical_factors": [
             "Flexibility (ability to adapt to various use cases)",
             "Simplicity (low barrier to entry)",
@@ -4387,7 +4387,7 @@
         "level_representation": [
             "Free-form geometry"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Mission-driven generation (gameplay goals determine level structure)",
         "ai_role_preference": [
             "I prefer traditional rule-based PCG without AI involvement",
             "I have no opinion/not sure"
@@ -4406,7 +4406,7 @@
         "most_important_problem": "Enabling creative control on a large scale"
     },
     {
-        "id": 12,
+        "id": "12",
         "professional_role": "Technical Artist",
         "years_experience": "10+ years",
         "game_engines": [
@@ -4427,9 +4427,9 @@
         "level_generation_frequency": "Always (essential part of workflow)",
         "primary_concerns": [
             "Lack of precise artistic control",
-            "Things looking \"varied but the same\". Spending more time making the tool than art-ing the thing."
+            "Things looking varied but the same. Spending more time making the tool than art-ing the thing."
         ],
-        "tool_view": "\"With great power comes great responsibility\"",
+        "tool_view": "With great power comes great responsibility",
         "critical_factors": [
             "Integration with existing workflows",
             "Flexibility (ability to adapt to various use cases)",
@@ -4443,7 +4443,7 @@
         "level_representation": [
             "JSON"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Mission-driven generation (gameplay goals determine level structure)",
         "ai_role_preference": [
             "Assistant-based (AI helps implement your design intentions)",
             "Tool-based (AI enhances specific components of your manual design process)"
@@ -4464,7 +4464,7 @@
         "most_important_problem": "Speed from what I imagine to what's on the screen"
     },
     {
-        "id": 24,
+        "id": "24",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "3-5 years",
         "game_engines": [
@@ -4495,14 +4495,14 @@
         ],
         "node_tool_features": null,
         "realtime_feedback_importance": "Essential",
-        "preferred_approach": "Mixed-initiative (not as well-known term) approach where the tool learns from my examples",
+        "preferred_approach": "Mixed-initiative approach where the tool learns from my examples",
         "integration_preference": "Web-based tool accessible from anywhere",
         "genre_interest": {},
         "level_representation": [
             "Node-based graphs (mission/flow graphs)",
             "Graph tiles"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Context-dependent (different approaches for different game sections)",
         "ai_role_preference": [
             "I have no opinion/not sure"
         ],
@@ -4518,10 +4518,10 @@
             "Learning resources and examples for different game genres",
             "Better integration with existing workflows"
         ],
-        "most_important_problem": "I don't think we need more tools, we need more knowledge. I like what BorisTheBrave & Oskar Stalberg do: explaining generation techniques. I think the knowledge should be readily available, but folks should design their own systems aligned with their own projects. "
+        "most_important_problem": "I don't think we need more tools, we need more knowledge. I like what BorisTheBrave & Oskar Stalberg do: explaining generation techniques. I think the knowledge should be readily available, but folks should design their own systems aligned with their own projects."
     },
     {
-        "id": 49,
+        "id": "49",
         "professional_role": "Game Designer",
         "years_experience": "0-2 years",
         "game_engines": [
@@ -4575,7 +4575,7 @@
         "most_important_problem": null
     },
     {
-        "id": 51,
+        "id": "51",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "0-2 years",
         "game_engines": [
@@ -4607,7 +4607,7 @@
         "integration_preference": "Plugin that works across multiple engines",
         "genre_interest": {},
         "level_representation": null,
-        "most_useful_approach": null,
+        "most_useful_approach": "Not sure/would need to experiment",
         "ai_role_preference": [
             "I prefer traditional rule-based PCG without AI involvement",
             "I have no opinion/not sure"
@@ -4628,7 +4628,7 @@
         "most_important_problem": null
     },
     {
-        "id": 65,
+        "id": "65",
         "professional_role": "Technical Artist",
         "years_experience": "10+ years",
         "game_engines": [
@@ -4655,7 +4655,7 @@
             "Technical complexity/steep learning curve",
             "Integration with existing workflows"
         ],
-        "tool_view": "\"PCG tools are too complex to integrate into my workflow\"",
+        "tool_view": "PCG tools are too complex to integrate into my workflow",
         "critical_factors": [
             "Feature completeness (comprehensive capabilities)",
             "Documentation and learning resources",
@@ -4663,14 +4663,14 @@
         ],
         "node_tool_features": null,
         "realtime_feedback_importance": "Somewhat important",
-        "preferred_approach": "Mixed-initiative (not as well-known term) approach where the tool learns from my examples",
+        "preferred_approach": "Mixed-initiative approach where the tool learns from my examples",
         "integration_preference": "Standalone application that exports to game engines",
         "genre_interest": {},
         "level_representation": [
             "Navigation mesh",
             "Scene graph/hierarchical structure"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Balanced approach (iterative refinement between mission and space)",
         "ai_role_preference": [
             "Assistant-based (AI helps implement your design intentions)"
         ],
@@ -4679,7 +4679,7 @@
             "Maintaining creative control over the final output"
         ],
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "Intellectual property/ownership concerns"
         ],
         "desired_solutions": [
@@ -4690,7 +4690,7 @@
         "most_important_problem": "Show processes of how solution made decisions per asset."
     },
     {
-        "id": 72,
+        "id": "72",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "3-5 years",
         "game_engines": [
@@ -4715,7 +4715,7 @@
             "Technical complexity/steep learning curve",
             "Time investment to set up compared to potential benefits"
         ],
-        "tool_view": "\"PCG tools are too complex to integrate into my workflow\"",
+        "tool_view": "PCG tools are too complex to integrate into my workflow",
         "critical_factors": [
             "Simplicity (low barrier to entry)",
             "Documentation and learning resources",
@@ -4740,7 +4740,7 @@
             "Navigation mesh",
             "Scene graph/hierarchical structure"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Balanced approach (iterative refinement between mission and space)",
         "ai_role_preference": [
             "Tool-based (AI enhances specific components of your manual design process)"
         ],
@@ -4760,7 +4760,7 @@
         "most_important_problem": null
     },
     {
-        "id": 73,
+        "id": "73",
         "professional_role": "Game Designer",
         "years_experience": "10+ years",
         "game_engines": [
@@ -4810,7 +4810,7 @@
             "Free-form geometry",
             "Scene graph/hierarchical structure"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Balanced approach (iterative refinement between mission and space)",
         "ai_role_preference": [
             "Suggestion-based (AI proposes level designs for you to select and modify)",
             "Assistant-based (AI helps implement your design intentions)"
@@ -4831,7 +4831,7 @@
         "most_important_problem": "Base its creation on existing level designs fed into it, to create variations or new layouts that speed up workflow whole remaining tonally consistent"
     },
     {
-        "id": 74,
+        "id": "74",
         "professional_role": "Game Designer",
         "years_experience": "3-5 years",
         "game_engines": [
@@ -4855,7 +4855,7 @@
             "Difficulty in debugging unexpected outputs",
             "Time investment to set up compared to potential benefits"
         ],
-        "tool_view": "\"PCG tools don't give me enough control over the final output\"",
+        "tool_view": "PCG tools don't give me enough control over the final output",
         "critical_factors": [
             "Familiarity (resemblance to tools you already know)",
             "Reliability (predictable, stable results)",
@@ -4880,7 +4880,7 @@
             "Free-form geometry",
             "Navigation mesh"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Context-dependent (different approaches for different game sections)",
         "ai_role_preference": [
             "Suggestion-based (AI proposes level designs for you to select and modify)",
             "Tool-based (AI enhances specific components of your manual design process)"
@@ -4901,7 +4901,7 @@
         "most_important_problem": "Creating a gameplay space I can build of off. A generated piece of level could be used as a sketch for a challenge in a level, this would speed up the process of prototyping challenges in-game."
     },
     {
-        "id": 75,
+        "id": "75",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "0-2 years",
         "game_engines": [
@@ -4925,7 +4925,7 @@
             "Technical complexity/steep learning curve",
             "Time investment to set up compared to potential benefits"
         ],
-        "tool_view": "\"Most PCG tools are built for programmers, not designers\"",
+        "tool_view": "Most PCG tools are built for programmers, not designers",
         "critical_factors": [
             "Flexibility (ability to adapt to various use cases)",
             "Simplicity (low barrier to entry)",
@@ -4946,7 +4946,7 @@
         "integration_preference": "Deep integration within existing engine (like Unreal Blueprint)",
         "genre_interest": {},
         "level_representation": null,
-        "most_useful_approach": null,
+        "most_useful_approach": "Mission-driven generation (gameplay goals determine level structure)",
         "ai_role_preference": [
             "Assistant-based (AI helps implement your design intentions)"
         ],
@@ -4954,7 +4954,7 @@
             "Maintaining creative control over the final output"
         ],
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "Loss of designer agency/control"
         ],
         "desired_solutions": [
@@ -4965,7 +4965,7 @@
         "most_important_problem": "Difficulty for artists to use"
     },
     {
-        "id": 76,
+        "id": "76",
         "professional_role": "Game Designer",
         "years_experience": "0-2 years",
         "game_engines": [
@@ -5014,7 +5014,7 @@
             "Scene graph/hierarchical structure",
             "Free-form geometry"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Mission-driven generation (gameplay goals determine level structure)",
         "ai_role_preference": [
             "I prefer traditional rule-based PCG without AI involvement"
         ],
@@ -5023,7 +5023,7 @@
             "Understanding how the AI makes its decisions"
         ],
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "Loss of designer agency/control"
         ],
         "desired_solutions": [
@@ -5034,7 +5034,7 @@
         "most_important_problem": "replayable content workload"
     },
     {
-        "id": 77,
+        "id": "77",
         "professional_role": "Game Designer",
         "years_experience": "3-5 years",
         "game_engines": [
@@ -5058,7 +5058,7 @@
             "Difficulty in debugging unexpected outputs",
             "Unpredictable results affecting game balance"
         ],
-        "tool_view": "\"Most PCG tools are built for programmers, not designers\"",
+        "tool_view": "Most PCG tools are built for programmers, not designers",
         "critical_factors": [
             "Simplicity (low barrier to entry)",
             "Documentation and learning resources",
@@ -5083,7 +5083,7 @@
             "Hexagonal grid/tile-based",
             "Scene graph/hierarchical structure"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Space-driven generation (spatial layout determines gameplay possibilities)",
         "ai_role_preference": [
             "Suggestion-based (AI proposes level designs for you to select and modify)",
             "Assistant-based (AI helps implement your design intentions)"
@@ -5094,7 +5094,7 @@
         ],
         "ai_concerns": [
             "Loss of designer agency/control",
-            "Potential \"black box\" nature (lack of transparency)"
+            "Potential black box nature (lack of transparency)"
         ],
         "desired_solutions": [
             "Time savings compared to manual design",
@@ -5104,7 +5104,7 @@
         "most_important_problem": "Making engaging levels when I don't consider myself a good level designer"
     },
     {
-        "id": 78,
+        "id": "78",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "3-5 years",
         "game_engines": [
@@ -5154,7 +5154,7 @@
             "Hexagonal grid/tile-based",
             "Node-based graphs (mission/flow graphs)"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Context-dependent (different approaches for different game sections)",
         "ai_role_preference": [
             "I prefer traditional rule-based PCG without AI involvement",
             "Tool-based (AI enhances specific components of your manual design process)"
@@ -5164,7 +5164,7 @@
             "Understanding how the AI makes its decisions"
         ],
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "Unpredictable or inconsistent results"
         ],
         "desired_solutions": [
@@ -5175,7 +5175,7 @@
         "most_important_problem": "Skip the setup steps that I have to do in each project just because the project slightly differs from the previous (in terms of tech used, pipeline or design constraints)"
     },
     {
-        "id": 79,
+        "id": "79",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "0-2 years",
         "game_engines": [
@@ -5200,7 +5200,7 @@
             "Time investment to set up compared to potential benefits",
             "Unpredictable results affecting game balance"
         ],
-        "tool_view": "\"PCG tools don't give me enough control over the final output\"",
+        "tool_view": "PCG tools don't give me enough control over the final output",
         "critical_factors": [
             "Flexibility (ability to adapt to various use cases)",
             "Feature completeness (comprehensive capabilities)",
@@ -5223,7 +5223,7 @@
         "level_representation": [
             "Free-form geometry"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Not sure/would need to experiment",
         "ai_role_preference": [
             "I prefer traditional rule-based PCG without AI involvement"
         ],
@@ -5232,7 +5232,7 @@
             "Novelty/uniqueness of the generated content"
         ],
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "Intellectual property/ownership concerns"
         ],
         "desired_solutions": [
@@ -5243,7 +5243,7 @@
         "most_important_problem": "Take away the initial risk of dedicating time for setting up a PCG system."
     },
     {
-        "id": 80,
+        "id": "80",
         "professional_role": "Level Designer",
         "years_experience": "0-2 years",
         "game_engines": [
@@ -5267,7 +5267,7 @@
             "Difficulty in debugging unexpected outputs",
             "Time investment to set up compared to potential benefits"
         ],
-        "tool_view": "\"PCG tools don't give me enough control over the final output\"",
+        "tool_view": "PCG tools don't give me enough control over the final output",
         "critical_factors": [
             "Flexibility (ability to adapt to various use cases)",
             "Simplicity (low barrier to entry)",
@@ -5292,7 +5292,7 @@
             "Free-form geometry",
             "Voxel-based"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Balanced approach (iterative refinement between mission and space)",
         "ai_role_preference": [
             "Tool-based (AI enhances specific components of your manual design process)",
             "Assistant-based (AI helps implement your design intentions)"
@@ -5310,10 +5310,10 @@
             "Improved iteration speed on level designs",
             "Reduced technical barriers to procedural generation"
         ],
-        "most_important_problem": "Monotonous tasks. "
+        "most_important_problem": "Monotonous tasks."
     },
     {
-        "id": 81,
+        "id": "81",
         "professional_role": "Level Designer",
         "years_experience": "3-5 years",
         "game_engines": [
@@ -5335,7 +5335,7 @@
             "Technical complexity/steep learning curve",
             "Unclear design methodology for procedural systems"
         ],
-        "tool_view": "\"Most PCG tools are built for programmers, not designers\"",
+        "tool_view": "Most PCG tools are built for programmers, not designers",
         "critical_factors": [
             "Flexibility (ability to adapt to various use cases)",
             "Feature completeness (comprehensive capabilities)",
@@ -5358,7 +5358,7 @@
         "level_representation": [
             "Rectangular grid/tile-based"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Space-driven generation (spatial layout determines gameplay possibilities)",
         "ai_role_preference": [
             "Tool-based (AI enhances specific components of your manual design process)"
         ],
@@ -5378,7 +5378,7 @@
         "most_important_problem": "More rapid and flexible implementation of art assets"
     },
     {
-        "id": 82,
+        "id": "82",
         "professional_role": "Academic/Researcher",
         "years_experience": "10+ years",
         "game_engines": [
@@ -5426,7 +5426,7 @@
             "Free-form geometry",
             "Navigation mesh"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Not sure/would need to experiment",
         "ai_role_preference": [
             "Suggestion-based (AI proposes level designs for you to select and modify)"
         ],
@@ -5435,7 +5435,7 @@
             "Consistency with existing game assets and style"
         ],
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "Lack of connection to the intended game-wide player experience (escalating narrative arc, challenge, pacing of memorable set-piece events, etc.)"
         ],
         "desired_solutions": [
@@ -5446,7 +5446,7 @@
         "most_important_problem": "High quality coverage of the basics (e.g. 'make a hospital ward') with easy customisation for me to build unique assets onto."
     },
     {
-        "id": 83,
+        "id": "83",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "0-2 years",
         "game_engines": [
@@ -5471,7 +5471,7 @@
             "Technical complexity/steep learning curve",
             "Unclear design methodology for procedural systems"
         ],
-        "tool_view": "\"PCG tools are too complex to integrate into my workflow\"",
+        "tool_view": "PCG tools are too complex to integrate into my workflow",
         "critical_factors": [
             "Documentation and learning resources",
             "Flexibility (ability to adapt to various use cases)",
@@ -5492,13 +5492,13 @@
         "integration_preference": "Plugin that works across multiple engines",
         "genre_interest": {},
         "level_representation": null,
-        "most_useful_approach": null,
+        "most_useful_approach": "Context-dependent (different approaches for different game sections)",
         "ai_role_preference": [
             "I have no opinion/not sure"
         ],
         "ai_importance_factors": null,
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "Loss of designer agency/control"
         ],
         "desired_solutions": [
@@ -5509,7 +5509,7 @@
         "most_important_problem": null
     },
     {
-        "id": 84,
+        "id": "84",
         "professional_role": "Game Designer",
         "years_experience": "3-5 years",
         "game_engines": [
@@ -5534,7 +5534,7 @@
             "Unpredictable results affecting game balance",
             "Integration with existing workflows"
         ],
-        "tool_view": "\"PCG tools are too complex to integrate into my workflow\"",
+        "tool_view": "PCG tools are too complex to integrate into my workflow",
         "critical_factors": [
             "Flexibility (ability to adapt to various use cases)",
             "Documentation and learning resources",
@@ -5558,7 +5558,7 @@
             "Rectangular grid/tile-based",
             "Free-form geometry"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Not sure/would need to experiment",
         "ai_role_preference": [
             "Suggestion-based (AI proposes level designs for you to select and modify)",
             "Tool-based (AI enhances specific components of your manual design process)"
@@ -5579,7 +5579,7 @@
         "most_important_problem": null
     },
     {
-        "id": 85,
+        "id": "85",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "0-2 years",
         "game_engines": [
@@ -5604,7 +5604,7 @@
             "Unpredictable results affecting game balance",
             "Difficulty in debugging unexpected outputs"
         ],
-        "tool_view": "\"PCG tools are too complex to integrate into my workflow\"",
+        "tool_view": "PCG tools are too complex to integrate into my workflow",
         "critical_factors": [
             "Familiarity (resemblance to tools you already know)",
             "Documentation and learning resources",
@@ -5630,7 +5630,7 @@
             "Node-based graphs (mission/flow graphs)",
             "Scene graph/hierarchical structure"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Context-dependent (different approaches for different game sections)",
         "ai_role_preference": [
             "Assistant-based (AI helps implement your design intentions)"
         ],
@@ -5650,7 +5650,7 @@
         "most_important_problem": null
     },
     {
-        "id": 86,
+        "id": "86",
         "professional_role": "Level Designer",
         "years_experience": "3-5 years",
         "game_engines": [
@@ -5676,7 +5676,7 @@
             "Time investment to set up compared to potential benefits",
             "Technical complexity/steep learning curve"
         ],
-        "tool_view": "\"PCG Tools have their benefits but I often find them more time consuming to set-up and use than building something myself\"",
+        "tool_view": "PCG Tools have their benefits but I often find them more time consuming to set-up and use than building something myself",
         "critical_factors": [
             "Flexibility (ability to adapt to various use cases)",
             "Reliability (predictable, stable results)",
@@ -5702,7 +5702,7 @@
             "Rectangular grid/tile-based",
             "Scene graph/hierarchical structure"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Context-dependent (different approaches for different game sections)",
         "ai_role_preference": [
             "I prefer traditional rule-based PCG without AI involvement"
         ],
@@ -5722,7 +5722,7 @@
         "most_important_problem": "I want a PCG tool to help bridge the gap between the worlds and levels I imagine and my skill in bringing those worlds to life"
     },
     {
-        "id": 87,
+        "id": "87",
         "professional_role": "Technical Artist",
         "years_experience": "3-5 years",
         "game_engines": [
@@ -5746,7 +5746,7 @@
             "Lack of precise artistic control",
             "Integration with existing workflows"
         ],
-        "tool_view": "\"PCG tools don't give me enough control over the final output\"",
+        "tool_view": "PCG tools don't give me enough control over the final output",
         "critical_factors": [
             "Documentation and learning resources",
             "Integration with existing workflows",
@@ -5770,7 +5770,7 @@
             "Scene graph/hierarchical structure",
             "Free-form geometry"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Balanced approach (iterative refinement between mission and space)",
         "ai_role_preference": [
             "I prefer traditional rule-based PCG without AI involvement"
         ],
@@ -5790,7 +5790,7 @@
         "most_important_problem": "Variation"
     },
     {
-        "id": 88,
+        "id": "88",
         "professional_role": "Technical Artist",
         "years_experience": "0-2 years",
         "game_engines": [
@@ -5816,7 +5816,7 @@
             "Lack of precise artistic control",
             "Hard to prove potential benefits to stake holders"
         ],
-        "tool_view": "\"PCG tools are too complex to integrate into my workflow\"",
+        "tool_view": "PCG tools are too complex to integrate into my workflow",
         "critical_factors": [
             "Simplicity (low barrier to entry)",
             "Reliability (predictable, stable results)",
@@ -5839,7 +5839,7 @@
         "level_representation": [
             "Rectangular grid/tile-based"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Not sure/would need to experiment",
         "ai_role_preference": [
             "Suggestion-based (AI proposes level designs for you to select and modify)",
             "Tool-based (AI enhances specific components of your manual design process)"
@@ -5860,7 +5860,7 @@
         "most_important_problem": "Flexibility and control over level creation during quick iteration"
     },
     {
-        "id": 89,
+        "id": "89",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "3-5 years",
         "game_engines": [
@@ -5881,7 +5881,7 @@
         "primary_concerns": [
             "Lack of precise artistic control"
         ],
-        "tool_view": "\"I'm satisfied with the current PCG tools available\"",
+        "tool_view": "I'm satisfied with the current PCG tools available",
         "critical_factors": [
             "Simplicity (low barrier to entry)",
             "Documentation and learning resources",
@@ -5905,7 +5905,7 @@
             "Rectangular grid/tile-based",
             "Node-based graphs (mission/flow graphs)"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Mission-driven generation (gameplay goals determine level structure)",
         "ai_role_preference": [
             "I have no opinion/not sure"
         ],
@@ -5924,7 +5924,7 @@
         "most_important_problem": null
     },
     {
-        "id": 90,
+        "id": "90",
         "professional_role": "Game Designer",
         "years_experience": "3-5 years",
         "game_engines": [
@@ -5948,7 +5948,7 @@
             "Lack of precise artistic control",
             "No dirrect use in developed project"
         ],
-        "tool_view": "\"PCG tools are too complex to integrate into my workflow\"",
+        "tool_view": "PCG tools are too complex to integrate into my workflow",
         "critical_factors": [
             "Familiarity (resemblance to tools you already know)",
             "Simplicity (low barrier to entry)",
@@ -5972,7 +5972,7 @@
             "Rectangular grid/tile-based",
             "Free-form geometry"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Space-driven generation (spatial layout determines gameplay possibilities)",
         "ai_role_preference": [
             "Full automation (AI generates complete levels with minimal input)",
             "Tool-based (AI enhances specific components of your manual design process)"
@@ -5993,7 +5993,7 @@
         "most_important_problem": null
     },
     {
-        "id": 91,
+        "id": "91",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "0-2 years",
         "game_engines": [
@@ -6018,7 +6018,7 @@
             "Integration with existing workflows",
             "Unpredictable results affecting game balance"
         ],
-        "tool_view": "\"I'm satisfied with the current PCG tools available\"",
+        "tool_view": "I'm satisfied with the current PCG tools available",
         "critical_factors": [
             "Flexibility (ability to adapt to various use cases)",
             "Reliability (predictable, stable results)",
@@ -6042,7 +6042,7 @@
             "Rectangular grid/tile-based",
             "Scene graph/hierarchical structure"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Balanced approach (iterative refinement between mission and space)",
         "ai_role_preference": [
             "I prefer traditional rule-based PCG without AI involvement"
         ],
@@ -6051,7 +6051,7 @@
             "Consistency with existing game assets and style"
         ],
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "Intellectual property/ownership concerns"
         ],
         "desired_solutions": [
@@ -6062,7 +6062,7 @@
         "most_important_problem": null
     },
     {
-        "id": 92,
+        "id": "92",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "3-5 years",
         "game_engines": [
@@ -6087,7 +6087,7 @@
             "Time investment to set up compared to potential benefits",
             "Unpredictable results affecting game balance"
         ],
-        "tool_view": "\"PCG tools are too complex to integrate into my workflow\"",
+        "tool_view": "PCG tools are too complex to integrate into my workflow",
         "critical_factors": [
             "Flexibility (ability to adapt to various use cases)",
             "Reliability (predictable, stable results)",
@@ -6113,7 +6113,7 @@
             "Voxel-based",
             "Constraint-based representations (is this a known term)"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Context-dependent (different approaches for different game sections)",
         "ai_role_preference": [
             "I prefer traditional rule-based PCG without AI involvement"
         ],
@@ -6133,7 +6133,7 @@
         "most_important_problem": null
     },
     {
-        "id": 93,
+        "id": "93",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "0-2 years",
         "game_engines": [
@@ -6157,7 +6157,7 @@
             "Unpredictable results affecting game balance",
             "Unclear design methodology for procedural systems"
         ],
-        "tool_view": "\"I'm satisfied with the current PCG tools available\"",
+        "tool_view": "I'm satisfied with the current PCG tools available",
         "critical_factors": [
             "Integration with existing workflows",
             "Reliability (predictable, stable results)",
@@ -6180,7 +6180,7 @@
         "level_representation": [
             "Free-form geometry"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Balanced approach (iterative refinement between mission and space)",
         "ai_role_preference": [
             "Suggestion-based (AI proposes level designs for you to select and modify)"
         ],
@@ -6200,7 +6200,7 @@
         "most_important_problem": null
     },
     {
-        "id": 94,
+        "id": "94",
         "professional_role": "Technical Artist",
         "years_experience": "0-2 years",
         "game_engines": [
@@ -6223,7 +6223,7 @@
             "Difficulty in debugging unexpected outputs",
             "Time investment to set up compared to potential benefits"
         ],
-        "tool_view": "\"Existing PCG tools are too limited in what they can generate\"",
+        "tool_view": "Existing PCG tools are too limited in what they can generate",
         "critical_factors": [
             "Feature completeness (comprehensive capabilities)",
             "Flexibility (ability to adapt to various use cases)",
@@ -6246,7 +6246,7 @@
         "level_representation": [
             "Node-based graphs (mission/flow graphs)"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Not sure/would need to experiment",
         "ai_role_preference": [
             "I prefer traditional rule-based PCG without AI involvement"
         ],
@@ -6262,7 +6262,7 @@
         "most_important_problem": null
     },
     {
-        "id": 95,
+        "id": "95",
         "professional_role": "Game Designer",
         "years_experience": "10+ years",
         "game_engines": [
@@ -6286,7 +6286,7 @@
         "primary_concerns": [
             "I don't have any concerns about the system - it's usually a lack of content that results in poor experiences."
         ],
-        "tool_view": "\"PCG tools don't give me enough control over the final output\"",
+        "tool_view": "PCG tools don't give me enough control over the final output",
         "critical_factors": [
             "New tools don't have to feel similar to existing ones, but they should feel intuitive, and let you accomplish what you want. Doesn't have to be simple, but logical and robuust.",
             "Reliability (predictable, stable results)",
@@ -6312,7 +6312,7 @@
             "Scene graph/hierarchical structure",
             "Rectangular grid/tile-based"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Mission-driven generation (gameplay goals determine level structure)",
         "ai_role_preference": [
             "I prefer traditional rule-based PCG without AI involvement",
             "Tool-based (AI enhances specific components of your manual design process)"
@@ -6333,7 +6333,7 @@
         "most_important_problem": "Testing viability by running analytics. Combining elements into a level isn't what I'd use an of-the-shelf solution for. But something that could help test if a level is good, or at least works, that would be awesome."
     },
     {
-        "id": 96,
+        "id": "96",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "6-10 years",
         "game_engines": [
@@ -6359,7 +6359,7 @@
             "Integration with existing workflows",
             "Difficulty in debugging unexpected outputs"
         ],
-        "tool_view": "\"PCG tools don't give me enough control over the final output\"",
+        "tool_view": "PCG tools don't give me enough control over the final output",
         "critical_factors": [
             "Flexibility (ability to adapt to various use cases)",
             "Simplicity (low barrier to entry)",
@@ -6376,7 +6376,7 @@
             "Runtime vs. offline generation options"
         ],
         "realtime_feedback_importance": "Essential",
-        "preferred_approach": "Mixed-initiative (not as well-known term) approach where the tool learns from my examples",
+        "preferred_approach": "Mixed-initiative approach where the tool learns from my examples",
         "integration_preference": "Core plugin that works across engines, with deep UI integrations for particular engines",
         "genre_interest": {},
         "level_representation": [
@@ -6385,7 +6385,7 @@
             "Constraint-based representations (is this a known term)",
             "Drawn zones (mix of free-form and constraints)"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Space-driven generation (spatial layout determines gameplay possibilities)",
         "ai_role_preference": [
             "Assistant-based (AI helps implement your design intentions)",
             "Tool-based (AI enhances specific components of your manual design process)"
@@ -6406,7 +6406,7 @@
         "most_important_problem": "I have artistic vision, but not necessarily the artistic/practical skills to implement that vision. I do have extensive programming and some design skills. So I can build a game, but I will struggle to make it look eye-catching unless I simplify the art style a lot. I would love a proc-gen tool that can cleverly add detail and decorate a basic block-out (in e.g. a 3D first-person shooter) such that it looks like a fully fledged level. So input: basic (BSP) geometry, perhaps with some mark-up that indicates design/semantic intentions - output: level that is decorated with details such as slants, trims, pipes, walls with depth, bridges that start and end properly, other procedural geometry, etc. That way, I can stay in control over the overall design of the level, and have the artistic details be figured out by a tool, much like an art director making a request. That way, I do not need to be dependent on finding a (specific) artist to fully implement my vision, or at the very least I can get something very decent looking already, which also helps with inspiration and motivation."
     },
     {
-        "id": 98,
+        "id": "98",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "6-10 years",
         "game_engines": [
@@ -6433,7 +6433,7 @@
             "Difficulty in debugging unexpected outputs",
             "Lack of precise artistic control"
         ],
-        "tool_view": "\"PCG tools don't give me enough control over the final output\"",
+        "tool_view": "PCG tools don't give me enough control over the final output",
         "critical_factors": [
             "Integration with existing workflows",
             "Flexibility (ability to adapt to various use cases)",
@@ -6458,7 +6458,7 @@
             "Free-form geometry",
             "Scene graph/hierarchical structure"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Mission-driven generation (gameplay goals determine level structure)",
         "ai_role_preference": [
             "Assistant-based (AI helps implement your design intentions)",
             "Suggestion-based (AI proposes level designs for you to select and modify)"
@@ -6468,7 +6468,7 @@
             "Learning from my design preferences over time"
         ],
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "Unpredictable or inconsistent results"
         ],
         "desired_solutions": [
@@ -6479,7 +6479,7 @@
         "most_important_problem": "Reduce time on complex / boring stuff. Increase agency of level designer by suggesting content. Example: Create a world procedurally, create content more hand tailored."
     },
     {
-        "id": 99,
+        "id": "99",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "10+ years",
         "game_engines": [
@@ -6505,7 +6505,7 @@
             "Difficulty in debugging unexpected outputs",
             "Time investment to set up compared to potential benefits"
         ],
-        "tool_view": "\"PCG tools don't give me enough control over the final output\"",
+        "tool_view": "PCG tools don't give me enough control over the final output",
         "critical_factors": [
             "Simplicity (low barrier to entry)",
             "Flexibility (ability to adapt to various use cases)",
@@ -6528,7 +6528,7 @@
         "level_representation": [
             "Free-form geometry"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Context-dependent (different approaches for different game sections)",
         "ai_role_preference": [
             "Assistant-based (AI helps implement your design intentions)"
         ],
@@ -6538,7 +6538,7 @@
         ],
         "ai_concerns": [
             "Intellectual property/ownership concerns",
-            "Potential \"black box\" nature (lack of transparency)"
+            "Potential black box nature (lack of transparency)"
         ],
         "desired_solutions": [
             "Reduced technical barriers to procedural generation",
@@ -6548,7 +6548,7 @@
         "most_important_problem": null
     },
     {
-        "id": 100,
+        "id": "100",
         "professional_role": "Academic/Researcher",
         "years_experience": "6-10 years",
         "game_engines": [
@@ -6572,7 +6572,7 @@
             "Time investment to set up compared to potential benefits",
             "Lack of precise artistic control"
         ],
-        "tool_view": "\"I'm satisfied with the current PCG tools available\"",
+        "tool_view": "I'm satisfied with the current PCG tools available",
         "critical_factors": [
             "Reliability (predictable, stable results)",
             "Integration with existing workflows",
@@ -6596,7 +6596,7 @@
             "Voxel-based",
             "Rectangular grid/tile-based"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Balanced approach (iterative refinement between mission and space)",
         "ai_role_preference": [
             "Suggestion-based (AI proposes level designs for you to select and modify)",
             "Tool-based (AI enhances specific components of your manual design process)"
@@ -6606,7 +6606,7 @@
             "Consistency with existing game assets and style"
         ],
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "Unpredictable or inconsistent results"
         ],
         "desired_solutions": [
@@ -6617,7 +6617,7 @@
         "most_important_problem": "Creating a large foundation for artists to manually tweak and iterate with."
     },
     {
-        "id": 101,
+        "id": "101",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "6-10 years",
         "game_engines": [
@@ -6641,7 +6641,7 @@
             "Lack of precise artistic control",
             "Unpredictable results affecting game balance"
         ],
-        "tool_view": "\"PCG tools are too complex to integrate into my workflow\"",
+        "tool_view": "PCG tools are too complex to integrate into my workflow",
         "critical_factors": [
             "Integration with existing workflows",
             "Simplicity (low barrier to entry)",
@@ -6665,7 +6665,7 @@
             "Rectangular grid/tile-based",
             "Scene graph/hierarchical structure"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Space-driven generation (spatial layout determines gameplay possibilities)",
         "ai_role_preference": [
             "I prefer traditional rule-based PCG without AI involvement"
         ],
@@ -6684,7 +6684,7 @@
         "most_important_problem": "Quick iteration on the algorithms themselves"
     },
     {
-        "id": 97,
+        "id": "97",
         "professional_role": "Game Designer",
         "years_experience": "3-5 years",
         "game_engines": [
@@ -6721,7 +6721,7 @@
         "level_representation": [
             "Rectangular grid/tile-based"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Context-dependent (different approaches for different game sections)",
         "ai_role_preference": [
             "Assistant-based (AI helps implement your design intentions)",
             "Tool-based (AI enhances specific components of your manual design process)"
@@ -6742,7 +6742,7 @@
         "most_important_problem": null
     },
     {
-        "id": 102,
+        "id": "102",
         "professional_role": "Technical Artist",
         "years_experience": "10+ years",
         "game_engines": "Unreal Engine",
@@ -6765,7 +6765,7 @@
             "Difficulty in debugging unexpected outputs",
             "Unpredictable results affecting game balance"
         ],
-        "tool_view": "\"PCG tools don't give me enough control over the final output\"",
+        "tool_view": "PCG tools don't give me enough control over the final output",
         "critical_factors": [
             "Flexibility (ability to adapt to various use cases)",
             "Reliability (predictable, stable results)",
@@ -6786,7 +6786,7 @@
         "integration_preference": "Deep integration within existing engine (like Unreal Blueprint)",
         "genre_interest": {},
         "level_representation": "Free-form geometry",
-        "most_useful_approach": null,
+        "most_useful_approach": "Context-dependent (different approaches for different game sections)",
         "ai_role_preference": [
             "Suggestion-based (AI proposes level designs for you to select and modify)",
             "Tool-based (AI enhances specific components of your manual design process)"
@@ -6807,7 +6807,7 @@
         "most_important_problem": "Creating bigger worlds with less work (fewer people)."
     },
     {
-        "id": 103,
+        "id": "103",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "10+ years",
         "game_engines": [
@@ -6833,7 +6833,7 @@
             "Technical complexity/steep learning curve",
             "Integration with existing workflows"
         ],
-        "tool_view": "\"Existing PCG tools are too limited in what they can generate\"",
+        "tool_view": "Existing PCG tools are too limited in what they can generate",
         "critical_factors": [
             "Simplicity (low barrier to entry)",
             "Flexibility (ability to adapt to various use cases)",
@@ -6857,7 +6857,7 @@
             "Navigation mesh",
             "Rectangular grid/tile-based"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Balanced approach (iterative refinement between mission and space)",
         "ai_role_preference": [
             "Full automation (AI generates complete levels with minimal input)",
             "Tool-based (AI enhances specific components of your manual design process)"
@@ -6867,7 +6867,7 @@
             "Novelty/uniqueness of the generated content"
         ],
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "Loss of designer agency/control"
         ],
         "desired_solutions": [
@@ -6878,7 +6878,7 @@
         "most_important_problem": "Tool simplicity combined with output variation"
     },
     {
-        "id": 104,
+        "id": "104",
         "professional_role": "Technical Artist",
         "years_experience": "3-5 years",
         "game_engines": "Unreal Engine",
@@ -6899,7 +6899,7 @@
             "Time investment to set up compared to potential benefits",
             "Unpredictable results affecting game balance"
         ],
-        "tool_view": "\"I'm satisfied with the current PCG tools available\"",
+        "tool_view": "I'm satisfied with the current PCG tools available",
         "critical_factors": [
             "Integration with existing workflows",
             "Documentation and learning resources",
@@ -6924,7 +6924,7 @@
             "Voxel-based",
             "Node-based graphs (mission/flow graphs)"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Context-dependent (different approaches for different game sections)",
         "ai_role_preference": "I have no opinion/not sure",
         "ai_importance_factors": "Understanding how the AI makes its decisions",
         "ai_concerns": [
@@ -6939,7 +6939,7 @@
         "most_important_problem": "-"
     },
     {
-        "id": 105,
+        "id": "105",
         "professional_role": "Technical Artist",
         "years_experience": "10+ years",
         "game_engines": "Unity",
@@ -6958,7 +6958,7 @@
             "Difficulty in debugging unexpected outputs",
             "Time investment to set up compared to potential benefits"
         ],
-        "tool_view": "\"PCG tools are too complex to integrate into my workflow\"",
+        "tool_view": "PCG tools are too complex to integrate into my workflow",
         "critical_factors": [
             "Simplicity (low barrier to entry)",
             "Reliability (predictable, stable results)",
@@ -6979,7 +6979,7 @@
         "integration_preference": "Deep integration within existing engine (like Unreal Blueprint)",
         "genre_interest": {},
         "level_representation": "Rectangular grid/tile-based",
-        "most_useful_approach": null,
+        "most_useful_approach": "Space-driven generation (spatial layout determines gameplay possibilities)",
         "ai_role_preference": [
             "Tool-based (AI enhances specific components of your manual design process)",
             "I prefer traditional rule-based PCG without AI involvement"
@@ -6989,7 +6989,7 @@
             "Consistency with existing game assets and style"
         ],
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "Unpredictable or inconsistent results"
         ],
         "desired_solutions": [
@@ -7000,7 +7000,7 @@
         "most_important_problem": "Create high quality content"
     },
     {
-        "id": 106,
+        "id": "106",
         "professional_role": "Academic/Researcher",
         "years_experience": "10+ years",
         "game_engines": [
@@ -7028,7 +7028,7 @@
             "Time investment to set up compared to potential benefits",
             "Integration with existing workflows"
         ],
-        "tool_view": "\"Most PCG tools are built for programmers, not designers\"",
+        "tool_view": "Most PCG tools are built for programmers, not designers",
         "critical_factors": [
             "Documentation and learning resources",
             "Reliability (predictable, stable results)",
@@ -7057,7 +7057,7 @@
             "Free-form geometry",
             "Voxel-based"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Context-dependent (different approaches for different game sections)",
         "ai_role_preference": [
             "Full automation (AI generates complete levels with minimal input)",
             "Suggestion-based (AI proposes level designs for you to select and modify)"
@@ -7078,7 +7078,7 @@
         "most_important_problem": "Generating runtime based geometry that can also be generated in editor."
     },
     {
-        "id": 107,
+        "id": "107",
         "professional_role": "Technical Artist",
         "years_experience": "3-5 years",
         "game_engines": "Unreal Engine",
@@ -7100,7 +7100,7 @@
             "Integration with existing workflows",
             "Time investment to set up compared to potential benefits"
         ],
-        "tool_view": "PCG is powerful but new and growing. ",
+        "tool_view": "PCG is powerful but new and growing.",
         "critical_factors": [
             "Feature completeness (comprehensive capabilities)",
             "Documentation and learning resources",
@@ -7125,7 +7125,7 @@
             "Node-based graphs (mission/flow graphs)",
             "Navigation mesh"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Space-driven generation (spatial layout determines gameplay possibilities)",
         "ai_role_preference": [
             "Suggestion-based (AI proposes level designs for you to select and modify)",
             "Assistant-based (AI helps implement your design intentions)"
@@ -7143,7 +7143,7 @@
         "most_important_problem": "Making tools accessible to users unlocks massive UGC potential."
     },
     {
-        "id": 108,
+        "id": "108",
         "professional_role": "Game Designer",
         "years_experience": "6-10 years",
         "game_engines": "Unreal Engine",
@@ -7182,7 +7182,7 @@
         "integration_preference": "Deep integration within existing engine (like Unreal Blueprint)",
         "genre_interest": {},
         "level_representation": "Rectangular grid/tile-based",
-        "most_useful_approach": null,
+        "most_useful_approach": "Balanced approach (iterative refinement between mission and space)",
         "ai_role_preference": [
             "Assistant-based (AI helps implement your design intentions)",
             "Tool-based (AI enhances specific components of your manual design process)"
@@ -7203,7 +7203,7 @@
         "most_important_problem": "Speed of iterations/testing with gameplay"
     },
     {
-        "id": 109,
+        "id": "109",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "10+ years",
         "game_engines": "Custom in-house engine",
@@ -7227,7 +7227,7 @@
             "Time investment to set up compared to potential benefits",
             "Technical complexity/steep learning curve"
         ],
-        "tool_view": "\"Existing PCG tools are too limited in what they can generate\"",
+        "tool_view": "Existing PCG tools are too limited in what they can generate",
         "critical_factors": [
             "Feature completeness (comprehensive capabilities)",
             "Performance",
@@ -7251,7 +7251,7 @@
             "Rectangular grid/tile-based",
             "Free-form geometry"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Space-driven generation (spatial layout determines gameplay possibilities)",
         "ai_role_preference": [
             "Tool-based (AI enhances specific components of your manual design process)",
             "I prefer traditional rule-based PCG without AI involvement"
@@ -7272,7 +7272,7 @@
         "most_important_problem": "Make levels that fit well with the game."
     },
     {
-        "id": 110,
+        "id": "110",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "10+ years",
         "game_engines": [
@@ -7299,7 +7299,7 @@
             "Difficulty in debugging unexpected outputs",
             "Time investment to set up compared to potential benefits"
         ],
-        "tool_view": "\"PCG tools don't give me enough control over the final output\"",
+        "tool_view": "PCG tools don't give me enough control over the final output",
         "critical_factors": [
             "Flexibility (ability to adapt to various use cases)",
             "Reliability (predictable, stable results)",
@@ -7324,7 +7324,7 @@
             "Hexagonal grid/tile-based",
             "Free-form geometry"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Mission-driven generation (gameplay goals determine level structure)",
         "ai_role_preference": "I prefer traditional rule-based PCG without AI involvement",
         "ai_importance_factors": [
             "Understanding how the AI makes its decisions",
@@ -7332,7 +7332,7 @@
         ],
         "ai_concerns": [
             "Intellectual property/ownership concerns",
-            "Potential \"black box\" nature (lack of transparency)"
+            "Potential black box nature (lack of transparency)"
         ],
         "desired_solutions": [
             "Improved iteration speed on level designs",
@@ -7342,7 +7342,7 @@
         "most_important_problem": "Rich detailed worlds"
     },
     {
-        "id": 111,
+        "id": "111",
         "professional_role": "Environment Artist",
         "years_experience": "0-2 years",
         "game_engines": "Unreal Engine",
@@ -7360,7 +7360,7 @@
             "Lack of precise artistic control",
             "Difficulty in debugging unexpected outputs"
         ],
-        "tool_view": "\"PCG tools are too complex to integrate into my workflow\"",
+        "tool_view": "PCG tools are too complex to integrate into my workflow",
         "critical_factors": [
             "Familiarity (resemblance to tools you already know)",
             "Simplicity (low barrier to entry)",
@@ -7384,7 +7384,7 @@
             "Free-form geometry",
             "Node-based graphs (mission/flow graphs)"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Not sure/would need to experiment",
         "ai_role_preference": "Tool-based (AI enhances specific components of your manual design process)",
         "ai_importance_factors": "Maintaining creative control over the final output",
         "ai_concerns": [
@@ -7399,7 +7399,7 @@
         "most_important_problem": null
     },
     {
-        "id": 112,
+        "id": "112",
         "professional_role": "Technical Artist",
         "years_experience": "3-5 years",
         "game_engines": "Unreal Engine",
@@ -7421,7 +7421,7 @@
             "Time investment to set up compared to potential benefits",
             "Integration with existing workflows"
         ],
-        "tool_view": "\"Existing PCG tools are too limited in what they can generate\"",
+        "tool_view": "Existing PCG tools are too limited in what they can generate",
         "critical_factors": [
             "Flexibility (ability to adapt to various use cases)",
             "Integration with existing workflows",
@@ -7446,7 +7446,7 @@
             "Free-form geometry",
             "Scene graph/hierarchical structure"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Space-driven generation (spatial layout determines gameplay possibilities)",
         "ai_role_preference": "Tool-based (AI enhances specific components of your manual design process)",
         "ai_importance_factors": [
             "Maintaining creative control over the final output",
@@ -7461,10 +7461,10 @@
             "Ability to create more content variations with consistent quality",
             "Improved iteration speed on level designs"
         ],
-        "most_important_problem": "Ability to properly modify by hand the results "
+        "most_important_problem": "Ability to properly modify by hand the results"
     },
     {
-        "id": 113,
+        "id": "113",
         "professional_role": "Game Designer",
         "years_experience": "10+ years",
         "game_engines": "Unreal Engine",
@@ -7503,7 +7503,7 @@
         "integration_preference": "Only web-based is less interesting than others.",
         "genre_interest": {},
         "level_representation": null,
-        "most_useful_approach": null,
+        "most_useful_approach": "Not sure/would need to experiment",
         "ai_role_preference": [
             "Assistant-based (AI helps implement your design intentions)",
             "Tool-based (AI enhances specific components of your manual design process)"
@@ -7513,7 +7513,7 @@
             "Speed of generation compared to traditional methods"
         ],
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "Unpredictable or inconsistent results"
         ],
         "desired_solutions": [
@@ -7524,7 +7524,7 @@
         "most_important_problem": "I think a good PCG system forces me to introspect on implicit design constraints, and thereby help me expand the design space and variety of gameplay."
     },
     {
-        "id": 114,
+        "id": "114",
         "professional_role": "Level Designer",
         "years_experience": "3-5 years",
         "game_engines": [
@@ -7552,7 +7552,7 @@
             "Difficulty in debugging unexpected outputs",
             "Unpredictable results affecting game balance"
         ],
-        "tool_view": "\"PCG tools don't give me enough control over the final output\"",
+        "tool_view": "PCG tools don't give me enough control over the final output",
         "critical_factors": [
             "Flexibility (ability to adapt to various use cases)",
             "Simplicity (low barrier to entry)",
@@ -7580,7 +7580,7 @@
             "Constraint-based representations (is this a known term)",
             "Voxel-based"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Balanced approach (iterative refinement between mission and space)",
         "ai_role_preference": [
             "Suggestion-based (AI proposes level designs for you to select and modify)",
             "Assistant-based (AI helps implement your design intentions)"
@@ -7601,7 +7601,7 @@
         "most_important_problem": "Ease of iteration and time reduced between itterations"
     },
     {
-        "id": 115,
+        "id": "115",
         "professional_role": "Game Designer",
         "years_experience": "10+ years",
         "game_engines": [
@@ -7627,7 +7627,7 @@
             "Time investment to set up compared to potential benefits",
             "Lack of precise artistic control"
         ],
-        "tool_view": "\"Most PCG tools are built for programmers, not designers\"",
+        "tool_view": "Most PCG tools are built for programmers, not designers",
         "critical_factors": [
             "Simplicity (low barrier to entry)",
             "Flexibility (ability to adapt to various use cases)",
@@ -7651,7 +7651,7 @@
             "Rectangular grid/tile-based",
             "Hexagonal grid/tile-based"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Context-dependent (different approaches for different game sections)",
         "ai_role_preference": [
             "I prefer traditional rule-based PCG without AI involvement",
             "Tool-based (AI enhances specific components of your manual design process)"
@@ -7672,7 +7672,7 @@
         "most_important_problem": "Understand my generation process of creating levels and propose a generator graph that I can edit with the AI"
     },
     {
-        "id": 116,
+        "id": "116",
         "professional_role": "Technical Artist",
         "years_experience": "6-10 years",
         "game_engines": [
@@ -7721,7 +7721,7 @@
             "Rectangular grid/tile-based",
             "Free-form geometry"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Mission-driven generation (gameplay goals determine level structure)",
         "ai_role_preference": [
             "Tool-based (AI enhances specific components of your manual design process)",
             "Full automation (AI generates complete levels with minimal input)"
@@ -7731,7 +7731,7 @@
             "Novelty/uniqueness of the generated content"
         ],
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "Loss of designer agency/control"
         ],
         "desired_solutions": [
@@ -7742,7 +7742,7 @@
         "most_important_problem": "Make intresting play spaces."
     },
     {
-        "id": 117,
+        "id": "117",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "10+ years",
         "game_engines": [
@@ -7795,7 +7795,7 @@
             "Voxel-based",
             "Rectangular grid/tile-based"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Context-dependent (different approaches for different game sections)",
         "ai_role_preference": [
             "Suggestion-based (AI proposes level designs for you to select and modify)",
             "Assistant-based (AI helps implement your design intentions)"
@@ -7816,7 +7816,7 @@
         "most_important_problem": "Adaptable generators"
     },
     {
-        "id": 118,
+        "id": "118",
         "professional_role": "Programmer/Technical Designer",
         "years_experience": "10+ years",
         "game_engines": [
@@ -7856,7 +7856,7 @@
             "Free-form geometry",
             "Navigation mesh"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Balanced approach (iterative refinement between mission and space)",
         "ai_role_preference": [
             "Full automation (AI generates complete levels with minimal input)",
             "Tool-based (AI enhances specific components of your manual design process)"
@@ -7866,7 +7866,7 @@
             "Novelty/uniqueness of the generated content"
         ],
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "Intellectual property/ownership concerns"
         ],
         "desired_solutions": [
@@ -7877,7 +7877,7 @@
         "most_important_problem": null
     },
     {
-        "id": 119,
+        "id": "119",
         "professional_role": "Level Designer",
         "years_experience": "10+ years",
         "game_engines": "Unreal Engine",
@@ -7899,7 +7899,7 @@
             "Technical complexity/steep learning curve",
             "Time investment to set up compared to potential benefits"
         ],
-        "tool_view": "\"I'm satisfied with the current PCG tools available\"",
+        "tool_view": "I'm satisfied with the current PCG tools available",
         "critical_factors": [
             "Documentation and learning resources",
             "Flexibility (ability to adapt to various use cases)",
@@ -7920,7 +7920,7 @@
         "integration_preference": "Deep integration within existing engine (like Unreal Blueprint)",
         "genre_interest": {},
         "level_representation": null,
-        "most_useful_approach": null,
+        "most_useful_approach": "Context-dependent (different approaches for different game sections)",
         "ai_role_preference": [
             "Assistant-based (AI helps implement your design intentions)",
             "I prefer traditional rule-based PCG without AI involvement"
@@ -7941,7 +7941,7 @@
         "most_important_problem": "An easy solution to generate and blend well with landscapes"
     },
     {
-        "id": 120,
+        "id": "120",
         "professional_role": "Game Designer",
         "years_experience": "6-10 years",
         "game_engines": [
@@ -7966,7 +7966,7 @@
             "Time investment to set up compared to potential benefits",
             "Unpredictable results affecting game balance"
         ],
-        "tool_view": "\"Most PCG tools are built for programmers, not designers\"",
+        "tool_view": "Most PCG tools are built for programmers, not designers",
         "critical_factors": [
             "Flexibility (ability to adapt to various use cases)",
             "Documentation and learning resources",
@@ -7993,7 +7993,7 @@
             "Node-based graphs (mission/flow graphs)",
             "Navigation mesh"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Balanced approach (iterative refinement between mission and space)",
         "ai_role_preference": [
             "I prefer traditional rule-based PCG without AI involvement",
             "Assistant-based (AI helps implement your design intentions)"
@@ -8004,7 +8004,7 @@
         ],
         "ai_concerns": [
             "Intellectual property/ownership concerns",
-            "Potential \"black box\" nature (lack of transparency)"
+            "Potential black box nature (lack of transparency)"
         ],
         "desired_solutions": [
             "Ability to create more content variations with consistent quality",
@@ -8014,7 +8014,7 @@
         "most_important_problem": null
     },
     {
-        "id": 121,
+        "id": "121",
         "professional_role": "Game Designer",
         "years_experience": "10+ years",
         "game_engines": "Unity",
@@ -8033,7 +8033,7 @@
             "Integration with existing workflows",
             "Unclear design methodology for procedural systems"
         ],
-        "tool_view": "\"PCG tools are too complex to integrate into my workflow\"",
+        "tool_view": "PCG tools are too complex to integrate into my workflow",
         "critical_factors": [
             "Flexibility (ability to adapt to various use cases)",
             "Simplicity (low barrier to entry)",
@@ -8057,7 +8057,7 @@
             "Scene graph/hierarchical structure",
             "Free-form geometry"
         ],
-        "most_useful_approach": null,
+        "most_useful_approach": "Balanced approach (iterative refinement between mission and space)",
         "ai_role_preference": [
             "Suggestion-based (AI proposes level designs for you to select and modify)",
             "Tool-based (AI enhances specific components of your manual design process)"
@@ -8067,7 +8067,7 @@
             "Learning from my design preferences over time"
         ],
         "ai_concerns": [
-            "Potential \"black box\" nature (lack of transparency)",
+            "Potential black box nature (lack of transparency)",
             "Unpredictable or inconsistent results"
         ],
         "desired_solutions": [
