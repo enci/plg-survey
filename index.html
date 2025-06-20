@@ -115,6 +115,109 @@
             transition: all 0.3s ease;
         }
 
+        .load-data-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 0.7rem 1.8rem;
+            border-radius: 25px;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            cursor: pointer;
+            opacity: 1;
+            transition: all 0.3s ease;
+        }
+
+        .load-data-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .data-status {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .data-status.success {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #059669;
+        }
+
+        .data-status.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #dc2626;
+        }
+
+        .data-status.loading {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: #2563eb;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .analysis-section {
+            margin-top: 2rem;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .question-selector {
+            margin-bottom: 2rem;
+        }
+
+        .question-selector label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .question-dropdown {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: white;
+            transition: border-color 0.3s ease;
+        }
+
+        .question-dropdown:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .chart-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 400px;
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        #analysisChart {
+            max-width: 100%;
+            max-height: 400px;
+        }
+
         .footer {
             text-align: center;
             padding: 1.5rem;
@@ -222,7 +325,20 @@
                 </div>
             </div>
 
-            <button class="coming-soon">Interactive Analysis Coming Soon</button>
+            <button id="loadDataBtn" class="load-data-btn">Load Survey Data</button>
+            <div id="dataStatus" class="data-status hidden"></div>
+            
+            <div id="analysisSection" class="analysis-section hidden">
+                <div class="question-selector">
+                    <label for="questionSelect">Select a question to analyze:</label>
+                    <select id="questionSelect" class="question-dropdown">
+                        <option value="">Choose a question...</option>
+                    </select>
+                </div>
+                <div id="chartContainer" class="chart-container">
+                    <canvas id="analysisChart"></canvas>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -231,6 +347,7 @@
         <p>Survey Analysis Tool | Created by Bojan Endrovski</p>
     </footer>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
