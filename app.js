@@ -1,5 +1,5 @@
 // Procedural Level Generation Survey Analysis Tool
-// Version 2.0 - Data Loading Implementation
+// Version 3.0 - Complete with Filtering System
 
 console.log('Survey Analysis Tool Initialized');
 
@@ -11,7 +11,10 @@ const SurveyApp = {
         loaded: false
     },
     charts: {},
-    filters: {},
+    filters: {
+        active: {},
+        filteredData: null
+    },
     
     // Initialize the application
     init() {
@@ -28,16 +31,26 @@ const SurveyApp = {
         if (questionSelect) {
             questionSelect.addEventListener('change', (e) => this.analyzeQuestion(e.target.value));
         }
+
+        // Add filter listeners
+        const filterIds = ['filterRole', 'filterExperience', 'filterEngine', 'filterFrequency'];
+        filterIds.forEach(filterId => {
+            const filterElement = document.getElementById(filterId);
+            if (filterElement) {
+                filterElement.addEventListener('change', () => this.applyFilters());
+            }
+        });
+
+        // Add clear filters button listener
+        const clearFiltersBtn = document.getElementById('clearFilters');
+        if (clearFiltersBtn) {
+            clearFiltersBtn.addEventListener('click', () => this.clearFilters());
+        }
     },
     
     // Load survey data and schema
     async loadData() {
-        const statusDiv = document.getElementById('dataStatus');
-        
         try {
-            // Show loading state
-            this.showStatus('loading', 'Loading survey data and schema...');
-            
             // Load both files concurrently
             const [responsesResponse, schemaResponse] = await Promise.all([
                 fetch('procedural-level-generation-survey.json'),
@@ -67,7 +80,7 @@ const SurveyApp = {
             
         } catch (error) {
             console.error('Error loading data:', error);
-            this.showStatus('error', `Failed to load data: ${error.message}`);
+            alert(`Failed to load data: ${error.message}`);
         }
     },
     
@@ -104,48 +117,194 @@ const SurveyApp = {
     showDataSummary() {
         const { responses, schema } = this.data;
         
-        // Count unique roles
-        const roles = responses.map(r => r.professional_role).filter(Boolean);
-        const uniqueRoles = new Set(roles).size;
-        
-        // Count experience levels
-        const experienceLevels = responses.map(r => r.years_experience).filter(Boolean);
-        const uniqueExperience = new Set(experienceLevels).size;
-        
-        const summaryText = `
-            ✓ Successfully loaded survey data!
-            <br><strong>${responses.length}</strong> total responses
-            <br><strong>${Object.keys(schema.questions).length}</strong> question types in schema
-            <br><strong>${uniqueRoles}</strong> different professional roles
-            <br><strong>${uniqueExperience}</strong> experience level categories
-        `;
-        
-        this.showStatus('success', summaryText);
-        
-        // Hide status after 3 seconds
-        setTimeout(() => {
-            const statusDiv = document.getElementById('dataStatus');
-            if (statusDiv) {
-                statusDiv.classList.add('hidden');
-            }
-        }, 3000);
-        
-        // Populate question dropdown
-        this.populateQuestionDropdown();
-        
         console.log('Survey data loaded successfully:', {
             responses: responses.length,
-            schema_questions: Object.keys(schema.questions).length,
-            unique_roles: uniqueRoles,
-            unique_experience: uniqueExperience
+            schema_questions: Object.keys(schema.questions).length
+        });
+        
+        // Initialize filters and populate dropdowns
+        this.populateFilterDropdowns();
+        this.populateQuestionDropdown();
+        this.updateFilterCount();
+    },
+
+    // Populate filter dropdowns
+    populateFilterDropdowns() {
+        const { responses } = this.data;
+        if (!responses) return;
+
+        // Professional Role filter
+        const roles = [...new Set(responses.map(r => r.professional_role).filter(Boolean))].sort();
+        this.populateDropdown('filterRole', roles);
+
+        // Experience filter
+        const experienceLevels = [...new Set(responses.map(r => r.years_experience).filter(Boolean))];
+        // Sort experience levels in logical order
+        const orderedExperience = ['0-2 years', '3-5 years', '6-10 years', '10+ years'];
+        const sortedExperience = orderedExperience.filter(exp => experienceLevels.includes(exp));
+        this.populateDropdown('filterExperience', sortedExperience);
+
+        // Game Engine filter (handle arrays)
+        const engines = new Set();
+        responses.forEach(r => {
+            if (r.game_engines && Array.isArray(r.game_engines)) {
+                r.game_engines.forEach(engine => engines.add(engine));
+            } else if (r.game_engines && typeof r.game_engines === 'string') {
+                engines.add(r.game_engines);
+            }
+        });
+        this.populateDropdown('filterEngine', [...engines].sort());
+
+        // PCG Usage Frequency filter
+        const frequencies = [...new Set(responses.map(r => r.level_generation_frequency).filter(Boolean))];
+        // Sort frequencies in logical order
+        const orderedFrequencies = [
+            'Always (essential part of workflow)',
+            'Often (most projects)',
+            'Sometimes (about half of projects)',
+            'Rarely (a few projects)',
+            'Never'
+        ];
+        const sortedFrequencies = orderedFrequencies.filter(freq => frequencies.includes(freq));
+        this.populateDropdown('filterFrequency', sortedFrequencies);
+    },
+
+    // Helper to populate a dropdown
+    populateDropdown(elementId, options) {
+        const dropdown = document.getElementById(elementId);
+        if (!dropdown) return;
+
+        // Keep the "All" option and add new options
+        const allOption = dropdown.querySelector('option[value=""]');
+        dropdown.innerHTML = '';
+        dropdown.appendChild(allOption);
+
+        options.forEach(option => {
+            const optionElement = document.createElement('option');
+            optionElement.value = option;
+            optionElement.textContent = option;
+            dropdown.appendChild(optionElement);
         });
     },
 
-    // Show the analysis section (no longer needed as it's always visible)
-    showAnalysisSection() {
-        // Legacy method - analysis section is now always visible
+    // Apply filters to the data
+    applyFilters() {
+        const { responses } = this.data;
+        if (!responses) return;
+
+        // Get filter values
+        const filters = {
+            role: document.getElementById('filterRole')?.value || '',
+            experience: document.getElementById('filterExperience')?.value || '',
+            engine: document.getElementById('filterEngine')?.value || '',
+            frequency: document.getElementById('filterFrequency')?.value || ''
+        };
+
+        // Store active filters
+        this.filters.active = Object.fromEntries(
+            Object.entries(filters).filter(([key, value]) => value !== '')
+        );
+
+        // Filter the data
+        this.filters.filteredData = responses.filter(response => {
+            // Professional role filter
+            if (filters.role && response.professional_role !== filters.role) {
+                return false;
+            }
+
+            // Experience filter
+            if (filters.experience && response.years_experience !== filters.experience) {
+                return false;
+            }
+
+            // Game engine filter (handle arrays)
+            if (filters.engine) {
+                if (Array.isArray(response.game_engines)) {
+                    if (!response.game_engines.includes(filters.engine)) {
+                        return false;
+                    }
+                } else if (response.game_engines !== filters.engine) {
+                    return false;
+                }
+            }
+
+            // PCG frequency filter
+            if (filters.frequency && response.level_generation_frequency !== filters.frequency) {
+                return false;
+            }
+
+            return true;
+        });
+
+        // Update UI
+        this.updateFilterCount();
+        this.showClearFiltersButton();
+        
+        // Re-analyze current question with filtered data
+        const currentQuestion = document.getElementById('questionSelect')?.value;
+        if (currentQuestion) {
+            this.analyzeQuestion(currentQuestion);
+        }
     },
 
+    // Clear all filters
+    clearFilters() {
+        // Reset all filter dropdowns
+        document.getElementById('filterRole').value = '';
+        document.getElementById('filterExperience').value = '';
+        document.getElementById('filterEngine').value = '';
+        document.getElementById('filterFrequency').value = '';
+
+        // Clear filter state
+        this.filters.active = {};
+        this.filters.filteredData = null;
+
+        // Update UI
+        this.updateFilterCount();
+        this.hideClearFiltersButton();
+
+        // Re-analyze current question with full data
+        const currentQuestion = document.getElementById('questionSelect')?.value;
+        if (currentQuestion) {
+            this.analyzeQuestion(currentQuestion);
+        }
+    },
+
+    // Update filter count display
+    updateFilterCount() {
+        const filterCountElement = document.getElementById('filterCount');
+        if (!filterCountElement) return;
+
+        const totalResponses = this.data.responses?.length || 0;
+        const filteredCount = this.filters.filteredData?.length || totalResponses;
+        
+        if (Object.keys(this.filters.active).length > 0) {
+            filterCountElement.textContent = `Showing ${filteredCount} of ${totalResponses} responses`;
+        } else {
+            filterCountElement.textContent = `Showing all ${totalResponses} responses`;
+        }
+    },
+
+    // Show/hide clear filters button
+    showClearFiltersButton() {
+        const clearBtn = document.getElementById('clearFilters');
+        if (clearBtn && Object.keys(this.filters.active).length > 0) {
+            clearBtn.classList.remove('hidden');
+        }
+    },
+
+    hideClearFiltersButton() {
+        const clearBtn = document.getElementById('clearFilters');
+        if (clearBtn) {
+            clearBtn.classList.add('hidden');
+        }
+    },
+
+    // Get current dataset (filtered or full)
+    getCurrentData() {
+        return this.filters.filteredData || this.data.responses || [];
+    },
+    
     // Populate the question dropdown with single choice questions
     populateQuestionDropdown() {
         const questionSelect = document.getElementById('questionSelect');
@@ -177,7 +336,7 @@ const SurveyApp = {
             return;
         }
         
-        const { responses, schema } = this.data;
+        const { schema } = this.data;
         const question = schema.questions[questionKey];
         
         if (!question || question.type !== 'single_choice') {
@@ -189,8 +348,11 @@ const SurveyApp = {
         
         console.log(`Analyzing question: ${question.question}`);
         
+        // Use filtered data if available, otherwise use all data
+        const currentData = this.getCurrentData();
+        
         // Get response data for this question
-        const responseData = responses.map(r => r[questionKey]).filter(Boolean);
+        const responseData = currentData.map(r => r[questionKey]).filter(Boolean);
         
         // Count responses and separate "other" answers
         const counts = {};
@@ -213,12 +375,12 @@ const SurveyApp = {
         }
         
         // Create pie chart and show other answers
-        this.createPieChart(question.question, counts);
+        this.createPieChart(question.question, counts, currentData.length);
         this.showOtherAnswers(otherAnswers);
     },
 
     // Create a pie chart
-    createPieChart(title, data) {
+    createPieChart(title, data, totalResponses) {
         const ctx = document.getElementById('analysisChart');
         if (!ctx) return;
         
@@ -232,6 +394,11 @@ const SurveyApp = {
         
         // Generate colors for each slice
         const colors = this.generateColors(labels.length);
+        
+        // Add filter info to title if filters are active
+        const filterInfo = Object.keys(this.filters.active).length > 0 
+            ? ` (${totalResponses} responses)` 
+            : '';
         
         this.charts.current = new Chart(ctx, {
             type: 'pie',
@@ -249,7 +416,7 @@ const SurveyApp = {
                 plugins: {
                     title: {
                         display: true,
-                        text: title,
+                        text: title + filterInfo,
                         font: {
                             size: 16,
                             weight: 'bold'
@@ -335,23 +502,13 @@ const SurveyApp = {
         }
     },
     
-    // Show status message
-    showStatus(type, message) {
-        const statusDiv = document.getElementById('dataStatus');
-        if (!statusDiv) return;
-        
-        statusDiv.className = `data-status ${type}`;
-        statusDiv.innerHTML = message;
-        statusDiv.classList.remove('hidden');
-    },
-    
     // Get unique values for a field
     getUniqueValues(field) {
         if (!this.data.loaded) return [];
         return [...new Set(this.data.responses.map(r => r[field]).filter(Boolean))];
     },
     
-    // Filter responses by criteria
+    // Filter responses by criteria (legacy method)
     filterResponses(criteria) {
         if (!this.data.loaded) return [];
         
@@ -365,7 +522,7 @@ const SurveyApp = {
         });
     },
     
-    // Placeholder for chart creation
+    // Placeholder for chart creation (legacy method)
     createChart(type, containerId, data) {
         console.log(`Chart creation placeholder: ${type} in ${containerId}`);
         // Legacy placeholder - actual chart creation now handled by specific methods

@@ -187,6 +187,83 @@
             font-weight: 600;
         }
 
+        .filters-section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .filters-section h3 {
+            margin: 0 0 1rem 0;
+            color: #374151;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .filter-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-item label {
+            margin-bottom: 0.25rem;
+            font-weight: 500;
+            color: #555;
+            font-size: 0.9rem;
+        }
+
+        .filter-dropdown {
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            background: white;
+            transition: border-color 0.2s ease;
+        }
+
+        .filter-dropdown:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+        }
+
+        .filter-summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        #filterCount {
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .clear-filters-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .clear-filters-btn:hover {
+            background: #dc2626;
+        }
+
         .question-selector {
             margin-bottom: 2rem;
         }
@@ -362,14 +439,47 @@
                     <span class="stat-label">Insights</span>
                 </div>
             </div>
-
-            <div id="dataStatus" class="data-status hidden"></div>
         </div>
     </div>
 
     <div class="analyzer-container">
         <div class="analyzer-section">
             <h2>Survey Analysis</h2>
+            
+            <div class="filters-section">
+                <h3>Filters</h3>
+                <div class="filter-grid">
+                    <div class="filter-item">
+                        <label for="filterRole">Professional Role:</label>
+                        <select id="filterRole" class="filter-dropdown">
+                            <option value="">All Roles</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <label for="filterExperience">Years of Experience:</label>
+                        <select id="filterExperience" class="filter-dropdown">
+                            <option value="">All Experience Levels</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <label for="filterEngine">Game Engine:</label>
+                        <select id="filterEngine" class="filter-dropdown">
+                            <option value="">All Engines</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <label for="filterFrequency">PCG Usage Frequency:</label>
+                        <select id="filterFrequency" class="filter-dropdown">
+                            <option value="">All Frequencies</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="filter-summary">
+                    <span id="filterCount">Showing all 120 responses</span>
+                    <button id="clearFilters" class="clear-filters-btn hidden">Clear Filters</button>
+                </div>
+            </div>
+            
             <div class="question-selector">
                 <label for="questionSelect">Select a question to analyze:</label>
                 <select id="questionSelect" class="question-dropdown">
