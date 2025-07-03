@@ -144,8 +144,8 @@ const SurveyApp = {
         Object.entries(schema.questions).forEach(([key, question]) => {
             if (key === 'id') return; // Skip identifier
             
-            // Include single choice, multiple choice, and matrix questions
-            if (['single_choice', 'multiple_choice', 'matrix'].includes(question.type)) {
+            // Include single choice, multiple choice, matrix, and open text questions
+            if (['single_choice', 'multiple_choice', 'matrix', 'open_text'].includes(question.type)) {
                 const option = document.createElement('option');
                 option.value = key;
                 option.textContent = `${this.getQuestionTypeLabel(question.type)} - ${question.question}`;
@@ -161,7 +161,8 @@ const SurveyApp = {
         const labels = {
             'single_choice': '📊 Single Choice',
             'multiple_choice': '📈 Multiple Choice', 
-            'matrix': '📋 Matrix'
+            'matrix': '📋 Matrix',
+            'open_text': '📝 Open Text'
         };
         return labels[type] || type;
     },
@@ -489,6 +490,9 @@ const SurveyApp = {
             case 'matrix':
                 this.analyzeMatrix(questionKey, question);
                 break;
+            case 'open_text':
+                this.analyzeOpenText(questionKey, question);
+                break;
             default:
                 console.log(`Question type ${question.type} not supported for visualization`);
                 this.clearChart();
@@ -600,6 +604,24 @@ const SurveyApp = {
         
         this.createStackedBarChart(question.question, matrixData, scale, currentData.length);
         this.clearOtherAnswers(); // Matrix questions don't typically have "other" answers
+    },
+
+    // Analyze open text questions (text list)
+    analyzeOpenText(questionKey, question) {
+        const currentData = this.getCurrentData();
+        const responses = [];
+        
+        // Collect all text responses
+        currentData.forEach(response => {
+            const value = response[questionKey];
+            if (value && typeof value === 'string' && value.trim() !== '') {
+                responses.push(value.trim());
+            }
+        });
+        
+        // Clear any existing chart and show text responses
+        this.clearChart();
+        this.showTextResponses(question.question, responses, currentData.length);
     },
 
     // Create a pie chart
@@ -895,6 +917,44 @@ const SurveyApp = {
         otherContainer.classList.remove('hidden');
     },
 
+    // Show text responses for open text questions
+    showTextResponses(questionTitle, responses, totalResponses) {
+        const chartContainer = document.getElementById('chartContainer');
+        const otherContainer = document.getElementById('otherAnswers');
+        
+        if (!chartContainer) return;
+        
+        // Clear other answers container
+        if (otherContainer) {
+            otherContainer.classList.add('hidden');
+            otherContainer.innerHTML = '';
+        }
+        
+        // Add filter info to title if filters are active
+        const filterInfo = this.filters.active.length > 0 
+            ? ` (${totalResponses} responses)` 
+            : '';
+        
+        // Replace chart container content with text responses
+        chartContainer.innerHTML = `
+            <div class="text-responses">
+                <h3>${questionTitle}${filterInfo}</h3>
+                <div class="response-count">${responses.length} text responses:</div>
+                <div class="responses-list">
+                    ${responses.length > 0 
+                        ? responses.map((response, index) => `
+                            <div class="response-item">
+                                <span class="response-number">${index + 1}.</span>
+                                <span class="response-text">"${response}"</span>
+                            </div>
+                        `).join('')
+                        : '<div class="no-responses">No responses found for this question.</div>'
+                    }
+                </div>
+            </div>
+        `;
+    },
+
     // Clear other answers display
     clearOtherAnswers() {
         const otherContainer = document.getElementById('otherAnswers');
@@ -909,6 +969,12 @@ const SurveyApp = {
         if (this.charts.current) {
             this.charts.current.destroy();
             this.charts.current = null;
+        }
+        
+        // Also restore chart container for non-chart content
+        const chartContainer = document.getElementById('chartContainer');
+        if (chartContainer && !chartContainer.querySelector('canvas')) {
+            chartContainer.innerHTML = '<canvas id="analysisChart"></canvas>';
         }
     },
     

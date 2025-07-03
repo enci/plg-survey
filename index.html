@@ -41,6 +41,12 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
+        .emoji {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #667eea;
+        }
+
         h1 {
             font-size: 2.5rem;
             font-weight: 700;
@@ -445,6 +451,68 @@
             line-height: 1.4;
         }
 
+        .text-responses {
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .text-responses h3 {
+            margin: 0 0 1rem 0;
+            color: #333;
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .response-count {
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+            color: #374151;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        .responses-list {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem;
+            background: #f8fafc;
+        }
+
+        .response-item {
+            display: flex;
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            background: white;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .response-number {
+            font-weight: 600;
+            color: #667eea;
+            min-width: 2rem;
+            font-size: 0.9rem;
+        }
+
+        .response-text {
+            flex: 1;
+            color: #374151;
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+
+        .no-responses {
+            text-align: center;
+            color: #6b7280;
+            font-style: italic;
+            padding: 2rem;
+        }
+
         .footer {
             text-align: center;
             padding: 1.5rem;
@@ -523,7 +591,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Procedural Level Generation Survey</h1>            
+            <h1>Procedural Level Generation Survey</h1>
             <div class="description">
                 <p>
                     This survey is part of doctoral research by Bojan Endrovski, supervised by Rafa Bidarra and Joris Dormans.
@@ -535,13 +603,16 @@
                     implementation challenges, and the balance between procedural and hand-crafted content in 
                     modern game development. You can explore the insights gathered from our survey.
                 </p>
+                <p class="emoji">
+                    🎮🏗️📊🚀🎯🔬🌍🏰🔄📈🎲🧩🔮
+                </p>            
             </div>
         </div>
     </div>
 
     <div class="analyzer-container">
         <div class="analyzer-section">
-            <h2>Survey Analysis</h2>
+            <h2>🔍 Survey Analysis</h2>
             
             <div class="filters-section">
                 <h3>Filters</h3>
