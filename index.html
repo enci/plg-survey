@@ -202,6 +202,81 @@
             font-weight: 600;
         }
 
+        .filter-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .add-filter-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .add-filter-btn:hover {
+            background: #5a67d8;
+        }
+
+        .filters-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .dynamic-filter {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            flex-wrap: wrap;
+        }
+
+        .dynamic-filter select {
+            padding: 0.4rem;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            background: white;
+            min-width: 150px;
+        }
+
+        .dynamic-filter select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+        }
+
+        .filter-label {
+            font-size: 0.85rem;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .remove-filter-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .remove-filter-btn:hover {
+            background: #dc2626;
+        }
+
         .filter-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -448,35 +523,13 @@
             
             <div class="filters-section">
                 <h3>Filters</h3>
-                <div class="filter-grid">
-                    <div class="filter-item">
-                        <label for="filterRole">Professional Role:</label>
-                        <select id="filterRole" class="filter-dropdown">
-                            <option value="">All Roles</option>
-                        </select>
-                    </div>
-                    <div class="filter-item">
-                        <label for="filterExperience">Years of Experience:</label>
-                        <select id="filterExperience" class="filter-dropdown">
-                            <option value="">All Experience Levels</option>
-                        </select>
-                    </div>
-                    <div class="filter-item">
-                        <label for="filterEngine">Game Engine:</label>
-                        <select id="filterEngine" class="filter-dropdown">
-                            <option value="">All Engines</option>
-                        </select>
-                    </div>
-                    <div class="filter-item">
-                        <label for="filterFrequency">PCG Usage Frequency:</label>
-                        <select id="filterFrequency" class="filter-dropdown">
-                            <option value="">All Frequencies</option>
-                        </select>
-                    </div>
+                <div class="filter-controls">
+                    <button id="addFilterBtn" class="add-filter-btn">+ Add Filter</button>
+                    <button id="clearAllFilters" class="clear-filters-btn hidden">Clear All Filters</button>
                 </div>
+                <div id="filtersContainer" class="filters-container"></div>
                 <div class="filter-summary">
                     <span id="filterCount">Showing all 120 responses</span>
-                    <button id="clearFilters" class="clear-filters-btn hidden">Clear Filters</button>
                 </div>
             </div>
             

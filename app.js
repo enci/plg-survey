@@ -12,8 +12,9 @@ const SurveyApp = {
     },
     charts: {},
     filters: {
-        active: {},
-        filteredData: null
+        active: [],
+        filteredData: null,
+        nextId: 1
     },
     
     // Initialize the application
@@ -32,19 +33,15 @@ const SurveyApp = {
             questionSelect.addEventListener('change', (e) => this.analyzeQuestion(e.target.value));
         }
 
-        // Add filter listeners
-        const filterIds = ['filterRole', 'filterExperience', 'filterEngine', 'filterFrequency'];
-        filterIds.forEach(filterId => {
-            const filterElement = document.getElementById(filterId);
-            if (filterElement) {
-                filterElement.addEventListener('change', () => this.applyFilters());
-            }
-        });
+        // Add filter button listeners
+        const addFilterBtn = document.getElementById('addFilterBtn');
+        if (addFilterBtn) {
+            addFilterBtn.addEventListener('click', () => this.addFilter());
+        }
 
-        // Add clear filters button listener
-        const clearFiltersBtn = document.getElementById('clearFilters');
-        if (clearFiltersBtn) {
-            clearFiltersBtn.addEventListener('click', () => this.clearFilters());
+        const clearAllFiltersBtn = document.getElementById('clearAllFilters');
+        if (clearAllFiltersBtn) {
+            clearAllFiltersBtn.addEventListener('click', () => this.clearAllFilters());
         }
     },
     
@@ -122,123 +119,199 @@ const SurveyApp = {
             schema_questions: Object.keys(schema.questions).length
         });
         
-        // Initialize filters and populate dropdowns
-        this.populateFilterDropdowns();
+        // Initialize and populate dropdowns
         this.populateQuestionDropdown();
         this.updateFilterCount();
     },
 
-    // Populate filter dropdowns
-    populateFilterDropdowns() {
-        const { responses } = this.data;
-        if (!responses) return;
+    // Add a new dynamic filter
+    addFilter() {
+        const filterId = `filter_${this.filters.nextId++}`;
+        const filterContainer = document.getElementById('filtersContainer');
+        
+        if (!filterContainer) return;
+        
+        // Create filter element
+        const filterDiv = document.createElement('div');
+        filterDiv.className = 'dynamic-filter';
+        filterDiv.setAttribute('data-filter-id', filterId);
+        
+        // Create question selector
+        const questionSelect = document.createElement('select');
+        questionSelect.className = 'filter-question-select';
+        questionSelect.innerHTML = '<option value="">Select question...</option>';
+        
+        // Populate with all questions that can be filtered
+        this.populateFilterQuestionOptions(questionSelect);
+        
+        // Create value selector (initially empty)
+        const valueSelect = document.createElement('select');
+        valueSelect.className = 'filter-value-select';
+        valueSelect.innerHTML = '<option value="">Select value...</option>';
+        valueSelect.disabled = true;
+        
+        // Create remove button
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'remove-filter-btn';
+        removeBtn.textContent = '✕';
+        removeBtn.title = 'Remove filter';
+        
+        // Add event listeners
+        questionSelect.addEventListener('change', (e) => {
+            this.onFilterQuestionChange(filterId, e.target.value, valueSelect);
+        });
+        
+        valueSelect.addEventListener('change', () => {
+            this.applyFilters();
+        });
+        
+        removeBtn.addEventListener('click', () => {
+            this.removeFilter(filterId);
+        });
+        
+        // Assemble filter
+        filterDiv.appendChild(document.createTextNode('Filter by: '));
+        filterDiv.appendChild(questionSelect);
+        filterDiv.appendChild(document.createTextNode(' = '));
+        filterDiv.appendChild(valueSelect);
+        filterDiv.appendChild(removeBtn);
+        
+        filterContainer.appendChild(filterDiv);
+        this.updateClearAllButton();
+    },
 
-        // Professional Role filter
-        const roles = [...new Set(responses.map(r => r.professional_role).filter(Boolean))].sort();
-        this.populateDropdown('filterRole', roles);
+    // Populate filter question dropdown with all filterable questions
+    populateFilterQuestionOptions(selectElement) {
+        const { schema } = this.data;
+        if (!schema) return;
+        
+        Object.entries(schema.questions).forEach(([key, question]) => {
+            // Skip identifier questions and include single_choice and some multiple_choice
+            if (key === 'id' || question.type === 'open_text') return;
+            
+            const option = document.createElement('option');
+            option.value = key;
+            option.textContent = this.truncateText(question.question, 60);
+            selectElement.appendChild(option);
+        });
+    },
 
-        // Experience filter
-        const experienceLevels = [...new Set(responses.map(r => r.years_experience).filter(Boolean))];
-        // Sort experience levels in logical order
-        const orderedExperience = ['0-2 years', '3-5 years', '6-10 years', '10+ years'];
-        const sortedExperience = orderedExperience.filter(exp => experienceLevels.includes(exp));
-        this.populateDropdown('filterExperience', sortedExperience);
-
-        // Game Engine filter (handle arrays)
-        const engines = new Set();
-        responses.forEach(r => {
-            if (r.game_engines && Array.isArray(r.game_engines)) {
-                r.game_engines.forEach(engine => engines.add(engine));
-            } else if (r.game_engines && typeof r.game_engines === 'string') {
-                engines.add(r.game_engines);
+    // Handle question selection change in a filter
+    onFilterQuestionChange(filterId, questionKey, valueSelect) {
+        if (!questionKey) {
+            valueSelect.innerHTML = '<option value="">Select value...</option>';
+            valueSelect.disabled = true;
+            this.applyFilters();
+            return;
+        }
+        
+        const { responses, schema } = this.data;
+        const question = schema.questions[questionKey];
+        
+        if (!question) return;
+        
+        // Get unique values for this question
+        const values = new Set();
+        
+        responses.forEach(response => {
+            const value = response[questionKey];
+            if (value !== null && value !== undefined && value !== '') {
+                if (Array.isArray(value)) {
+                    // For multiple choice questions, add each individual choice
+                    value.forEach(v => values.add(v));
+                } else {
+                    values.add(value);
+                }
             }
         });
-        this.populateDropdown('filterEngine', [...engines].sort());
-
-        // PCG Usage Frequency filter
-        const frequencies = [...new Set(responses.map(r => r.level_generation_frequency).filter(Boolean))];
-        // Sort frequencies in logical order
-        const orderedFrequencies = [
-            'Always (essential part of workflow)',
-            'Often (most projects)',
-            'Sometimes (about half of projects)',
-            'Rarely (a few projects)',
-            'Never'
-        ];
-        const sortedFrequencies = orderedFrequencies.filter(freq => frequencies.includes(freq));
-        this.populateDropdown('filterFrequency', sortedFrequencies);
-    },
-
-    // Helper to populate a dropdown
-    populateDropdown(elementId, options) {
-        const dropdown = document.getElementById(elementId);
-        if (!dropdown) return;
-
-        // Keep the "All" option and add new options
-        const allOption = dropdown.querySelector('option[value=""]');
-        dropdown.innerHTML = '';
-        dropdown.appendChild(allOption);
-
-        options.forEach(option => {
-            const optionElement = document.createElement('option');
-            optionElement.value = option;
-            optionElement.textContent = option;
-            dropdown.appendChild(optionElement);
+        
+        // Sort values appropriately
+        let sortedValues = [...values];
+        if (questionKey === 'years_experience') {
+            const order = ['0-2 years', '3-5 years', '6-10 years', '10+ years'];
+            sortedValues = order.filter(exp => values.has(exp));
+        } else if (questionKey === 'level_generation_frequency') {
+            const order = [
+                'Always (essential part of workflow)',
+                'Often (most projects)',
+                'Sometimes (about half of projects)',
+                'Rarely (a few projects)',
+                'Never'
+            ];
+            sortedValues = order.filter(freq => values.has(freq));
+        } else {
+            sortedValues.sort();
+        }
+        
+        // Populate value dropdown
+        valueSelect.innerHTML = '<option value="">Select value...</option>';
+        sortedValues.forEach(value => {
+            const option = document.createElement('option');
+            option.value = value;
+            option.textContent = this.truncateText(value, 50);
+            valueSelect.appendChild(option);
         });
+        
+        valueSelect.disabled = false;
+        this.applyFilters();
     },
 
-    // Apply filters to the data
+    // Remove a filter
+    removeFilter(filterId) {
+        const filterElement = document.querySelector(`[data-filter-id="${filterId}"]`);
+        if (filterElement) {
+            filterElement.remove();
+            this.applyFilters();
+            this.updateClearAllButton();
+        }
+    },
+
+    // Apply all active filters
     applyFilters() {
         const { responses } = this.data;
         if (!responses) return;
-
-        // Get filter values
-        const filters = {
-            role: document.getElementById('filterRole')?.value || '',
-            experience: document.getElementById('filterExperience')?.value || '',
-            engine: document.getElementById('filterEngine')?.value || '',
-            frequency: document.getElementById('filterFrequency')?.value || ''
-        };
-
-        // Store active filters
-        this.filters.active = Object.fromEntries(
-            Object.entries(filters).filter(([key, value]) => value !== '')
-        );
-
-        // Filter the data
-        this.filters.filteredData = responses.filter(response => {
-            // Professional role filter
-            if (filters.role && response.professional_role !== filters.role) {
-                return false;
+        
+        // Get all active filters
+        const activeFilters = [];
+        const filterElements = document.querySelectorAll('.dynamic-filter');
+        
+        filterElements.forEach(filterDiv => {
+            const questionSelect = filterDiv.querySelector('.filter-question-select');
+            const valueSelect = filterDiv.querySelector('.filter-value-select');
+            
+            if (questionSelect.value && valueSelect.value) {
+                activeFilters.push({
+                    question: questionSelect.value,
+                    value: valueSelect.value
+                });
             }
-
-            // Experience filter
-            if (filters.experience && response.years_experience !== filters.experience) {
-                return false;
-            }
-
-            // Game engine filter (handle arrays)
-            if (filters.engine) {
-                if (Array.isArray(response.game_engines)) {
-                    if (!response.game_engines.includes(filters.engine)) {
-                        return false;
-                    }
-                } else if (response.game_engines !== filters.engine) {
-                    return false;
-                }
-            }
-
-            // PCG frequency filter
-            if (filters.frequency && response.level_generation_frequency !== filters.frequency) {
-                return false;
-            }
-
-            return true;
         });
-
+        
+        // Store active filters
+        this.filters.active = activeFilters;
+        
+        // Filter the data
+        if (activeFilters.length === 0) {
+            this.filters.filteredData = null;
+        } else {
+            this.filters.filteredData = responses.filter(response => {
+                return activeFilters.every(filter => {
+                    const responseValue = response[filter.question];
+                    
+                    if (Array.isArray(responseValue)) {
+                        // For multiple choice questions
+                        return responseValue.includes(filter.value);
+                    } else {
+                        // For single choice questions
+                        return responseValue === filter.value;
+                    }
+                });
+            });
+        }
+        
         // Update UI
         this.updateFilterCount();
-        this.showClearFiltersButton();
+        this.updateClearAllButton();
         
         // Re-analyze current question with filtered data
         const currentQuestion = document.getElementById('questionSelect')?.value;
@@ -248,26 +321,43 @@ const SurveyApp = {
     },
 
     // Clear all filters
-    clearFilters() {
-        // Reset all filter dropdowns
-        document.getElementById('filterRole').value = '';
-        document.getElementById('filterExperience').value = '';
-        document.getElementById('filterEngine').value = '';
-        document.getElementById('filterFrequency').value = '';
-
-        // Clear filter state
-        this.filters.active = {};
+    clearAllFilters() {
+        const filterContainer = document.getElementById('filtersContainer');
+        if (filterContainer) {
+            filterContainer.innerHTML = '';
+        }
+        
+        this.filters.active = [];
         this.filters.filteredData = null;
-
-        // Update UI
+        
         this.updateFilterCount();
-        this.hideClearFiltersButton();
-
+        this.updateClearAllButton();
+        
         // Re-analyze current question with full data
         const currentQuestion = document.getElementById('questionSelect')?.value;
         if (currentQuestion) {
             this.analyzeQuestion(currentQuestion);
         }
+    },
+
+    // Update clear all button visibility
+    updateClearAllButton() {
+        const clearBtn = document.getElementById('clearAllFilters');
+        const hasFilters = document.querySelectorAll('.dynamic-filter').length > 0;
+        
+        if (clearBtn) {
+            if (hasFilters) {
+                clearBtn.classList.remove('hidden');
+            } else {
+                clearBtn.classList.add('hidden');
+            }
+        }
+    },
+
+    // Utility function to truncate text
+    truncateText(text, maxLength) {
+        if (text.length <= maxLength) return text;
+        return text.substring(0, maxLength - 3) + '...';
     },
 
     // Update filter count display
@@ -278,25 +368,10 @@ const SurveyApp = {
         const totalResponses = this.data.responses?.length || 0;
         const filteredCount = this.filters.filteredData?.length || totalResponses;
         
-        if (Object.keys(this.filters.active).length > 0) {
+        if (this.filters.active.length > 0) {
             filterCountElement.textContent = `Showing ${filteredCount} of ${totalResponses} responses`;
         } else {
             filterCountElement.textContent = `Showing all ${totalResponses} responses`;
-        }
-    },
-
-    // Show/hide clear filters button
-    showClearFiltersButton() {
-        const clearBtn = document.getElementById('clearFilters');
-        if (clearBtn && Object.keys(this.filters.active).length > 0) {
-            clearBtn.classList.remove('hidden');
-        }
-    },
-
-    hideClearFiltersButton() {
-        const clearBtn = document.getElementById('clearFilters');
-        if (clearBtn) {
-            clearBtn.classList.add('hidden');
         }
     },
 
@@ -396,7 +471,7 @@ const SurveyApp = {
         const colors = this.generateColors(labels.length);
         
         // Add filter info to title if filters are active
-        const filterInfo = Object.keys(this.filters.active).length > 0 
+        const filterInfo = this.filters.active.length > 0 
             ? ` (${totalResponses} responses)` 
             : '';
         
