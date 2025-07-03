@@ -43,6 +43,12 @@ const SurveyApp = {
         if (clearAllFiltersBtn) {
             clearAllFiltersBtn.addEventListener('click', () => this.clearAllFilters());
         }
+
+        // Add filter logic selector listener
+        const filterLogic = document.getElementById('filterLogic');
+        if (filterLogic) {
+            filterLogic.addEventListener('change', () => this.applyFilters());
+        }
     },
     
     // Load survey data and schema
@@ -178,6 +184,7 @@ const SurveyApp = {
         
         filterContainer.appendChild(filterDiv);
         this.updateClearAllButton();
+        this.highlightLogicSelector();
     },
 
     // Populate filter question dropdown with all filterable questions
@@ -263,6 +270,7 @@ const SurveyApp = {
             filterElement.remove();
             this.applyFilters();
             this.updateClearAllButton();
+            this.highlightLogicSelector();
         }
     },
 
@@ -287,6 +295,9 @@ const SurveyApp = {
             }
         });
         
+        // Get filter logic (AND/OR)
+        const filterLogic = document.getElementById('filterLogic')?.value || 'AND';
+        
         // Store active filters
         this.filters.active = activeFilters;
         
@@ -295,23 +306,37 @@ const SurveyApp = {
             this.filters.filteredData = null;
         } else {
             this.filters.filteredData = responses.filter(response => {
-                return activeFilters.every(filter => {
-                    const responseValue = response[filter.question];
-                    
-                    if (Array.isArray(responseValue)) {
-                        // For multiple choice questions
-                        return responseValue.includes(filter.value);
-                    } else {
-                        // For single choice questions
-                        return responseValue === filter.value;
-                    }
-                });
+                if (filterLogic === 'OR') {
+                    // OR logic: response passes if ANY filter matches
+                    return activeFilters.some(filter => {
+                        const responseValue = response[filter.question];
+                        
+                        if (Array.isArray(responseValue)) {
+                            return responseValue.includes(filter.value);
+                        } else {
+                            return responseValue === filter.value;
+                        }
+                    });
+                } else {
+                    // AND logic: response passes if ALL filters match (default)
+                    return activeFilters.every(filter => {
+                        const responseValue = response[filter.question];
+                        
+                        if (Array.isArray(responseValue)) {
+                            return responseValue.includes(filter.value);
+                        } else {
+                            return responseValue === filter.value;
+                        }
+                    });
+                }
             });
         }
         
         // Update UI
         this.updateFilterCount();
         this.updateClearAllButton();
+        this.highlightLogicSelector();
+        this.highlightLogicSelector();
         
         // Re-analyze current question with filtered data
         const currentQuestion = document.getElementById('questionSelect')?.value;
@@ -354,6 +379,20 @@ const SurveyApp = {
         }
     },
 
+    // Highlight logic selector when filters are active
+    highlightLogicSelector() {
+        const logicDropdown = document.getElementById('filterLogic');
+        const hasMultipleFilters = document.querySelectorAll('.dynamic-filter').length > 1;
+        
+        if (logicDropdown) {
+            if (hasMultipleFilters) {
+                logicDropdown.classList.add('logic-highlight');
+            } else {
+                logicDropdown.classList.remove('logic-highlight');
+            }
+        }
+    },
+
     // Utility function to truncate text
     truncateText(text, maxLength) {
         if (text.length <= maxLength) return text;
@@ -367,9 +406,11 @@ const SurveyApp = {
 
         const totalResponses = this.data.responses?.length || 0;
         const filteredCount = this.filters.filteredData?.length || totalResponses;
+        const filterLogic = document.getElementById('filterLogic')?.value || 'AND';
         
         if (this.filters.active.length > 0) {
-            filterCountElement.textContent = `Showing ${filteredCount} of ${totalResponses} responses`;
+            const logicText = this.filters.active.length > 1 ? ` (${filterLogic} logic)` : '';
+            filterCountElement.textContent = `Showing ${filteredCount} of ${totalResponses} responses${logicText}`;
         } else {
             filterCountElement.textContent = `Showing all ${totalResponses} responses`;
         }

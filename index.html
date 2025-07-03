@@ -206,6 +206,8 @@
             display: flex;
             gap: 1rem;
             margin-bottom: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
         }
 
         .add-filter-btn {
@@ -221,6 +223,39 @@
 
         .add-filter-btn:hover {
             background: #5a67d8;
+        }
+
+        .logic-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logic-label {
+            font-size: 0.9rem;
+            color: #374151;
+            font-weight: 500;
+        }
+
+        .logic-dropdown {
+            padding: 0.4rem 0.6rem;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.2s ease;
+        }
+
+        .logic-dropdown:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+        }
+
+        .logic-highlight {
+            background: #fef3c7;
+            border-color: #f59e0b;
         }
 
         .filters-container {
@@ -525,6 +560,13 @@
                 <h3>Filters</h3>
                 <div class="filter-controls">
                     <button id="addFilterBtn" class="add-filter-btn">+ Add Filter</button>
+                    <div class="logic-selector">
+                        <span class="logic-label">Combine filters with:</span>
+                        <select id="filterLogic" class="logic-dropdown">
+                            <option value="AND">AND (all must match)</option>
+                            <option value="OR">OR (any can match)</option>
+                        </select>
+                    </div>
                     <button id="clearAllFilters" class="clear-filters-btn hidden">Clear All Filters</button>
                 </div>
                 <div id="filtersContainer" class="filters-container"></div>
