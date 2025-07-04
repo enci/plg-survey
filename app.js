@@ -444,7 +444,7 @@ const SurveyApp = {
             const logicText = this.filters.active.length > 1 ? ` (${filterLogic} logic)` : '';
             filterCountElement.textContent = `Filtering ${percentage}% of responses${logicText}`;
         } else {
-            filterCountElement.textContent = `Showing all responses`;
+            filterCountElement.textContent = `Add/combine filters to narrow down the responses based on specific criteria.`;
         }
     },
 
