@@ -461,9 +461,11 @@ const SurveyApp = {
 
     // Analyze the selected question
     analyzeQuestion(questionKey) {
+
+        this.clearChart();
+        this.clearOtherAnswers();
+
         if (!questionKey || !this.data.loaded) {
-            this.clearChart();
-            this.clearOtherAnswers();
             return;
         }
         
@@ -472,8 +474,6 @@ const SurveyApp = {
         
         if (!question) {
             console.log('Question not found');
-            this.clearChart();
-            this.clearOtherAnswers();
             return;
         }
         
@@ -971,9 +971,9 @@ const SurveyApp = {
             this.charts.current = null;
         }
         
-        // Also restore chart container for non-chart content
+        // Always ensure chart container has the canvas element
         const chartContainer = document.getElementById('chartContainer');
-        if (chartContainer && !chartContainer.querySelector('canvas')) {
+        if (chartContainer) {
             chartContainer.innerHTML = '<canvas id="analysisChart"></canvas>';
         }
     },
