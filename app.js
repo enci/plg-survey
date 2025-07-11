@@ -340,20 +340,24 @@ const SurveyApp = {
                 if (filterLogic === 'OR') {
                     return activeAdvancedFilters.some(filter => {
                         const responseValue = response[filter.question];
+                        let match;
                         if (Array.isArray(responseValue)) {
-                            return responseValue.includes(filter.value);
+                            match = responseValue.includes(filter.value);
                         } else {
-                            return responseValue === filter.value;
+                            match = responseValue === filter.value;
                         }
+                        return filter.negate ? !match : match;
                     });
                 } else {
                     return activeAdvancedFilters.every(filter => {
                         const responseValue = response[filter.question];
+                        let match;
                         if (Array.isArray(responseValue)) {
-                            return responseValue.includes(filter.value);
+                            match = responseValue.includes(filter.value);
                         } else {
-                            return responseValue === filter.value;
+                            match = responseValue === filter.value;
                         }
+                        return filter.negate ? !match : match;
                     });
                 }
             });
@@ -377,11 +381,13 @@ const SurveyApp = {
         filterElements.forEach(filterDiv => {
             const questionSelect = filterDiv.querySelector('.filter-question-select');
             const valueSelect = filterDiv.querySelector('.filter-value-select');
+            const negateCheckbox = filterDiv.querySelector('.negate-checkbox');
             
             if (questionSelect.value && valueSelect.value) {
                 activeFilters.push({
                     question: questionSelect.value,
-                    value: valueSelect.value
+                    value: valueSelect.value,
+                    negate: negateCheckbox.checked
                 });
             }
         });
@@ -449,6 +455,18 @@ const SurveyApp = {
         valueSelect.className = 'filter-value-select';
         valueSelect.innerHTML = '<option value="">Select value...</option>';
         valueSelect.disabled = true;
+
+        const negateContainer = document.createElement('div');
+        negateContainer.className = 'negate-filter';
+        const negateCheckbox = document.createElement('input');
+        negateCheckbox.type = 'checkbox';
+        negateCheckbox.id = `negate_${filterId}`;
+        negateCheckbox.className = 'negate-checkbox';
+        const negateLabel = document.createElement('label');
+        negateLabel.htmlFor = negateCheckbox.id;
+        negateLabel.textContent = 'Negate';
+        negateContainer.appendChild(negateCheckbox);
+        negateContainer.appendChild(negateLabel);
         
         const removeBtn = document.createElement('button');
         removeBtn.className = 'remove-filter-btn';
@@ -462,6 +480,10 @@ const SurveyApp = {
         valueSelect.addEventListener('change', () => {
             this.applyAllFilters();
         });
+
+        negateCheckbox.addEventListener('change', () => {
+            this.applyAllFilters();
+        });
         
         removeBtn.addEventListener('click', () => {
             this.removeAdvancedFilter(filterId);
@@ -471,6 +493,7 @@ const SurveyApp = {
         filterDiv.appendChild(questionSelect);
         filterDiv.appendChild(document.createTextNode(' = '));
         filterDiv.appendChild(valueSelect);
+        filterDiv.appendChild(negateContainer);
         filterDiv.appendChild(removeBtn);
         
         filterContainer.appendChild(filterDiv);
