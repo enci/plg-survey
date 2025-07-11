@@ -77,100 +77,6 @@
             margin-bottom: 1rem;
         }
 
-        .stats {
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            margin: 1.5rem 0;
-            flex-wrap: wrap;
-        }
-
-        .stat-item {
-            text-align: center;
-            padding: 0.8rem;
-            background: rgba(102, 126, 234, 0.1);
-            border-radius: 12px;
-            min-width: 100px;
-        }
-
-        .stat-number {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #667eea;
-            display: block;
-        }
-
-        .stat-label {
-            font-size: 0.8rem;
-            color: #666;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .coming-soon {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            padding: 0.7rem 1.8rem;
-            border-radius: 25px;
-            border: none;
-            font-size: 1rem;
-            font-weight: 600;
-            margin-top: 1.5rem;
-            cursor: not-allowed;
-            opacity: 0.8;
-            transition: all 0.3s ease;
-        }
-
-        .load-data-btn {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            padding: 0.7rem 1.8rem;
-            border-radius: 25px;
-            border: none;
-            font-size: 1rem;
-            font-weight: 600;
-            margin-top: 1.5rem;
-            cursor: pointer;
-            opacity: 1;
-            transition: all 0.3s ease;
-        }
-
-        .load-data-btn:hover {
-            opacity: 0.9;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
-        }
-
-        .data-status {
-            margin-top: 1rem;
-            padding: 1rem;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-        }
-
-        .data-status.success {
-            background: rgba(34, 197, 94, 0.1);
-            border: 1px solid rgba(34, 197, 94, 0.3);
-            color: #059669;
-        }
-
-        .data-status.error {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: #dc2626;
-        }
-
-        .data-status.loading {
-            background: rgba(59, 130, 246, 0.1);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            color: #2563eb;
-        }
-
-        .hidden {
-            display: none;
-        }
-
         .analyzer-container {
             max-width: 1000px;
             margin: 2rem auto;
@@ -193,6 +99,145 @@
             font-weight: 600;
         }
 
+        /* Demographics Filter Styles */
+        .demographics-section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .demographics-section h3 {
+            margin: 0 0 1.5rem 0;
+            color: #374151;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .demographics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .demographic-group {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .demographic-group h4 {
+            margin: 0 0 1rem 0;
+            color: #374151;
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .toggle-all {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .toggle-all:hover {
+            background: #5a67d8;
+        }
+
+        .demographic-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .demographic-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .demographic-option:hover {
+            background: #f3f4f6;
+        }
+
+        .demographic-option input[type="checkbox"] {
+            cursor: pointer;
+        }
+
+        .demographic-option label {
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: #374151;
+            flex: 1;
+        }
+
+        .option-count {
+            font-size: 0.75rem;
+            color: #6b7280;
+            background: #f3f4f6;
+            padding: 0.125rem 0.375rem;
+            border-radius: 12px;
+            min-width: 2rem;
+            text-align: center;
+        }
+
+        .demographics-summary {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #eff6ff;
+            border: 1px solid #dbeafe;
+            border-radius: 8px;
+        }
+
+        .summary-text {
+            font-weight: 500;
+            color: #1e40af;
+            margin-bottom: 0.75rem;
+            text-align: center;
+        }
+
+        .progress-container {
+            position: relative;
+            background: #e5e7eb;
+            border-radius: 12px;
+            height: 24px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 12px;
+            transition: width 0.3s ease;
+            min-width: 0;
+        }
+
+        .progress-label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #374151;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+            z-index: 1;
+        }
+
+        /* Advanced Filters Section */
         .filters-section {
             margin-bottom: 2rem;
             padding: 1.5rem;
@@ -259,11 +304,6 @@
             box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
         }
 
-        .logic-highlight {
-            background: #fef3c7;
-            border-color: #f59e0b;
-        }
-
         .filters-container {
             display: flex;
             flex-direction: column;
@@ -288,19 +328,15 @@
             border-radius: 4px;
             font-size: 0.85rem;
             background: white;
-            min-width: 150px;
+            min-width: 250px;
+            max-width: 400px;
+            width: auto;
         }
 
         .dynamic-filter select:focus {
             outline: none;
             border-color: #667eea;
             box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
-        }
-
-        .filter-label {
-            font-size: 0.85rem;
-            color: #6b7280;
-            font-weight: 500;
         }
 
         .remove-filter-btn {
@@ -315,68 +351,6 @@
         }
 
         .remove-filter-btn:hover {
-            background: #dc2626;
-        }
-
-        .filter-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .filter-item {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .filter-item label {
-            margin-bottom: 0.25rem;
-            font-weight: 500;
-            color: #555;
-            font-size: 0.9rem;
-        }
-
-        .filter-dropdown {
-            padding: 0.5rem;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            background: white;
-            transition: border-color 0.2s ease;
-        }
-
-        .filter-dropdown:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
-        }
-
-        .filter-summary {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-top: 1rem;
-            border-top: 1px solid #e2e8f0;
-        }
-
-        #filterCount {
-            font-weight: 500;
-            color: #374151;
-        }
-
-        .clear-filters-btn {
-            background: #ef4444;
-            color: white;
-            border: none;
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
-
-        .clear-filters-btn:hover {
             background: #dc2626;
         }
 
@@ -513,6 +487,10 @@
             padding: 2rem;
         }
 
+        .hidden {
+            display: none;
+        }
+
         .footer {
             text-align: center;
             padding: 1.5rem;
@@ -545,17 +523,9 @@
                 font-size: 2rem;
             }
 
-            .stats {
+            .demographics-grid {
+                grid-template-columns: 1fr;
                 gap: 1rem;
-            }
-
-            .stat-item {
-                min-width: 80px;
-                padding: 0.6rem;
-            }
-
-            .stat-number {
-                font-size: 1.5rem;
             }
 
             .description {
@@ -563,7 +533,7 @@
             }
         }
 
-        /* Subtle animations */
+        /* Animations */
         .header {
             animation: fadeInUp 0.8s ease-out;
         }
@@ -577,14 +547,6 @@
                 opacity: 1;
                 transform: translateY(0);
             }
-        }
-
-        .stat-item {
-            transition: transform 0.3s ease;
-        }
-
-        .stat-item:hover {
-            transform: translateY(-5px);
         }
     </style>
 </head>
@@ -615,9 +577,47 @@
 
     <div class="analyzer-container">
         <div class="analyzer-section">
-            <h2>🔍 Survey Analysis</h2>                            
+            <h2>🔍 Survey Analysis</h2>
+            
+            <!-- Demographics Filtering Section -->
+            <div class="demographics-section">
+                <h3>👥 Demographics Filters</h3>
+                <div class="demographics-grid">
+                    <div class="demographic-group">
+                        <h4>
+                            Professional Role
+                            <button class="toggle-all" onclick="SurveyApp.toggleAllDemographic('professional_role')">Toggle All</button>
+                        </h4>
+                        <div class="demographic-options" id="professional_role_options">
+                            <!-- Options will be populated by JavaScript -->
+                        </div>
+                    </div>
+                    
+                    <div class="demographic-group">
+                        <h4>
+                            Years of Experience
+                            <button class="toggle-all" onclick="SurveyApp.toggleAllDemographic('years_experience')">Toggle All</button>
+                        </h4>
+                        <div class="demographic-options" id="years_experience_options">
+                            <!-- Options will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="demographics-summary">
+                    <div class="summary-text" id="demographicsSummary">
+                        Loading demographics...
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar" id="demographicsProgress"></div>
+                        <div class="progress-label" id="demographicsProgressLabel">0 / 0 responses</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Advanced Filters Section -->
             <div class="filters-section">
-                <h3>Filters</h3>
+                <h3>⚙️ Advanced Filters</h3>
                 <div class="filter-controls">
                     <button id="addFilterBtn" class="add-filter-btn">+ Add Filter</button>
                     <div class="logic-selector">
@@ -627,12 +627,9 @@
                             <option value="OR">OR (any can match)</option>
                         </select>
                     </div>
-                    <button id="clearAllFilters" class="clear-filters-btn hidden">Clear All Filters</button>
+                    <button id="clearAllFilters" class="clear-demographics hidden">Clear All Filters</button>
                 </div>
                 <div id="filtersContainer" class="filters-container"></div>
-                <div class="filter-summary">
-                    <span id="filterCount">Showing all 120 responses</span>
-                </div>
             </div>
             
             <div class="question-selector">
@@ -645,7 +642,6 @@
                 <canvas id="analysisChart"></canvas>
             </div>
             <div id="otherAnswers" class="other-answers hidden"></div>
-        </div>
         </div>
     </div>
 

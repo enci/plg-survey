@@ -1,5 +1,5 @@
 // Procedural Level Generation Survey Analysis Tool
-// Version 4.0 - Multiple Question Types with Charts
+// Version 5.0 - Demographics Filtering Enhancement
 
 console.log('Survey Analysis Tool Initialized');
 
@@ -12,7 +12,11 @@ const SurveyApp = {
     },
     charts: {},
     filters: {
-        active: [],
+        demographics: {
+            professional_role: new Set(),
+            years_experience: new Set()
+        },
+        advanced: [],
         filteredData: null,
         nextId: 1
     },
@@ -21,33 +25,29 @@ const SurveyApp = {
     init() {
         console.log('Initializing Survey Analysis Tool...');
         this.setupEventListeners();
-        // Auto-load data on startup
         this.loadData();
     },
     
     // Set up event listeners
     setupEventListeners() {
-        // Add question selector listener
         const questionSelect = document.getElementById('questionSelect');
         if (questionSelect) {
             questionSelect.addEventListener('change', (e) => this.analyzeQuestion(e.target.value));
         }
 
-        // Add filter button listeners
         const addFilterBtn = document.getElementById('addFilterBtn');
         if (addFilterBtn) {
-            addFilterBtn.addEventListener('click', () => this.addFilter());
+            addFilterBtn.addEventListener('click', () => this.addAdvancedFilter());
         }
 
         const clearAllFiltersBtn = document.getElementById('clearAllFilters');
         if (clearAllFiltersBtn) {
-            clearAllFiltersBtn.addEventListener('click', () => this.clearAllFilters());
+            clearAllFiltersBtn.addEventListener('click', () => this.clearAllAdvancedFilters());
         }
 
-        // Add filter logic selector listener
         const filterLogic = document.getElementById('filterLogic');
         if (filterLogic) {
-            filterLogic.addEventListener('change', () => this.applyFilters());
+            filterLogic.addEventListener('change', () => this.applyAllFilters());
         }
     },
     
@@ -101,22 +101,9 @@ const SurveyApp = {
         
         console.log(`✓ Loaded ${responses.length} survey responses`);
         console.log(`✓ Loaded schema with ${Object.keys(schema.questions).length} question definitions`);
-        
-        // Basic data validation
-        if (responses.length === 0) {
-            throw new Error('No survey responses found');
-        }
-        
-        // Check if first response has expected structure
-        const firstResponse = responses[0];
-        if (!firstResponse.id || !firstResponse.professional_role) {
-            throw new Error('Survey responses missing expected fields');
-        }
-        
-        console.log('✓ Data validation passed');
     },
     
-    // Show data summary
+    // Show data summary and initialize demographics
     showDataSummary() {
         const { responses, schema } = this.data;
         
@@ -125,9 +112,286 @@ const SurveyApp = {
             schema_questions: Object.keys(schema.questions).length
         });
         
-        // Initialize and populate dropdowns
         this.populateQuestionDropdown();
-        this.updateFilterCount();
+        this.initializeDemographics();
+        this.updateDemographicsSummary();
+    },
+
+    // Initialize demographics filters
+    initializeDemographics() {
+        this.populateDemographicOptions('professional_role');
+        this.populateDemographicOptions('years_experience');
+    },
+
+    // Populate demographic options with checkboxes
+    populateDemographicOptions(demographicKey) {
+        const container = document.getElementById(`${demographicKey}_options`);
+        if (!container) return;
+
+        const { responses, schema } = this.data;
+        const question = schema.questions[demographicKey];
+        
+        if (!question || !question.options) return;
+
+        // Count occurrences of each option
+        const counts = {};
+        let otherCount = 0;
+        
+        question.options.forEach(option => {
+            counts[option] = responses.filter(r => r[demographicKey] === option).length;
+        });
+
+        // Count non-schema responses as "Other"
+        responses.forEach(response => {
+            const value = response[demographicKey];
+            if (value && value !== null && value !== undefined && value.trim() !== '' && 
+                !question.options.includes(value)) {
+                otherCount++;
+            }
+        });
+
+        // Add "Other" if there are non-schema responses
+        const allOptions = [...question.options];
+        if (otherCount > 0) {
+            allOptions.push('Other');
+            counts['Other'] = otherCount;
+        }
+
+        // Sort options by count (descending)
+        const sortedOptions = allOptions.sort((a, b) => counts[b] - counts[a]);
+
+        container.innerHTML = '';
+        sortedOptions.forEach(option => {
+            const optionDiv = document.createElement('div');
+            optionDiv.className = 'demographic-option';
+            
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.id = `${demographicKey}_${option.replace(/\s+/g, '_').replace(/[^\w]/g, '_')}`;
+            checkbox.checked = true; // Start with all selected
+            checkbox.addEventListener('change', () => this.onDemographicChange(demographicKey, option, checkbox.checked));
+            
+            const label = document.createElement('label');
+            label.htmlFor = checkbox.id;
+            label.textContent = option;
+            
+            const count = document.createElement('span');
+            count.className = 'option-count';
+            count.textContent = counts[option];
+            
+            optionDiv.appendChild(checkbox);
+            optionDiv.appendChild(label);
+            optionDiv.appendChild(count);
+            
+            container.appendChild(optionDiv);
+        });
+
+        // Initialize with all options selected (including "Other" if it exists)
+        this.filters.demographics[demographicKey] = new Set(allOptions);
+    },
+
+    // Handle demographic option change
+    onDemographicChange(demographicKey, option, isChecked) {
+        if (isChecked) {
+            this.filters.demographics[demographicKey].add(option);
+        } else {
+            this.filters.demographics[demographicKey].delete(option);
+        }
+        
+        this.applyAllFilters();
+        this.updateDemographicsSummary();
+    },
+
+    // Toggle all demographics for a specific field
+    toggleAllDemographic(demographicKey) {
+        const container = document.getElementById(`${demographicKey}_options`);
+        if (!container) return;
+
+        const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+        const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+        
+        // If all are checked, uncheck all; otherwise, check all
+        const newState = !allChecked;
+        
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = newState;
+            const option = checkbox.labels[0].textContent;
+            if (newState) {
+                this.filters.demographics[demographicKey].add(option);
+            } else {
+                this.filters.demographics[demographicKey].delete(option);
+            }
+        });
+        
+        this.applyAllFilters();
+        this.updateDemographicsSummary();
+    },
+
+    // Clear all demographic filters
+    clearDemographics() {
+        Object.keys(this.filters.demographics).forEach(demographicKey => {
+            const { responses, schema } = this.data;
+            const question = schema.questions[demographicKey];
+            
+            if (question && question.options) {
+                const allOptions = [...question.options];
+                
+                // Check if there are non-schema responses to add "Other"
+                const hasOtherResponses = responses.some(response => {
+                    const value = response[demographicKey];
+                    return value && value !== null && value !== undefined && value.trim() !== '' && 
+                           !question.options.includes(value);
+                });
+                
+                if (hasOtherResponses) {
+                    allOptions.push('Other');
+                }
+                
+                // Set all to checked and add to filter set
+                this.filters.demographics[demographicKey] = new Set(allOptions);
+                
+                // Update UI checkboxes
+                const container = document.getElementById(`${demographicKey}_options`);
+                if (container) {
+                    const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+                    checkboxes.forEach(cb => cb.checked = true);
+                }
+            }
+        });
+        
+        this.applyAllFilters();
+        this.updateDemographicsSummary();
+    },
+
+    // Update demographics summary
+    updateDemographicsSummary() {
+        const summaryElement = document.getElementById('demographicsSummary');
+        const progressBar = document.getElementById('demographicsProgress');
+        const progressLabel = document.getElementById('demographicsProgressLabel');
+        
+        if (!summaryElement || !progressBar || !progressLabel) return;
+
+        const { responses } = this.data;
+        const demographicData = this.getCurrentData();
+        
+        const totalResponses = responses.length;
+        const filteredCount = demographicData.length;
+        const percentage = ((filteredCount / totalResponses) * 100).toFixed(1);
+
+        const roleCount = this.filters.demographics.professional_role.size;
+        const expCount = this.filters.demographics.years_experience.size;
+        
+        const totalRoles = this.data.schema?.questions?.professional_role?.options?.length || 0;
+        const totalExperiences = this.data.schema?.questions?.years_experience?.options?.length || 0;
+        
+        // Add 1 to totals if "Other" exists
+        const hasOtherRole = [...this.filters.demographics.professional_role].includes('Other');
+        const finalTotalRoles = totalRoles + (hasOtherRole ? 1 : 0);
+        
+        // Update summary text
+        summaryElement.textContent = 
+            `${roleCount}/${finalTotalRoles} roles, ${expCount}/${totalExperiences} experience levels selected`;
+        
+        // Update progress bar
+        progressBar.style.width = `${percentage}%`;
+        
+        // Update progress label
+        progressLabel.textContent = `${filteredCount} / ${totalResponses} responses (${percentage}%)`;
+    },
+
+    // Apply all filters (demographics + advanced)
+    applyAllFilters() {
+        const { responses } = this.data;
+        if (!responses) return;
+
+        // First apply demographic filters
+        let filteredData = responses.filter(response => {
+            const { schema } = this.data;
+            
+            // Check professional role
+            const roleValue = response.professional_role;
+            const roleQuestion = schema.questions.professional_role;
+            let roleMatch = false;
+            
+            if (roleValue && roleQuestion) {
+                if (roleQuestion.options.includes(roleValue)) {
+                    // Standard option
+                    roleMatch = this.filters.demographics.professional_role.has(roleValue);
+                } else {
+                    // Non-standard option - check if "Other" is selected
+                    roleMatch = this.filters.demographics.professional_role.has('Other');
+                }
+            }
+            
+            // Check years experience (standard field)
+            const expValue = response.years_experience;
+            const expMatch = this.filters.demographics.years_experience.has(expValue);
+            
+            return roleMatch && expMatch;
+        });
+
+        // Then apply advanced filters if any
+        const activeAdvancedFilters = this.getActiveAdvancedFilters();
+        
+        if (activeAdvancedFilters.length > 0) {
+            const filterLogic = document.getElementById('filterLogic')?.value || 'AND';
+            
+            filteredData = filteredData.filter(response => {
+                if (filterLogic === 'OR') {
+                    return activeAdvancedFilters.some(filter => {
+                        const responseValue = response[filter.question];
+                        if (Array.isArray(responseValue)) {
+                            return responseValue.includes(filter.value);
+                        } else {
+                            return responseValue === filter.value;
+                        }
+                    });
+                } else {
+                    return activeAdvancedFilters.every(filter => {
+                        const responseValue = response[filter.question];
+                        if (Array.isArray(responseValue)) {
+                            return responseValue.includes(filter.value);
+                        } else {
+                            return responseValue === filter.value;
+                        }
+                    });
+                }
+            });
+        }
+
+        this.filters.filteredData = filteredData;
+        this.updateDemographicsSummary();
+        
+        // Re-analyze current question with filtered data
+        const currentQuestion = document.getElementById('questionSelect')?.value;
+        if (currentQuestion) {
+            this.analyzeQuestion(currentQuestion);
+        }
+    },
+
+    // Get active advanced filters
+    getActiveAdvancedFilters() {
+        const activeFilters = [];
+        const filterElements = document.querySelectorAll('.dynamic-filter');
+        
+        filterElements.forEach(filterDiv => {
+            const questionSelect = filterDiv.querySelector('.filter-question-select');
+            const valueSelect = filterDiv.querySelector('.filter-value-select');
+            
+            if (questionSelect.value && valueSelect.value) {
+                activeFilters.push({
+                    question: questionSelect.value,
+                    value: valueSelect.value
+                });
+            }
+        });
+        
+        return activeFilters;
+    },
+
+    // Get current dataset (filtered)
+    getCurrentData() {
+        return this.filters.filteredData || this.data.responses || [];
     },
 
     // Populate the question dropdown with analyzable questions
@@ -137,14 +401,11 @@ const SurveyApp = {
         
         if (!questionSelect || !schema) return;
         
-        // Clear existing options except the first one
         questionSelect.innerHTML = '<option value="">Choose a question...</option>';
         
-        // Add questions that can be visualized
         Object.entries(schema.questions).forEach(([key, question]) => {
-            if (key === 'id') return; // Skip identifier
+            if (key === 'id') return;
             
-            // Include single choice, multiple choice, matrix, and open text questions
             if (['single_choice', 'multiple_choice', 'matrix', 'open_text'].includes(question.type)) {
                 const option = document.createElement('option');
                 option.value = key;
@@ -167,52 +428,45 @@ const SurveyApp = {
         return labels[type] || type;
     },
 
-    // Add a new dynamic filter
-    addFilter() {
+    // Add a new advanced filter
+    addAdvancedFilter() {
         const filterId = `filter_${this.filters.nextId++}`;
         const filterContainer = document.getElementById('filtersContainer');
         
         if (!filterContainer) return;
         
-        // Create filter element
         const filterDiv = document.createElement('div');
         filterDiv.className = 'dynamic-filter';
         filterDiv.setAttribute('data-filter-id', filterId);
         
-        // Create question selector
         const questionSelect = document.createElement('select');
         questionSelect.className = 'filter-question-select';
         questionSelect.innerHTML = '<option value="">Select question...</option>';
         
-        // Populate with all questions that can be filtered
         this.populateFilterQuestionOptions(questionSelect);
         
-        // Create value selector (initially empty)
         const valueSelect = document.createElement('select');
         valueSelect.className = 'filter-value-select';
         valueSelect.innerHTML = '<option value="">Select value...</option>';
         valueSelect.disabled = true;
         
-        // Create remove button
         const removeBtn = document.createElement('button');
         removeBtn.className = 'remove-filter-btn';
         removeBtn.textContent = '✕';
         removeBtn.title = 'Remove filter';
         
-        // Add event listeners
         questionSelect.addEventListener('change', (e) => {
-            this.onFilterQuestionChange(filterId, e.target.value, valueSelect);
+            this.onAdvancedFilterQuestionChange(filterId, e.target.value, valueSelect);
         });
         
         valueSelect.addEventListener('change', () => {
-            this.applyFilters();
+            this.applyAllFilters();
         });
         
         removeBtn.addEventListener('click', () => {
-            this.removeFilter(filterId);
+            this.removeAdvancedFilter(filterId);
         });
         
-        // Assemble filter
         filterDiv.appendChild(document.createTextNode('Filter by: '));
         filterDiv.appendChild(questionSelect);
         filterDiv.appendChild(document.createTextNode(' = '));
@@ -220,48 +474,48 @@ const SurveyApp = {
         filterDiv.appendChild(removeBtn);
         
         filterContainer.appendChild(filterDiv);
-        this.updateClearAllButton();
-        this.highlightLogicSelector();
+        this.updateClearAllAdvancedButton();
     },
 
-    // Populate filter question dropdown with all filterable questions
+    // Populate filter question dropdown with all filterable questions (excluding demographics)
     populateFilterQuestionOptions(selectElement) {
         const { schema } = this.data;
         if (!schema) return;
         
         Object.entries(schema.questions).forEach(([key, question]) => {
-            // Skip identifier questions and include single_choice and some multiple_choice
-            if (key === 'id' || question.type === 'open_text') return;
+            // Skip identifier questions, open text, and demographics
+            if (key === 'id' || question.type === 'open_text' || 
+                key === 'professional_role' || key === 'years_experience') return;
             
             const option = document.createElement('option');
             option.value = key;
-            option.textContent = this.truncateText(question.question, 60);
+            option.textContent = question.question; // Show full question text
             selectElement.appendChild(option);
         });
     },
 
-    // Handle question selection change in a filter
-    onFilterQuestionChange(filterId, questionKey, valueSelect) {
+    // Handle advanced filter question selection change
+    onAdvancedFilterQuestionChange(filterId, questionKey, valueSelect) {
         if (!questionKey) {
             valueSelect.innerHTML = '<option value="">Select value...</option>';
             valueSelect.disabled = true;
-            this.applyFilters();
+            this.applyAllFilters();
             return;
         }
         
-        const { responses, schema } = this.data;
+        const { schema } = this.data;
         const question = schema.questions[questionKey];
         
         if (!question) return;
         
-        // Get unique values for this question
+        // Get unique values for this question from current filtered data
+        const currentData = this.getCurrentData();
         const values = new Set();
         
-        responses.forEach(response => {
+        currentData.forEach(response => {
             const value = response[questionKey];
             if (value !== null && value !== undefined && value !== '') {
                 if (Array.isArray(value)) {
-                    // For multiple choice questions, add each individual choice
                     value.forEach(v => values.add(v));
                 } else {
                     values.add(value);
@@ -269,25 +523,8 @@ const SurveyApp = {
             }
         });
         
-        // Sort values appropriately
-        let sortedValues = [...values];
-        if (questionKey === 'years_experience') {
-            const order = ['0-2 years', '3-5 years', '6-10 years', '10+ years'];
-            sortedValues = order.filter(exp => values.has(exp));
-        } else if (questionKey === 'level_generation_frequency') {
-            const order = [
-                'Always (essential part of workflow)',
-                'Often (most projects)',
-                'Sometimes (about half of projects)',
-                'Rarely (a few projects)',
-                'Never'
-            ];
-            sortedValues = order.filter(freq => values.has(freq));
-        } else {
-            sortedValues.sort();
-        }
+        const sortedValues = [...values].sort();
         
-        // Populate value dropdown
         valueSelect.innerHTML = '<option value="">Select value...</option>';
         sortedValues.forEach(value => {
             const option = document.createElement('option');
@@ -297,113 +534,32 @@ const SurveyApp = {
         });
         
         valueSelect.disabled = false;
-        this.applyFilters();
+        this.applyAllFilters();
     },
 
-    // Remove a filter
-    removeFilter(filterId) {
+    // Remove an advanced filter
+    removeAdvancedFilter(filterId) {
         const filterElement = document.querySelector(`[data-filter-id="${filterId}"]`);
         if (filterElement) {
             filterElement.remove();
-            this.applyFilters();
-            this.updateClearAllButton();
-            this.highlightLogicSelector();
+            this.applyAllFilters();
+            this.updateClearAllAdvancedButton();
         }
     },
 
-    // Apply all active filters
-    applyFilters() {
-        const { responses } = this.data;
-        if (!responses) return;
-        
-        // Get all active filters
-        const activeFilters = [];
-        const filterElements = document.querySelectorAll('.dynamic-filter');
-        
-        filterElements.forEach(filterDiv => {
-            const questionSelect = filterDiv.querySelector('.filter-question-select');
-            const valueSelect = filterDiv.querySelector('.filter-value-select');
-            
-            if (questionSelect.value && valueSelect.value) {
-                activeFilters.push({
-                    question: questionSelect.value,
-                    value: valueSelect.value
-                });
-            }
-        });
-        
-        // Get filter logic (AND/OR)
-        const filterLogic = document.getElementById('filterLogic')?.value || 'AND';
-        
-        // Store active filters
-        this.filters.active = activeFilters;
-        
-        // Filter the data
-        if (activeFilters.length === 0) {
-            this.filters.filteredData = null;
-        } else {
-            this.filters.filteredData = responses.filter(response => {
-                if (filterLogic === 'OR') {
-                    // OR logic: response passes if ANY filter matches
-                    return activeFilters.some(filter => {
-                        const responseValue = response[filter.question];
-                        
-                        if (Array.isArray(responseValue)) {
-                            return responseValue.includes(filter.value);
-                        } else {
-                            return responseValue === filter.value;
-                        }
-                    });
-                } else {
-                    // AND logic: response passes if ALL filters match (default)
-                    return activeFilters.every(filter => {
-                        const responseValue = response[filter.question];
-                        
-                        if (Array.isArray(responseValue)) {
-                            return responseValue.includes(filter.value);
-                        } else {
-                            return responseValue === filter.value;
-                        }
-                    });
-                }
-            });
-        }
-        
-        // Update UI
-        this.updateFilterCount();
-        this.updateClearAllButton();
-        this.highlightLogicSelector();
-        
-        // Re-analyze current question with filtered data
-        const currentQuestion = document.getElementById('questionSelect')?.value;
-        if (currentQuestion) {
-            this.analyzeQuestion(currentQuestion);
-        }
-    },
-
-    // Clear all filters
-    clearAllFilters() {
+    // Clear all advanced filters
+    clearAllAdvancedFilters() {
         const filterContainer = document.getElementById('filtersContainer');
         if (filterContainer) {
             filterContainer.innerHTML = '';
         }
         
-        this.filters.active = [];
-        this.filters.filteredData = null;
-        
-        this.updateFilterCount();
-        this.updateClearAllButton();
-        this.highlightLogicSelector();
-        
-        // Re-analyze current question with full data
-        const currentQuestion = document.getElementById('questionSelect')?.value;
-        if (currentQuestion) {
-            this.analyzeQuestion(currentQuestion);
-        }
+        this.applyAllFilters();
+        this.updateClearAllAdvancedButton();
     },
 
-    // Update clear all button visibility
-    updateClearAllButton() {
+    // Update clear all advanced filters button visibility
+    updateClearAllAdvancedButton() {
         const clearBtn = document.getElementById('clearAllFilters');
         const hasFilters = document.querySelectorAll('.dynamic-filter').length > 0;
         
@@ -416,43 +572,6 @@ const SurveyApp = {
         }
     },
 
-    // Highlight logic selector when filters are active
-    highlightLogicSelector() {
-        const logicDropdown = document.getElementById('filterLogic');
-        const hasMultipleFilters = document.querySelectorAll('.dynamic-filter').length > 1;
-        
-        if (logicDropdown) {
-            if (hasMultipleFilters) {
-                logicDropdown.classList.add('logic-highlight');
-            } else {
-                logicDropdown.classList.remove('logic-highlight');
-            }
-        }
-    },
-
-    // Update filter count display
-    updateFilterCount() {
-        const filterCountElement = document.getElementById('filterCount');
-        if (!filterCountElement) return;
-
-        const totalResponses = this.data.responses?.length || 0;
-        const filteredCount = this.filters.filteredData?.length || totalResponses;
-        const filterLogic = document.getElementById('filterLogic')?.value || 'AND';
-        
-        if (this.filters.active.length > 0) {
-            const percentage = ((filteredCount / totalResponses) * 100).toFixed(1);
-            const logicText = this.filters.active.length > 1 ? ` (${filterLogic} logic)` : '';
-            filterCountElement.textContent = `Filtering ${percentage}% of responses${logicText}`;
-        } else {
-            filterCountElement.textContent = `Add/combine filters to narrow down the responses based on specific criteria.`;
-        }
-    },
-
-    // Get current dataset (filtered or full)
-    getCurrentData() {
-        return this.filters.filteredData || this.data.responses || [];
-    },
-
     // Utility function to truncate text
     truncateText(text, maxLength) {
         if (text.length <= maxLength) return text;
@@ -461,7 +580,6 @@ const SurveyApp = {
 
     // Analyze the selected question
     analyzeQuestion(questionKey) {
-
         this.clearChart();
         this.clearOtherAnswers();
 
@@ -479,7 +597,6 @@ const SurveyApp = {
         
         console.log(`Analyzing question: ${question.question} (${question.type})`);
         
-        // Route to appropriate analysis method based on question type
         switch (question.type) {
             case 'single_choice':
                 this.analyzeSingleChoice(questionKey, question);
@@ -505,7 +622,6 @@ const SurveyApp = {
         const currentData = this.getCurrentData();
         const responseData = currentData.map(r => r[questionKey]).filter(Boolean);
         
-        // Count responses and separate "other" answers
         const counts = {};
         const otherAnswers = [];
         
@@ -527,109 +643,11 @@ const SurveyApp = {
         this.showOtherAnswers(otherAnswers);
     },
 
-    // Analyze multiple choice questions (bar chart)
-    analyzeMultipleChoice(questionKey, question) {
-        const currentData = this.getCurrentData();
-        const counts = {};
-        const otherAnswers = [];
-        
-        // Count all individual selections across all responses
-        currentData.forEach(response => {
-            const value = response[questionKey];
-            if (value) {
-                if (Array.isArray(value)) {
-                    value.forEach(item => {
-                        const isOtherAnswer = question.options && !question.options.includes(item);
-                        if (isOtherAnswer) {
-                            otherAnswers.push(item);
-                        } else {
-                            counts[item] = (counts[item] || 0) + 1;
-                        }
-                    });
-                } else if (typeof value === 'string') {
-                    // Handle single string values (shouldn't happen for multiple choice, but just in case)
-                    const isOtherAnswer = question.options && !question.options.includes(value);
-                    if (isOtherAnswer) {
-                        otherAnswers.push(value);
-                    } else {
-                        counts[value] = (counts[value] || 0) + 1;
-                    }
-                }
-            }
-        });
-        
-        if (otherAnswers.length > 0) {
-            counts['Other'] = otherAnswers.length;
-        }
-        
-        this.createBarChart(question.question, counts, currentData.length);
-        this.showOtherAnswers(otherAnswers);
-    },
-
-    // Analyze matrix questions (stacked bar chart)
-    analyzeMatrix(questionKey, question) {
-        const currentData = this.getCurrentData();
-        const matrixData = {};
-        
-        // Get matrix structure
-        const items = question.items || [];
-        const scale = question.scale || [];
-        
-        if (items.length === 0 || scale.length === 0) {
-            console.log('Matrix question missing items or scale');
-            this.clearChart();
-            this.clearOtherAnswers();
-            return;
-        }
-        
-        // Initialize data structure
-        items.forEach(item => {
-            matrixData[item] = {};
-            scale.forEach(scaleItem => {
-                matrixData[item][scaleItem] = 0;
-            });
-        });
-        
-        // Count responses
-        currentData.forEach(response => {
-            const matrixResponses = response[questionKey];
-            if (matrixResponses && typeof matrixResponses === 'object') {
-                Object.entries(matrixResponses).forEach(([item, value]) => {
-                    if (matrixData[item] && scale.includes(value)) {
-                        matrixData[item][value]++;
-                    }
-                });
-            }
-        });
-        
-        this.createStackedBarChart(question.question, matrixData, scale, currentData.length);
-        this.clearOtherAnswers(); // Matrix questions don't typically have "other" answers
-    },
-
-    // Analyze open text questions (text list)
-    analyzeOpenText(questionKey, question) {
-        const currentData = this.getCurrentData();
-        const responses = [];
-        
-        // Collect all text responses
-        currentData.forEach(response => {
-            const value = response[questionKey];
-            if (value && typeof value === 'string' && value.trim() !== '') {
-                responses.push(value.trim());
-            }
-        });
-        
-        // Clear any existing chart and show text responses
-        this.clearChart();
-        this.showTextResponses(question.question, responses, currentData.length);
-    },
-
     // Create a pie chart
     createPieChart(title, data, totalResponses) {
         const ctx = document.getElementById('analysisChart');
         if (!ctx) return;
         
-        // Destroy existing chart if it exists
         if (this.charts.current) {
             this.charts.current.destroy();
         }
@@ -637,11 +655,9 @@ const SurveyApp = {
         const labels = Object.keys(data);
         const values = Object.values(data);
         
-        // Generate colors for each slice
         const colors = this.generateColors(labels.length);
         
-        // Add filter info to title if filters are active
-        const filterInfo = this.filters.active.length > 0 
+        const filterInfo = this.filters.filteredData 
             ? ` (${totalResponses} responses)` 
             : '';
         
@@ -652,7 +668,7 @@ const SurveyApp = {
                 datasets: [{
                     data: values,
                     backgroundColor: colors.background,
-                    borderWidth: 0  // Remove border/outline
+                    borderWidth: 0
                 }]
             },
             options: {
@@ -691,193 +707,6 @@ const SurveyApp = {
         console.log(`Created pie chart for: ${title}`);
     },
 
-    // Create a bar chart for multiple choice questions
-    createBarChart(title, data, totalResponses) {
-        const ctx = document.getElementById('analysisChart');
-        if (!ctx) return;
-        
-        // Destroy existing chart if it exists
-        if (this.charts.current) {
-            this.charts.current.destroy();
-        }
-        
-        const labels = Object.keys(data);
-        const values = Object.values(data);
-        
-        // Sort by frequency (descending)
-        const sortedData = labels.map((label, index) => ({
-            label,
-            value: values[index]
-        })).sort((a, b) => b.value - a.value);
-        
-        const sortedLabels = sortedData.map(item => item.label);
-        const sortedValues = sortedData.map(item => item.value);
-        
-        // Generate colors
-        const colors = this.generateColors(sortedLabels.length);
-        
-        // Add filter info to title if filters are active
-        const filterInfo = this.filters.active.length > 0 
-            ? ` (${totalResponses} responses)` 
-            : '';
-        
-        this.charts.current = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: sortedLabels,
-                datasets: [{
-                    data: sortedValues,
-                    backgroundColor: colors.background,
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: title + filterInfo,
-                        font: {
-                            size: 16,
-                            weight: 'bold'
-                        },
-                        padding: 20
-                    },
-                    legend: {
-                        display: false // Hide legend for bar charts
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                const percentage = ((context.parsed.y / totalResponses) * 100).toFixed(1);
-                                return `${context.parsed.y} responses (${percentage}% of total)`;
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 1
-                        },
-                        title: {
-                            display: true,
-                            text: 'Number of Responses'
-                        }
-                    },
-                    x: {
-                        ticks: {
-                            maxRotation: 45,
-                            minRotation: 0
-                        }
-                    }
-                }
-            }
-        });
-        
-        console.log(`Created bar chart for: ${title}`);
-    },
-
-    // Create a stacked bar chart for matrix questions
-    createStackedBarChart(title, matrixData, scale, totalResponses) {
-        const ctx = document.getElementById('analysisChart');
-        if (!ctx) return;
-        
-        // Destroy existing chart if it exists
-        if (this.charts.current) {
-            this.charts.current.destroy();
-        }
-        
-        const items = Object.keys(matrixData);
-        const datasets = [];
-        
-        // Create a dataset for each scale item
-        scale.forEach((scaleItem, index) => {
-            const data = items.map(item => matrixData[item][scaleItem] || 0);
-            const color = this.generateColors(scale.length).background[index];
-            
-            datasets.push({
-                label: scaleItem,
-                data: data,
-                backgroundColor: color,
-                borderWidth: 0
-            });
-        });
-        
-        // Add filter info to title if filters are active
-        const filterInfo = this.filters.active.length > 0 
-            ? ` (${totalResponses} responses)` 
-            : '';
-        
-        this.charts.current = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: items,
-                datasets: datasets
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    x: {
-                        stacked: true,
-                        ticks: {
-                            maxRotation: 45,
-                            minRotation: 0
-                        }
-                    },
-                    y: {
-                        stacked: true,
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 1
-                        },
-                        title: {
-                            display: true,
-                            text: 'Number of Responses'
-                        }
-                    }
-                },
-                plugins: {
-                    title: {
-                        display: true,
-                        text: title + filterInfo,
-                        font: {
-                            size: 16,
-                            weight: 'bold'
-                        },
-                        padding: 20
-                    },
-                    legend: {
-                        position: 'top',
-                        labels: {
-                            padding: 20,
-                            usePointStyle: true
-                        }
-                    },
-                    tooltip: {
-                        mode: 'index',
-                        intersect: false,
-                        callbacks: {
-                            label: function(context) {
-                                const percentage = ((context.parsed.y / totalResponses) * 100).toFixed(1);
-                                return `${context.dataset.label}: ${context.parsed.y} (${percentage}% of total)`;
-                            }
-                        }
-                    }
-                },
-                interaction: {
-                    mode: 'index',
-                    intersect: false
-                }
-            }
-        });
-        
-        console.log(`Created stacked bar chart for: ${title}`);
-    },
-
     // Generate colors for chart
     generateColors(count) {
         const colors = [
@@ -891,7 +720,7 @@ const SurveyApp = {
         
         for (let i = 0; i < count; i++) {
             const color = colors[i % colors.length];
-            background.push(color + '80'); // Add transparency
+            background.push(color + '80');
         }
         
         return { background };
@@ -917,44 +746,6 @@ const SurveyApp = {
         otherContainer.classList.remove('hidden');
     },
 
-    // Show text responses for open text questions
-    showTextResponses(questionTitle, responses, totalResponses) {
-        const chartContainer = document.getElementById('chartContainer');
-        const otherContainer = document.getElementById('otherAnswers');
-        
-        if (!chartContainer) return;
-        
-        // Clear other answers container
-        if (otherContainer) {
-            otherContainer.classList.add('hidden');
-            otherContainer.innerHTML = '';
-        }
-        
-        // Add filter info to title if filters are active
-        const filterInfo = this.filters.active.length > 0 
-            ? ` (${totalResponses} responses)` 
-            : '';
-        
-        // Replace chart container content with text responses
-        chartContainer.innerHTML = `
-            <div class="text-responses">
-                <h3>${questionTitle}${filterInfo}</h3>
-                <div class="response-count">${responses.length} text responses:</div>
-                <div class="responses-list">
-                    ${responses.length > 0 
-                        ? responses.map((response, index) => `
-                            <div class="response-item">
-                                <span class="response-number">${index + 1}.</span>
-                                <span class="response-text">"${response}"</span>
-                            </div>
-                        `).join('')
-                        : '<div class="no-responses">No responses found for this question.</div>'
-                    }
-                </div>
-            </div>
-        `;
-    },
-
     // Clear other answers display
     clearOtherAnswers() {
         const otherContainer = document.getElementById('otherAnswers');
@@ -971,31 +762,10 @@ const SurveyApp = {
             this.charts.current = null;
         }
         
-        // Always ensure chart container has the canvas element
         const chartContainer = document.getElementById('chartContainer');
         if (chartContainer) {
             chartContainer.innerHTML = '<canvas id="analysisChart"></canvas>';
         }
-    },
-    
-    // Get unique values for a field (legacy method)
-    getUniqueValues(field) {
-        if (!this.data.loaded) return [];
-        return [...new Set(this.data.responses.map(r => r[field]).filter(Boolean))];
-    },
-    
-    // Filter responses by criteria (legacy method)
-    filterResponses(criteria) {
-        if (!this.data.loaded) return [];
-        
-        return this.data.responses.filter(response => {
-            return Object.entries(criteria).every(([field, value]) => {
-                if (Array.isArray(value)) {
-                    return value.includes(response[field]);
-                }
-                return response[field] === value;
-            });
-        });
     }
 };
 
