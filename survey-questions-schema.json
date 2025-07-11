@@ -77,13 +77,11 @@
         "Decorative prop placement",
         "Enemy/NPC placement",
         "City models",
-        "World building (terrain, vegetation, etc.)",
+        "Vegetation/foliage",
         "Mission/quest generation",
-        "Level layout/structure generation",
+        "Level layouts",
         "Texture generation",
-        "Asset variations",
-        "I don't currently use procedural generation",
-        "Puzzle generation"
+        "Asset variations"
       ],
       "has_other": true
     },
@@ -107,12 +105,9 @@
         "Integration with existing workflows",
         "Unpredictable results affecting game balance",
         "All levels ending up being more of the same",
-        "Technical complexity/steep learning curve",
+        "Technical complexity/learning curve",
         "Performance impact",
-        "Limited control over final output",
-        "Lack of precise artistic control",
-        "Time investment to set up compared to potential benefits",
-        "Unclear design methodology for procedural systems"
+        "Limited control over final output"
       ],
       "has_other": true
     },
@@ -252,7 +247,6 @@
         "Analysis-based (AI analyzes and provides feedback on generated levels)",
         "I prefer traditional rule-based PCG without AI involvement",
         "Tool-based (AI enhances specific components of your manual design process)",
-        "Full automation (AI generates complete levels with minimal input)",
         "I have no opinion/not sure"
       ]
     },
@@ -280,9 +274,6 @@
         "Potential copyright/IP issues with AI-generated content",
         "Performance and computational requirements",
         "Lack of specialized AI tools for level design specifically",
-        "Intellectual property/ownership concerns",
-        "Potential black box nature (lack of transparency)",
-        "Loss of designer agency/control",
         "Other (please specify)"
       ],
       "has_other": true
