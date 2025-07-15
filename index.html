@@ -23,6 +23,7 @@
 
         .container {
             max-width: 1000px;
+            width: 100%;
             margin: 0 auto;
             padding: 1.5rem;
             flex: 1;
@@ -44,6 +45,17 @@
         .emoji {
             font-size: 1.3rem;
             margin-bottom: 1rem;
+            color: #667eea;
+        }
+
+        .header-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 1.5rem;
+        }
+
+        .stat-item {
+            font-size: 1.3rem;
             color: #667eea;
         }
 
@@ -571,12 +583,10 @@
     <div class="container">
         <div class="header">
             <h1>Procedural Level Generation Survey</h1>
-            <div class="description">
-                <p class="emoji">
-                    ⏰ 60 Days
-                    ❓ 21 Questions
-                    👥 120 Participants                    
-                </p>            
+            <div class="header-stats">
+                <div class="stat-item">⏰ 60 Days</div>
+                <div class="stat-item">❔ 21 Questions</div>
+                <div class="stat-item">👥 120 Participants</div>
             </div>
         </div>
     </div>
