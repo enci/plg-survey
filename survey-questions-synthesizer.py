@@ -76,10 +76,12 @@ class survey_questions_synthesizer:
                 "question": "If you use procedural generation, what aspects do you currently use it for? (Select all that apply)",
                 "type": "multiple_choice",
                 "options": [
-                    "Terrain generation", "Decorative prop placement", "Enemy/NPC placement",
-                    "City models", "Vegetation/foliage", "Mission/quest generation",
-                    "Level layouts", "Texture generation", "Asset variations",
-                    
+                    "I don't currently use procedural generation",
+                    "World building (terrain, vegetation, etc.)",
+                    "Level layout/structure generation",
+                    "Mission/quest generation",
+                    "Enemy/NPC placement",
+                    "Puzzle generation"
                 ],
                 "has_other": True
             },
@@ -103,14 +105,13 @@ class survey_questions_synthesizer:
                 "type": "multiple_choice",
                 "max_selections": 3,
                 "options": [
+                    "Lack of precise artistic control",
+                    "Technical complexity/steep learning curve",
                     "Difficulty in debugging unexpected outputs",
-                    "Integration with existing workflows", 
+                    "Integration with existing workflows",
+                    "Time investment to set up compared to potential benefits",
                     "Unpredictable results affecting game balance",
-                    "All levels ending up being more of the same",
-                    "Technical complexity/learning curve",
-                    "Performance impact",
-                    "Limited control over final output",
-                    
+                    "Unclear design methodology for procedural systems",                    
                 ],
                 "has_other": True
             },
@@ -265,6 +266,7 @@ class survey_questions_synthesizer:
                     "Analysis-based (AI analyzes and provides feedback on generated levels)",
                     "I prefer traditional rule-based PCG without AI involvement",
                     "Tool-based (AI enhances specific components of your manual design process)",
+                    "Full automation (AI generates complete levels with minimal input)"
                     "I have no opinion/not sure"
                 ],
 
@@ -297,7 +299,9 @@ class survey_questions_synthesizer:
                     "Potential copyright/IP issues with AI-generated content",
                     "Performance and computational requirements",
                     "Lack of specialized AI tools for level design specifically",
-                    "Other (please specify)"
+                    "Intellectual property/ownership concerns",
+                    "Potential black box nature (lack of transparency)",
+                    "Loss of designer agency/control"
                 ],
                 "has_other": True
             },
@@ -306,7 +310,7 @@ class survey_questions_synthesizer:
             "desired_solutions": {
                 "question": "Which problems do you wish a procedural level generation tool could solve for you?",
                 "type": "multiple_choice",
-                "common_themes": [
+                "options": [
                     "Time savings compared to manual design",
                     "Ability to create more content variations with consistent quality",
                     "Improved iteration speed on level designs",
@@ -314,7 +318,8 @@ class survey_questions_synthesizer:
                     "Better integration with existing workflows",
                     "Community/marketplace of shareable generator components",
                     "Learning resources and examples for different game genres"
-                ]
+                ],
+                "has_other": True
             },
             
             # 21

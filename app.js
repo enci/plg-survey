@@ -265,11 +265,10 @@ const SurveyApp = {
 
     // Update demographics summary
     updateDemographicsSummary() {
-        const summaryElement = document.getElementById('demographicsSummary');
         const progressBar = document.getElementById('demographicsProgress');
         const progressLabel = document.getElementById('demographicsProgressLabel');
         
-        if (!summaryElement || !progressBar || !progressLabel) return;
+        if (!progressBar || !progressLabel) return;
 
         const { responses } = this.data;
         const demographicData = this.getCurrentData();
@@ -277,21 +276,7 @@ const SurveyApp = {
         const totalResponses = responses.length;
         const filteredCount = demographicData.length;
         const percentage = ((filteredCount / totalResponses) * 100).toFixed(1);
-
-        const roleCount = this.filters.demographics.professional_role.size;
-        const expCount = this.filters.demographics.years_experience.size;
-        
-        const totalRoles = this.data.schema?.questions?.professional_role?.options?.length || 0;
-        const totalExperiences = this.data.schema?.questions?.years_experience?.options?.length || 0;
-        
-        // Add 1 to totals if "Other" exists
-        const hasOtherRole = [...this.filters.demographics.professional_role].includes('Other');
-        const finalTotalRoles = totalRoles + (hasOtherRole ? 1 : 0);
-        
-        // Update summary text
-        summaryElement.textContent = 
-            `${roleCount}/${finalTotalRoles} roles, ${expCount}/${totalExperiences} experience levels selected`;
-        
+                
         // Update progress bar
         progressBar.style.width = `${percentage}%`;
         
@@ -666,6 +651,104 @@ const SurveyApp = {
         this.showOtherAnswers(otherAnswers);
     },
 
+        // Analyze multiple choice questions (bar chart)
+    analyzeMultipleChoice(questionKey, question) {
+        const currentData = this.getCurrentData();
+        const counts = {};
+        const otherAnswers = [];
+        
+        // Count all individual selections across all responses
+        currentData.forEach(response => {
+            const value = response[questionKey];
+            if (value) {
+                if (Array.isArray(value)) {
+                    value.forEach(item => {
+                        const isOtherAnswer = question.options && !question.options.includes(item);
+                        if (isOtherAnswer) {
+                            otherAnswers.push(item);
+                        } else {
+                            counts[item] = (counts[item] || 0) + 1;
+                        }
+                    });
+                } else if (typeof value === 'string') {
+                    // Handle single string values (shouldn't happen for multiple choice, but just in case)
+                    const isOtherAnswer = question.options && !question.options.includes(value);
+                    if (isOtherAnswer) {
+                        otherAnswers.push(value);
+                    } else {
+                        counts[value] = (counts[value] || 0) + 1;
+                    }
+                }
+            }
+        });
+        
+        if (otherAnswers.length > 0) {
+            counts['Other'] = otherAnswers.length;
+        }
+        
+        this.createBarChart(question.question, counts, currentData.length);
+        this.showOtherAnswers(otherAnswers);
+    },
+
+    // Analyze matrix questions (stacked bar chart)
+    analyzeMatrix(questionKey, question) {
+        const currentData = this.getCurrentData();
+        const matrixData = {};
+        
+        // Get matrix structure
+        const items = question.items || [];
+        const scale = question.scale || [];
+        
+        if (items.length === 0 || scale.length === 0) {
+            console.log('Matrix question missing items or scale');
+            this.clearChart();
+            this.clearOtherAnswers();
+            return;
+        }
+        
+        // Initialize data structure
+        items.forEach(item => {
+            matrixData[item] = {};
+            scale.forEach(scaleItem => {
+                matrixData[item][scaleItem] = 0;
+            });
+        });
+        
+        // Count responses
+        currentData.forEach(response => {
+            const matrixResponses = response[questionKey];
+            if (matrixResponses && typeof matrixResponses === 'object') {
+                Object.entries(matrixResponses).forEach(([item, value]) => {
+                    if (matrixData[item] && scale.includes(value)) {
+                        matrixData[item][value]++;
+                    }
+                });
+            }
+        });
+        
+        this.createStackedBarChart(question.question, matrixData, scale, currentData.length);
+        this.clearOtherAnswers(); // Matrix questions don't typically have "other" answers
+    },
+
+    // Analyze open text questions (text list)
+    analyzeOpenText(questionKey, question) {
+        const currentData = this.getCurrentData();
+        const responses = [];
+        
+        // Collect all text responses
+        currentData.forEach(response => {
+            const value = response[questionKey];
+            if (value && typeof value === 'string' && value.trim() !== '') {
+                responses.push(value.trim());
+            }
+        });
+        
+        // Clear any existing chart and show text responses
+        this.clearChart();
+        this.showTextResponses(question.question, responses, currentData.length);
+    },
+
+
     // Create a pie chart
     createPieChart(title, data, totalResponses) {
         const ctx = document.getElementById('analysisChart');
@@ -679,10 +762,6 @@ const SurveyApp = {
         const values = Object.values(data);
         
         const colors = this.generateColors(labels.length);
-        
-        const filterInfo = this.filters.filteredData 
-            ? ` (${totalResponses} responses)` 
-            : '';
         
         this.charts.current = new Chart(ctx, {
             type: 'pie',
@@ -700,7 +779,7 @@ const SurveyApp = {
                 plugins: {
                     title: {
                         display: true,
-                        text: title + filterInfo,
+                        text: title,
                         font: {
                             size: 16,
                             weight: 'bold'
@@ -728,6 +807,217 @@ const SurveyApp = {
         });
         
         console.log(`Created pie chart for: ${title}`);
+    },
+
+    // Create a bar chart for multiple choice questions
+    createBarChart(title, data, totalResponses) {
+        const ctx = document.getElementById('analysisChart');
+        if (!ctx) return;
+        
+        // Destroy existing chart if it exists
+        if (this.charts.current) {
+            this.charts.current.destroy();
+        }
+        
+        const labels = Object.keys(data);
+        const values = Object.values(data);
+        
+        // Sort by frequency (descending)
+        const sortedData = labels.map((label, index) => ({
+            label,
+            value: values[index]
+        })).sort((a, b) => b.value - a.value);
+        
+        const sortedLabels = sortedData.map(item => item.label);
+        const sortedValues = sortedData.map(item => item.value);
+        
+        // Generate colors
+        const colors = this.generateColors(sortedLabels.length);
+        
+        
+        this.charts.current = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: sortedLabels,
+                datasets: [{
+                    data: sortedValues,
+                    backgroundColor: colors.background,
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: title,
+                        font: {
+                            size: 16,
+                            weight: 'bold'
+                        },
+                        padding: 20
+                    },
+                    legend: {
+                        display: false // Hide legend for bar charts
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const percentage = ((context.parsed.y / totalResponses) * 100).toFixed(1);
+                                return `${context.parsed.y} responses (${percentage}% of total)`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        },
+                        title: {
+                            display: true,
+                            text: 'Number of Responses'
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 0
+                        }
+                    }
+                }
+            }
+        });
+        
+        console.log(`Created bar chart for: ${title}`);
+    },
+
+    // Create a stacked bar chart for matrix questions
+    createStackedBarChart(title, matrixData, scale, totalResponses) {
+        const ctx = document.getElementById('analysisChart');
+        if (!ctx) return;
+        
+        // Destroy existing chart if it exists
+        if (this.charts.current) {
+            this.charts.current.destroy();
+        }
+        
+        const items = Object.keys(matrixData);
+        const datasets = [];
+        
+        // Create a dataset for each scale item
+        scale.forEach((scaleItem, index) => {
+            const data = items.map(item => matrixData[item][scaleItem] || 0);
+            const color = this.generateColors(scale.length).background[index];
+            
+            datasets.push({
+                label: scaleItem,
+                data: data,
+                backgroundColor: color,
+                borderWidth: 0
+            });
+        });
+
+        this.charts.current = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: items,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        stacked: true,
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 0
+                        }
+                    },
+                    y: {
+                        stacked: true,
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        },
+                        title: {
+                            display: true,
+                            text: 'Number of Responses'
+                        }
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: title,
+                        font: {
+                            size: 16,
+                            weight: 'bold'
+                        },
+                        padding: 20
+                    },
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true
+                        }
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        callbacks: {
+                            label: function(context) {
+                                const percentage = ((context.parsed.y / totalResponses) * 100).toFixed(1);
+                                return `${context.dataset.label}: ${context.parsed.y} (${percentage}% of total)`;
+                            }
+                        }
+                    }
+                },
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                }
+            }
+        });
+        
+        console.log(`Created stacked bar chart for: ${title}`);
+    },
+
+     // Show text responses for open text questions
+    showTextResponses(questionTitle, responses, totalResponses) {
+        const chartContainer = document.getElementById('chartContainer');
+        const otherContainer = document.getElementById('otherAnswers');
+        
+        if (!chartContainer) return;
+        
+        // Clear other answers container
+        if (otherContainer) {
+            otherContainer.classList.add('hidden');
+            otherContainer.innerHTML = '';
+        }
+        
+        // Replace chart container content with text responses
+        chartContainer.innerHTML = `
+            <div class="text-responses">
+                <h3>${questionTitle}</h3>
+                <div class="response-count">${responses.length} text responses:</div>
+                <div class="responses-list">
+                    ${responses.length > 0 
+                        ? responses.map((response, index) => `
+                            <div class="response-item">
+                                <span class="response-number">${index + 1}.</span>
+                                <span class="response-text">"${response}"</span>
+                            </div>
+                        `).join('')
+                        : '<div class="no-responses">No responses found for this question.</div>'
+                    }
+                </div>
+            </div>
+        `;
     },
 
     // Generate colors for chart
