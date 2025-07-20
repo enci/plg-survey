@@ -3,6 +3,32 @@
 
 console.log('Survey Analysis Tool Initialized');
 
+
+// Convert HSV to RGB color
+function hsvToRgb(h, s, v) {
+    let r, g, b;
+    const i = Math.floor(h * 6);
+    const f = h * 6 - i;
+    const p = v * (1 - s);
+    const q = v * (1 - f * s);
+    const t = v * (1 - (1 - f) * s);
+
+    switch (i % 6) {
+        case 0: r = v; g = t; b = p; break;
+        case 1: r = q; g = v; b = p; break;
+        case 2: r = p; g = v; b = t; break;
+        case 3: r = p; g = q; b = v; break;
+        case 4: r = t, g = p, b = v; break;
+        case 5: r = v, g = p, b = q; break;
+    }
+
+    return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+}
+
+function rgbToHex(r, g, b) {
+    return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()}`;
+}
+
 // Global application state
 const SurveyApp = {
     data: {
@@ -632,14 +658,20 @@ const SurveyApp = {
         
         const counts = {};
         const otherAnswers = [];
-        
+
+        // Initialize counts
+        for (const option of question.options || []) {
+            counts[option] = 0;
+        }
+
+        // Count responses        
         responseData.forEach(response => {
             const isOtherAnswer = question.options && !question.options.includes(response);
             
             if (isOtherAnswer) {
                 otherAnswers.push(response);
             } else {
-                counts[response] = (counts[response] || 0) + 1;
+                counts[response] += 1;
             }
         });
         
@@ -656,6 +688,11 @@ const SurveyApp = {
         const currentData = this.getCurrentData();
         const counts = {};
         const otherAnswers = [];
+
+        // Initialize counts
+        question.options.forEach(option => {
+            counts[option] = 0;
+        });
         
         // Count all individual selections across all responses
         currentData.forEach(response => {
@@ -759,21 +796,23 @@ const SurveyApp = {
         }
         
         const labels = Object.keys(data);
-        const values = Object.values(data);
-        
+        const values = Object.values(data);        
         const colors = this.generateColors(labels.length);
         
         this.charts.current = new Chart(ctx, {
-            type: 'pie',
+            type: 'doughnut',
             data: {
                 labels: labels,
                 datasets: [{
                     data: values,
                     backgroundColor: colors.background,
-                    borderWidth: 0
+                    borderWidth: 0,
+                    borderRadius: 4, // Rounded corners for spacing
+                    spacing: 2 // Space between segments
                 }]
             },
             options: {
+                cutout: '60%', // Creates the hole in the middle
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
@@ -833,8 +872,7 @@ const SurveyApp = {
         
         // Generate colors
         const colors = this.generateColors(sortedLabels.length);
-        
-        
+
         this.charts.current = new Chart(ctx, {
             type: 'bar',
             data: {
@@ -842,7 +880,8 @@ const SurveyApp = {
                 datasets: [{
                     data: sortedValues,
                     backgroundColor: colors.background,
-                    borderWidth: 0
+                    borderWidth: 0,
+                    borderRadius: 4, // Rounded corners for spacing
                 }]
             },
             options: {
@@ -924,7 +963,7 @@ const SurveyApp = {
             type: 'bar',
             data: {
                 labels: items,
-                datasets: datasets
+                datasets: datasets                
             },
             options: {
                 responsive: true,
@@ -1022,18 +1061,25 @@ const SurveyApp = {
 
     // Generate colors for chart
     generateColors(count) {
-        const colors = [
-            '#667eea', '#764ba2', '#f093fb', '#f5576c',
-            '#4facfe', '#00f2fe', '#43e97b', '#38f9d7',
-            '#ffecd2', '#fcb69f', '#a8edea', '#fed6e3',
-            '#ff9a9e', '#fecfef', '#ffeaa7', '#fab1a0'
-        ];
-        
+        const colors = []
+        let hue = 0.6
+        let hueIncrement = 0.618033988749895; // Golden ratio increment for hue
+        for(let i = 0; i < count; i++) {            
+            const saturation = 1.0;
+            const value = 0.8;
+            // Convert HSV to RGB and then to Hex
+            let [r, g, b] = hsvToRgb(hue, saturation, value);
+            const color = rgbToHex(r, g, b);
+            colors.push(color);
+            hue += hueIncrement;
+            hue %= 1.0; // Wrap around to stay within [0, 1]
+        }
+                    
         const background = [];
         
         for (let i = 0; i < count; i++) {
             const color = colors[i % colors.length];
-            background.push(color + '80');
+            background.push(color + 'A0'); // Add transparency
         }
         
         return { background };
