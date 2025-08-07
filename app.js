@@ -3,7 +3,6 @@
 
 console.log('Survey Analysis Tool Initialized');
 
-
 // Convert HSV to RGB color
 function hsvToRgb(h, s, v) {
     let r, g, b;
@@ -845,6 +844,7 @@ const SurveyApp = {
             }
         });
         
+        this.showDownloadButton();
         console.log(`Created pie chart for: ${title}`);
     },
 
@@ -930,6 +930,7 @@ const SurveyApp = {
             }
         });
         
+        this.showDownloadButton();
         console.log(`Created bar chart for: ${title}`);
     },
 
@@ -1023,6 +1024,7 @@ const SurveyApp = {
             }
         });
         
+        this.showDownloadButton();
         console.log(`Created stacked bar chart for: ${title}`);
     },
 
@@ -1105,6 +1107,57 @@ const SurveyApp = {
         otherContainer.classList.remove('hidden');
     },
 
+    // Show download button for charts
+    showDownloadButton() {
+        let downloadContainer = document.getElementById('downloadContainer');
+        if (!downloadContainer) {
+            downloadContainer = document.createElement('div');
+            downloadContainer.id = 'downloadContainer';
+            downloadContainer.style.cssText = 'margin-top: 10px; text-align: center;';
+            
+            const chartContainer = document.getElementById('chartContainer');
+            if (chartContainer && chartContainer.parentNode) {
+                chartContainer.parentNode.insertBefore(downloadContainer, chartContainer.nextSibling);
+            }
+        }
+        
+        downloadContainer.innerHTML = `
+            <button id="downloadPngBtn" style="padding: 8px 16px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; margin: 5px;">
+                📥 Download as PNG
+            </button>
+        `;
+        
+        document.getElementById('downloadPngBtn').addEventListener('click', () => this.downloadChartAsPNG());
+    },
+
+    // Download chart as PNG
+    downloadChartAsPNG() {
+        if (!this.charts.current) return;
+        
+        const canvas = document.getElementById('analysisChart');
+        if (!canvas) return;
+        
+        try {
+            const link = document.createElement('a');
+            link.href = canvas.toDataURL('image/png');
+            link.download = 'chart.png';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (error) {
+            console.error('Error downloading PNG:', error);
+            alert('Error downloading chart as PNG.');
+        }
+    },
+
+    // Hide download button
+    hideDownloadButton() {
+        const downloadContainer = document.getElementById('downloadContainer');
+        if (downloadContainer) {
+            downloadContainer.innerHTML = '';
+        }
+    },
+
     // Clear other answers display
     clearOtherAnswers() {
         const otherContainer = document.getElementById('otherAnswers');
@@ -1125,6 +1178,8 @@ const SurveyApp = {
         if (chartContainer) {
             chartContainer.innerHTML = '<canvas id="analysisChart"></canvas>';
         }
+        
+        this.hideDownloadButton();
     }
 };
 
