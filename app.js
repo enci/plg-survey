@@ -798,6 +798,9 @@ const SurveyApp = {
         const values = Object.values(data);        
         const colors = this.generateColors(labels.length);
         
+        // Calculate total for percentages
+        const total = values.reduce((a, b) => a + b, 0);
+        
         this.charts.current = new Chart(ctx, {
             type: 'doughnut',
             data: {
@@ -806,8 +809,8 @@ const SurveyApp = {
                     data: values,
                     backgroundColor: colors.background,
                     borderWidth: 0,
-                    borderRadius: 4, // Rounded corners for spacing
-                    spacing: 2 // Space between segments
+                    borderRadius: 0, // Rounded corners for spacing
+                    spacing: 0 // Space between segments
                 }]
             },
             options: {
@@ -825,10 +828,30 @@ const SurveyApp = {
                         padding: 20
                     },
                     legend: {
-                        position: 'bottom',
+                        position: 'right',
+                        align: 'end',
                         labels: {
-                            padding: 20,
-                            usePointStyle: true
+                            padding: 15,
+                            usePointStyle: true,
+                            generateLabels: function(chart) {
+                                const data = chart.data;
+                                if (data.labels.length && data.datasets.length) {
+                                    return data.labels.map((label, i) => {
+                                        const value = data.datasets[0].data[i];
+                                        const percentage = ((value / total) * 100).toFixed(1);
+                                        return {
+                                            text: `${label}: (${percentage}%)`,
+                                            fillStyle: data.datasets[0].backgroundColor[i],
+                                            strokeStyle: data.datasets[0].backgroundColor[i],
+                                            lineWidth: 0,
+                                            pointStyle: 'circle',
+                                            hidden: isNaN(data.datasets[0].data[i]) || chart.getDatasetMeta(0).data[i].hidden,
+                                            index: i
+                                        };
+                                    });
+                                }
+                                return [];
+                            }
                         }
                     },
                     tooltip: {
@@ -881,7 +904,7 @@ const SurveyApp = {
                     data: sortedValues,
                     backgroundColor: colors.background,
                     borderWidth: 0,
-                    borderRadius: 4, // Rounded corners for spacing
+                    borderRadius: 0, // Rounded corners for spacing
                 }]
             },
             options: {
