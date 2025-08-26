@@ -244,7 +244,8 @@
         "Analysis-based (AI analyzes and provides feedback on generated levels)",
         "I prefer traditional rule-based PCG without AI involvement",
         "Tool-based (AI enhances specific components of your manual design process)",
-        "Full automation (AI generates complete levels with minimal input)I have no opinion/not sure"
+        "Full automation (AI generates complete levels with minimal input)",
+        "I have no opinion/not sure"
       ]
     },
     "ai_importance_factors": {

@@ -266,7 +266,7 @@ class survey_questions_synthesizer:
                     "Analysis-based (AI analyzes and provides feedback on generated levels)",
                     "I prefer traditional rule-based PCG without AI involvement",
                     "Tool-based (AI enhances specific components of your manual design process)",
-                    "Full automation (AI generates complete levels with minimal input)"
+                    "Full automation (AI generates complete levels with minimal input)",
                     "I have no opinion/not sure"
                 ],
 
