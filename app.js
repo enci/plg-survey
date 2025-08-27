@@ -74,6 +74,11 @@ const SurveyApp = {
         if (filterLogic) {
             filterLogic.addEventListener('change', () => this.applyAllFilters());
         }
+
+        const scaleSelect = document.getElementById('scaleSelect');
+        if (scaleSelect) {
+            scaleSelect.addEventListener('change', () => this.redrawCurrentChart());
+        }
     },
     
     // Load survey data and schema
@@ -408,6 +413,20 @@ const SurveyApp = {
     // Get current dataset (filtered)
     getCurrentData() {
         return this.filters.filteredData || this.data.responses || [];
+    },
+
+    // Get selected chart scale
+    getChartScale() {
+        const scaleSelect = document.getElementById('scaleSelect');
+        return scaleSelect ? parseInt(scaleSelect.value) : 1;
+    },
+
+    // Redraw current chart with new scale
+    redrawCurrentChart() {
+        const currentQuestion = document.getElementById('questionSelect')?.value;
+        if (currentQuestion) {
+            this.analyzeQuestion(currentQuestion);
+        }
     },
 
     // Populate the question dropdown with analyzable questions
@@ -869,6 +888,7 @@ const SurveyApp = {
                 cutout: '60%', // Creates the hole in the middle
                 responsive: true,
                 maintainAspectRatio: false,
+                devicePixelRatio: this.getChartScale(),
                 plugins: {
                     title: {
                         display: true,
@@ -981,6 +1001,7 @@ const SurveyApp = {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                devicePixelRatio: this.getChartScale(),
                 plugins: {
                     title: {
                         display: true,
@@ -1235,25 +1256,11 @@ const SurveyApp = {
 
     // Show download button for charts
     showDownloadButton() {
-        let downloadContainer = document.getElementById('downloadContainer');
-        if (!downloadContainer) {
-            downloadContainer = document.createElement('div');
-            downloadContainer.id = 'downloadContainer';
-            downloadContainer.style.cssText = 'margin-top: 10px; text-align: center;';
-            
-            const chartContainer = document.getElementById('chartContainer');
-            if (chartContainer && chartContainer.parentNode) {
-                chartContainer.parentNode.insertBefore(downloadContainer, chartContainer.nextSibling);
-            }
+        const downloadBtn = document.getElementById('downloadPngBtn');
+        if (downloadBtn) {
+            downloadBtn.style.display = 'inline-block';
+            downloadBtn.onclick = () => this.downloadChartAsPNG();
         }
-        
-        downloadContainer.innerHTML = `
-            <button id="downloadPngBtn" style="padding: 8px 16px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; margin: 5px;">
-                📥 Download as PNG
-            </button>
-        `;
-        
-        document.getElementById('downloadPngBtn').addEventListener('click', () => this.downloadChartAsPNG());
     },
 
     // Download chart as PNG
@@ -1263,10 +1270,12 @@ const SurveyApp = {
         const canvas = document.getElementById('analysisChart');
         if (!canvas) return;
         
+        const scale = this.getChartScale();
+        
         try {
             const link = document.createElement('a');
-            link.href = canvas.toDataURL('image/png');
-            link.download = 'chart.png';
+            link.href = canvas.toDataURL('image/png', 1.0);
+            link.download = `chart_${scale}x.png`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -1278,9 +1287,9 @@ const SurveyApp = {
 
     // Hide download button
     hideDownloadButton() {
-        const downloadContainer = document.getElementById('downloadContainer');
-        if (downloadContainer) {
-            downloadContainer.innerHTML = '';
+        const downloadBtn = document.getElementById('downloadPngBtn');
+        if (downloadBtn) {
+            downloadBtn.style.display = 'none';
         }
     },
 
