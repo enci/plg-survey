@@ -438,14 +438,17 @@ const SurveyApp = {
         
         questionSelect.innerHTML = '<option value="">Choose a question...</option>';
         
+        let qNum = 1;
         Object.entries(schema.questions).forEach(([key, question]) => {
             if (key === 'id') return;
-            
-            if (['single_choice', 'multiple_choice', 'matrix', 'open_text'].includes(question.type)) {
+            if ([
+                'single_choice', 'multiple_choice', 'matrix', 'open_text', 'ranking'
+            ].includes(question.type)) {
                 const option = document.createElement('option');
                 option.value = key;
-                option.textContent = `${this.getQuestionTypeLabel(question.type)} - ${question.question}`;
+                option.textContent = `${qNum} ${this.getQuestionTypeLabel(question.type)} - ${question.question}`;
                 questionSelect.appendChild(option);
+                qNum++;
             }
         });
         
@@ -458,7 +461,8 @@ const SurveyApp = {
             'single_choice': '📊 Single Choice',
             'multiple_choice': '📈 Multiple Choice', 
             'matrix': '📋 Matrix',
-            'open_text': '📝 Open Text'
+            'open_text': '📝 Open Text',
+            'ranking': '🏆 Ranking'
         };
         return labels[type] || type;
     },
@@ -701,11 +705,95 @@ const SurveyApp = {
             case 'open_text':
                 this.analyzeOpenText(questionKey, question);
                 break;
+            case 'ranking':
+                this.analyzeRanking(questionKey, question);
+                break;
             default:
                 console.log(`Question type ${question.type} not supported for visualization`);
                 this.clearChart();
                 this.clearOtherAnswers();
         }
+
+    },
+
+    // Analyze ranking questions (stacked bar chart by rank position)
+    analyzeRanking(questionKey, question) {
+        const currentData = this.getCurrentData();
+        const options = question.options || [];
+        const maxSelections = question.max_selections || 3;
+        // Initialize: {option: [count_rank1, count_rank2, ...]}
+        const rankCounts = {};
+        options.forEach(opt => {
+            rankCounts[opt] = Array(maxSelections).fill(0);
+        });
+        // Tally ranks
+        currentData.forEach(response => {
+            const ranking = response[questionKey];
+            if (Array.isArray(ranking)) {
+                ranking.forEach((opt, idx) => {
+                    if (rankCounts[opt] && idx < maxSelections) {
+                        rankCounts[opt][idx]++;
+                    }
+                });
+            }
+        });
+        // Prepare data for stacked bar chart
+        const datasets = [];
+        const colors = this.generateColors(maxSelections).background;
+        for (let i = 0; i < maxSelections; i++) {
+            datasets.push({
+                label: `Rank ${i + 1}`,
+                data: options.map(opt => rankCounts[opt][i]),
+                backgroundColor: colors[i % colors.length],
+                borderWidth: 0
+            });
+        }
+        // Chart.js stacked bar
+        const ctx = document.getElementById('analysisChart');
+        if (this.charts.current) this.charts.current.destroy();
+        this.charts.current = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: options,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: question.question,
+                        font: { size: 16, weight: 'bold' },
+                        padding: 20
+                    },
+                    legend: {
+                        position: 'top',
+                        labels: { usePointStyle: true, padding: 20 }
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.dataset.label}: ${context.parsed.y}`;
+                            }
+                        }
+                    }
+                },
+                interaction: { mode: 'index', intersect: false },
+                scales: {
+                    x: { stacked: true },
+                    y: {
+                        stacked: true,
+                        beginAtZero: true,
+                        title: { display: true, text: 'Number of Responses' }
+                    }
+                }
+            }
+        });
+        this.showDownloadButton();
+        this.clearOtherAnswers();
     },
 
     // Analyze single choice questions (pie chart)
