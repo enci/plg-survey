@@ -678,6 +678,48 @@ const SurveyApp = {
         this.clearChart();
         this.clearOtherAnswers();
 
+        // Dynamically set chart height for bar/stacked charts only, static for pie
+        const _schema = this.data.schema;
+        const _question = _schema.questions[questionKey];
+        let numBars = 0;
+        let labels = [];
+        let isPie = false;
+        if (_question) {
+            if (_question.type === 'multiple_choice' && _question.options) {
+                numBars = _question.options.length;
+                labels = _question.options;
+            } else if (_question.type === 'ranking' && _question.options) {
+                numBars = _question.options.length;
+                labels = _question.options;
+            } else if (_question.type === 'single_choice' && _question.options) {
+                numBars = _question.options.length;
+                labels = _question.options;
+                isPie = true;
+            } else if (_question.type === 'matrix' && _question.items) {
+                numBars = _question.items.length;
+                labels = _question.items;
+            }
+        }
+        // Use wrapLegendText for max label lines
+        let maxLabelLines = 1;
+        if (labels.length > 0 && !isPie) {
+            maxLabelLines = Math.max(...labels.map(label => {
+                return this.wrapLegendText(label, '', '', 35).lineCount;
+            }));
+        }
+        // Minimum and maximum height
+        let height = 100;
+        if(isPie) {
+            height = 300;
+        }
+        else {
+            height = 45 + (numBars * 45) + (numBars * 8 * (maxLabelLines-1));
+        }
+        const chartCanvas = document.getElementById('analysisChart');
+        if (chartCanvas) {
+            chartCanvas.style.height = height + 'px';
+        }
+
         if (!questionKey || !this.data.loaded) {
             return;
         }
@@ -988,8 +1030,8 @@ const SurveyApp = {
                         padding: 20
                     },
                     legend: {
-                        position: 'right',
-                        align: 'end',
+                        position: 'left',
+                        align: 'center',
                         labels: {
                             padding: dynamicPadding, // Dynamic space between legend items
                             usePointStyle: true,
@@ -1087,6 +1129,7 @@ const SurveyApp = {
                 }]
             },
             options: {
+                indexAxis: 'y', // horizontal bars
                 responsive: true,
                 maintainAspectRatio: false,
                 devicePixelRatio: this.getChartScale(),
@@ -1101,8 +1144,8 @@ const SurveyApp = {
                         padding: 20
                     },
                     legend: {
-                        position: 'right',
-                        align: 'end',
+                        position: 'left',
+                        align: 'middle',
                         maxColumns: 0,
                         maxWidth: 260,
                         labels: {
@@ -1117,10 +1160,8 @@ const SurveyApp = {
                                     return data.labels.map((label, i) => {
                                         const value = data.datasets[0].data[i];
                                         const percentage = ((value / totalResponses) * 100).toFixed(1);
-                                        
                                         // Use the utility function to wrap text with longer max length for bar charts
                                         const wrappedText = SurveyApp.wrapLegendText(label, value, percentage, 35);
-                                        
                                         return {
                                             text: wrappedText.lines,
                                             fillStyle: data.datasets[0].backgroundColor[i],
@@ -1139,14 +1180,14 @@ const SurveyApp = {
                     tooltip: {
                         callbacks: {
                             label: function(context) {
-                                const percentage = ((context.parsed.y / totalResponses) * 100).toFixed(1);
-                                return `${context.parsed.y} responses (${percentage}% of total)`;
+                                const percentage = ((context.parsed.x / totalResponses) * 100).toFixed(1);
+                                return `${context.parsed.x} responses (${percentage}% of total)`;
                             }
                         }
                     }
                 },
                 scales: {
-                    y: {
+                    x: {
                         beginAtZero: true,
                         ticks: {
                             stepSize: 1
@@ -1156,9 +1197,9 @@ const SurveyApp = {
                             text: 'Number of Responses'
                         }
                     },
-                    x: {
+                    y: {
                         ticks: {
-                            display: false // Hide x-axis labels since legend shows the info
+                            display: false // Hide y-axis labels since legend shows the info
                         }
                     }
                 }

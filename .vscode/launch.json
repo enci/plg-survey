@@ -9,6 +9,16 @@
             "webRoot": "${workspaceFolder}",
             "sourceMaps": true,
             "userDataDir": "${workspaceFolder}/.vscode/edge-debug-userdatadir"
+        },
+        {
+        "name": "Launch Chrome with Live Server",
+            "request": "launch",
+            "type": "pwa-chrome",
+            "url": "http://localhost:5500",
+            "webRoot": "${workspaceFolder}",
+            "sourceMaps": true,
+            "userDataDir": "${workspaceFolder}/.vscode/edge-debug-userdatadir"
         }
     ]
+
 }
