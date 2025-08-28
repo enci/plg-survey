@@ -636,8 +636,16 @@ const SurveyApp = {
 
     // Utility function to wrap text into multiple lines for legends
     // Returns an object with 'lines' array and 'lineCount' number
-    wrapLegendText(label, percentage, maxLength = 35) {
-        const words = label.split(' ');
+    wrapLegendText(label, percentage) {
+        maxLength = 45
+        
+        // Add percentage at the beginning if provided
+        let fullText = label;
+        if (percentage != 0) {
+            fullText = `${label} (${percentage}%)`;
+        }
+        
+        const words = fullText.split(' ');
         const lines = [];
         let currentLine = '';
         
@@ -656,16 +664,12 @@ const SurveyApp = {
             }
         }
                 
-        // Add the last line with percentage
-        let percentageText = percentage ? ` (${percentage}%)` : '';
+        // Add the last line
         if (currentLine) {
-            lines.push(currentLine + percentageText);
-        } else if (lines.length > 0) {
-            // If we have lines but no current line, add percentage to the last line
-            lines[lines.length - 1] += percentageText;
-        } else {
+            lines.push(currentLine);
+        } else if (lines.length === 0) {
             // Fallback for edge cases
-            lines.push(`${label}${percentageText}`);
+            lines.push(fullText);
         }
         
         return {
@@ -705,7 +709,7 @@ const SurveyApp = {
         let maxLabelLines = 1;
         if (labels.length > 0 && !isPie) {
             maxLabelLines = Math.max(...labels.map(label => {
-                return this.wrapLegendText(label, '', 35).lineCount;
+                return this.wrapLegendText(label, 50).lineCount;
             }));
         }
         // Minimum and maximum height
@@ -785,8 +789,7 @@ const SurveyApp = {
             // Calculate total for this option (all ranks)
             const total = rankCounts[opt].reduce((a, b) => a + b, 0);
             // Use percentage of total responses for the label (optional, can be blank)
-            const percentage = '';
-            return this.wrapLegendText(opt, percentage, 45).lines;
+            return this.wrapLegendText(opt, total > 0 ? (rankCounts[opt][0] / total * 100).toFixed(1) : 0).lines;
         });
         // Prepare data for stacked bar chart
         const datasets = [];
@@ -812,6 +815,7 @@ const SurveyApp = {
                 indexAxis: 'y', // horizontal stacked bars
                 responsive: true,
                 maintainAspectRatio: false,
+                devicePixelRatio: this.getChartScale(),
                 plugins: {
                     title: {
                         display: false,
@@ -1003,14 +1007,12 @@ const SurveyApp = {
         // Calculate total for percentages
         const total = values.reduce((a, b) => a + b, 0);
         
-        const maxLineWidth = 40;
-
         // Calculate dynamic padding based on maximum line count from wrapped text
         let maxLineCount = 1;
         
         labels.forEach(label => {
             const percentage = ((data[label] / total) * 100).toFixed(1);
-            const wrappedText = this.wrapLegendText(label, percentage, maxLineWidth);
+            const wrappedText = this.wrapLegendText(label, percentage);
             maxLineCount = Math.max(maxLineCount, wrappedText.lineCount);
         });
         const basePadding = 15;
@@ -1060,7 +1062,7 @@ const SurveyApp = {
                                         const percentage = ((value / total) * 100).toFixed(1);
                                         
                                         // Use the utility function to wrap text  
-                                        const wrappedText = SurveyApp.wrapLegendText(label, percentage, maxLineWidth);
+                                        const wrappedText = SurveyApp.wrapLegendText(label, percentage);
                                         
                                         return {
                                             text: wrappedText.lines,
@@ -1113,25 +1115,49 @@ const SurveyApp = {
         })).sort((a, b) => b.value - a.value);
         const sortedLabels = sortedData.map(item => item.label);
         const sortedValues = sortedData.map(item => item.value);
-        // Pre-process labels for wrapping
-        const wrappedLabels = sortedLabels.map((label, i) => {
-            const value = sortedValues[i];
-            const percentage = ((value / totalResponses) * 100).toFixed(1);
-            return this.wrapLegendText(label, percentage, 35).lines;
-        });
-        // Calculate dynamic padding based on maximum line count from wrapped text
-        let maxLineCount = 1;
-        wrappedLabels.forEach(lines => {
-            maxLineCount = Math.max(maxLineCount, Array.isArray(lines) ? lines.length : 1);
-        });
-        const basePadding = 14;
-        const dynamicPadding = basePadding + (maxLineCount - 1) * 10;
+        
         // Generate colors
         const colors = this.generateColors(sortedLabels.length);
+        
+        // Create callback function that has access to totalResponses
+        const yAxisCallback = function(value, index, values) {
+            // Get the data value and calculate percentage
+            const chart = this.chart;
+            const dataValue = chart.data.datasets[0].data[index];
+            const percentage = ((dataValue / totalResponses) * 100).toFixed(1);
+            const originalLabel = chart.data.labels[index];
+            
+            // Break long labels into multiple lines
+            const maxLineLength = 35;
+            const words = originalLabel.split(' ');
+            const lines = [];
+            let currentLine = '';
+            
+            for (const word of words) {
+                if ((currentLine + word).length > maxLineLength && currentLine.length > 0) {
+                    lines.push(currentLine.trim());
+                    currentLine = word + ' ';
+                } else {
+                    currentLine += word + ' ';
+                }
+            }
+            
+            if (currentLine.trim().length > 0) {
+                lines.push(currentLine.trim());
+            }
+            
+            // Add percentage to the last line
+            if (lines.length > 0) {
+                lines[lines.length - 1] += ` (${percentage}%)`;
+            }
+            
+            return lines;
+        };
+
         this.charts.current = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: wrappedLabels,
+                labels: sortedLabels, // Use simple labels instead of wrapped ones
                 datasets: [{
                     label: 'Responses',
                     data: sortedValues,
@@ -1156,39 +1182,7 @@ const SurveyApp = {
                         padding: 0
                     },
                     legend: {
-                        position: 'left',
-                        align: 'start',
-                        maxColumns: 0,
-                        maxWidth: 360,
-                        labels: {
-                            padding: dynamicPadding, // Dynamic space between legend items
-                            usePointStyle: true,
-                            boxWidth: 250,
-                            boxHeight: 12,
-                            textAlign: 'left',
-                            align: 'start',
-                            generateLabels: function(chart) {
-                                const data = chart.data;
-                                if (data.labels.length && data.datasets.length) {
-                                    return data.labels.map((label, i) => {
-                                        const value = data.datasets[0].data[i];
-                                        const percentage = ((value / totalResponses) * 100).toFixed(1);
-                                        // Use the utility function to wrap text with longer max length for bar charts
-                                        const wrappedText = Array.isArray(label) ? label : SurveyApp.wrapLegendText(label, percentage, 35).lines;
-                                        return {
-                                            text: wrappedText,
-                                            fillStyle: data.datasets[0].backgroundColor[i],
-                                            strokeStyle: data.datasets[0].backgroundColor[i],                                            
-                                            lineWidth: 0,
-                                            pointStyle: 'circle',
-                                            hidden: false,
-                                            index: i
-                                        };
-                                    });
-                                }
-                                return [];
-                            }
-                        }
+                        display: false // Disable legend, use y-axis labels instead
                     },
                     tooltip: {
                         callbacks: {
@@ -1212,7 +1206,13 @@ const SurveyApp = {
                     },
                     y: {
                         ticks: {
-                            display: false // Hide y-axis labels since legend shows the info
+                            display: true, // Show y-axis labels instead of legend
+                            callback: yAxisCallback,
+                            maxTicksLimit: 15, // Prevent too many ticks
+                            font: {
+                                size: 11
+                            },
+                            padding: 10 // Add some padding between labels and chart
                         }
                     }
                 }
@@ -1235,8 +1235,8 @@ const SurveyApp = {
         const wrappedLabels = items.map(item => {
             // Calculate total for this item (all scale values)
             const total = scale.reduce((sum, scaleItem) => sum + (matrixData[item][scaleItem] || 0), 0);
-            const percentage = '';
-            return this.wrapLegendText(item, percentage, 35).lines;
+            const percentage = total > 0 ? (matrixData[item][scale[0]] / total * 100).toFixed(1) : 0;
+            return this.wrapLegendText(item, percentage).lines;
         });
         const datasets = [];
         // Create a dataset for each scale item
@@ -1260,6 +1260,7 @@ const SurveyApp = {
                 indexAxis: 'y', // horizontal stacked bars
                 responsive: true,
                 maintainAspectRatio: false,
+                devicePixelRatio: this.getChartScale(),
                 scales: {
                     x: {
                         stacked: true,
