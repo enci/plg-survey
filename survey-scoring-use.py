@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Complete Survey Scoring Analysis Tool
+Complete Survey Scoring Analysis Tool - Fixed Version
 Extracts data from survey files and tests different scoring methodologies
 """
 
@@ -10,29 +10,23 @@ import matplotlib.pyplot as plt
 import numpy as np
 from pathlib import Path
 
-def load_survey_data(file_path):
+# Hardcoded survey file path
+SURVEY_FILE = "procedural-level-generation-survey.json"
+
+def load_survey_data():
     """
-    Load survey data from JSON or CSV file
+    Load survey data from the hardcoded JSON file
     
-    Args:
-        file_path: path to survey data file
-        
     Returns:
         list of survey responses
     """
-    file_path = Path(file_path)
+    file_path = Path(SURVEY_FILE)
     
     if not file_path.exists():
         raise FileNotFoundError(f"Survey file not found: {file_path}")
     
-    if file_path.suffix.lower() == '.json':
-        with open(file_path, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    elif file_path.suffix.lower() == '.csv':
-        df = pd.read_csv(file_path)
-        return df.to_dict('records')
-    else:
-        raise ValueError("File must be JSON or CSV format")
+    with open(file_path, 'r', encoding='utf-8') as f:
+        return json.load(f)
 
 def extract_frequency_data(survey_data, role_mapping=None):
     """
@@ -215,7 +209,11 @@ def analyze_scoring_methodologies(frequency_data, totals, categories_to_compare=
     return pd.DataFrame(results), weighting_schemes
 
 def create_visualizations(df_results, frequency_data, totals, weighting_schemes, categories):
-    """Create comprehensive visualizations"""
+    """Create comprehensive visualizations with proper matplotlib handling"""
+    
+    # Configure matplotlib for non-interactive environments
+    plt.ioff()  # Turn off interactive mode
+    plt.style.use('default')  # Use default style to avoid issues
     
     fig = plt.figure(figsize=(18, 12))
     
@@ -241,14 +239,16 @@ def create_visualizations(df_results, frequency_data, totals, weighting_schemes,
     ax1.legend()
     ax1.grid(True, alpha=0.3)
     
-    # 2. Gap comparison (if applicable)
+    # 2. Gap comparison (if applicable) - FIXED
     if 'Gap' in df_results.columns:
         ax2 = plt.subplot(2, 3, 2)
         gaps = df_results['Gap'].values
-        ax2.bar(schemes, gaps, alpha=0.8, color='orange')
+        x_gap = np.arange(len(schemes))
+        ax2.bar(x_gap, gaps, alpha=0.8, color='orange')
         ax2.set_xlabel('Scoring Methodology')
         ax2.set_ylabel('Score Gap')
         ax2.set_title(f'{categories[0].title()}-{categories[1].title()} Score Gaps')
+        ax2.set_xticks(x_gap)  # FIXED: Set ticks first
         ax2.set_xticklabels(schemes, rotation=45, ha='right')
         ax2.grid(True, alpha=0.3)
     
@@ -275,7 +275,7 @@ def create_visualizations(df_results, frequency_data, totals, weighting_schemes,
     ax3.grid(True, alpha=0.3)
     ax3.set_ylim(0, 1.05)
     
-    # 4. Response distributions
+    # 4. Response distributions - FIXED
     for i, category in enumerate(categories[:2]):  # Show first 2 categories
         ax = plt.subplot(2, 3, 4 + i)
         
@@ -284,17 +284,21 @@ def create_visualizations(df_results, frequency_data, totals, weighting_schemes,
             counts = [responses[cat] for cat in full_categories]
             percentages = [count/totals[category]*100 for count in counts]
             
-            bars = ax.bar(freq_categories, percentages, alpha=0.8, color=colors[i])
+            x_bars = np.arange(len(freq_categories))  # FIXED: Use numeric positions
+            bars = ax.bar(x_bars, percentages, alpha=0.8, color=colors[i])
             ax.set_xlabel('Frequency Category')
             ax.set_ylabel('Percentage of Responses')
             ax.set_title(f'{category.title()} Response Distribution (n={totals[category]})')
+            ax.set_xticks(x_bars)  # FIXED: Set ticks first
+            ax.set_xticklabels(freq_categories, rotation=45, ha='right')
             ax.grid(True, alpha=0.3)
             
             # Add value labels on bars
             for bar, pct in zip(bars, percentages):
                 height = bar.get_height()
-                ax.text(bar.get_x() + bar.get_width()/2., height + 0.5,
-                       f'{pct:.1f}%', ha='center', va='bottom')
+                if height > 0:  # Only add label if there's a bar
+                    ax.text(bar.get_x() + bar.get_width()/2., height + 0.5,
+                           f'{pct:.1f}%', ha='center', va='bottom', fontsize=8)
     
     # 6. Sensitivity analysis
     ax6 = plt.subplot(2, 3, 6)
@@ -317,14 +321,23 @@ def create_visualizations(df_results, frequency_data, totals, weighting_schemes,
             )
             gaps.append(score1 - score2)
         
-        ax6.plot(sometimes_weights, gaps, marker='o', linewidth=2)
+        ax6.plot(sometimes_weights, gaps, marker='o', linewidth=2, color='red')
         ax6.set_xlabel('"Sometimes" Weight')
         ax6.set_ylabel('Score Gap')
         ax6.set_title('Sensitivity: Gap vs "Sometimes" Weight')
         ax6.grid(True, alpha=0.3)
     
     plt.tight_layout()
-    plt.show()
+    
+    # Save the figure and handle properly
+    output_file = 'survey_scoring_analysis.pdf'
+    try:
+        plt.savefig(output_file, format='pdf', bbox_inches='tight')
+        print(f"\nVisualization saved as: {output_file}")
+    except Exception as e:
+        print(f"Warning: Could not save visualization: {e}")
+    finally:
+        plt.close(fig)  # Always close the figure to prevent warnings
 
 def print_detailed_analysis(df_results, frequency_data, totals):
     """Print detailed analysis and recommendations"""
@@ -374,61 +387,6 @@ def print_detailed_analysis(df_results, frequency_data, totals):
     print("   - Test sensitivity with different weight adjustments")
     print("   - Consider context of your research questions")
 
-SURVEY_FILE = "procedural-level-generation-survey.json"
-
-def main():
-    """Main function to run the complete analysis"""
-    
-    print("=== SURVEY SCORING METHODOLOGY ANALYZER ===\n")
-    
-    try:
-        # Load and process survey data
-        print(f"Loading survey data from: {SURVEY_FILE}")
-        survey_data = load_survey_data(SURVEY_FILE)
-        frequency_data, totals = extract_frequency_data(survey_data)
-        print("Survey data processed successfully!")
-        
-    except Exception as e:
-        print(f"Error loading survey data: {e}")
-        print("Please ensure the file 'procedural-level-generation-survey.json' exists in the current directory.")
-        return
-    
-    # Choose categories to compare
-    available_categories = [cat for cat, total in totals.items() if total > 0]
-    print(f"\nAvailable categories: {available_categories}")
-    
-    if len(available_categories) >= 2:
-        categories_to_compare = available_categories[:2]  # Use first two
-    else:
-        categories_to_compare = available_categories
-        
-    print(f"Comparing: {categories_to_compare}")
-    
-    # Run analysis
-    df_results, weighting_schemes = analyze_scoring_methodologies(
-        frequency_data, totals, categories_to_compare
-    )
-    
-    # Print results
-    print_detailed_analysis(df_results, frequency_data, totals)
-    
-    # Create visualizations
-    print("\nGenerating visualizations...")
-    create_visualizations(
-        df_results, frequency_data, totals, 
-        weighting_schemes, categories_to_compare
-    )
-    
-    # Option to test custom weights
-    while True:
-        test_custom = input("\nWould you like to test custom weights? (y/n): ").lower()
-        if test_custom == 'y':
-            test_custom_weights(frequency_data, totals, categories_to_compare)
-        else:
-            break
-    
-    print("\nAnalysis complete!")
-
 def test_custom_weights(frequency_data, totals, categories):
     """Allow testing of custom weight schemes"""
     print("\n=== CUSTOM WEIGHT TESTER ===")
@@ -477,6 +435,63 @@ def test_custom_weights(frequency_data, totals, categories):
         gap = score1 - score2
         gap_pct = (gap / score1 * 100) if score1 > 0 else 0
         print(f"  Gap: {gap:.1f} ({gap_pct:.1f}%)")
+
+def main():
+    """Main function to run the complete analysis"""
+    
+    print("=== SURVEY SCORING METHODOLOGY ANALYZER ===\n")
+    
+    try:
+        # Load and process survey data
+        print(f"Loading survey data from: {SURVEY_FILE}")
+        survey_data = load_survey_data()
+        frequency_data, totals = extract_frequency_data(survey_data)
+        print("Survey data processed successfully!")
+        
+    except Exception as e:
+        print(f"Error loading survey data: {e}")
+        print("Please ensure the file 'procedural-level-generation-survey.json' exists in the current directory.")
+        return
+    
+    # Choose categories to compare
+    available_categories = [cat for cat, total in totals.items() if total > 0]
+    print(f"\nAvailable categories: {available_categories}")
+    
+    if len(available_categories) >= 2:
+        categories_to_compare = available_categories[:2]  # Use first two
+    else:
+        categories_to_compare = available_categories
+        
+    print(f"Comparing: {categories_to_compare}")
+    
+    # Run analysis
+    df_results, weighting_schemes = analyze_scoring_methodologies(
+        frequency_data, totals, categories_to_compare
+    )
+    
+    # Print results
+    print_detailed_analysis(df_results, frequency_data, totals)
+    
+    # Create visualizations
+    print("\nGenerating visualizations...")
+    create_visualizations(
+        df_results, frequency_data, totals, 
+        weighting_schemes, categories_to_compare
+    )
+    
+    # Option to test custom weights
+    while True:
+        try:
+            test_custom = input("\nWould you like to test custom weights? (y/n): ").lower()
+            if test_custom == 'y':
+                test_custom_weights(frequency_data, totals, categories_to_compare)
+            else:
+                break
+        except KeyboardInterrupt:
+            print("\nExiting...")
+            break
+    
+    print("\nAnalysis complete!")
 
 if __name__ == "__main__":
     main()
