@@ -715,7 +715,7 @@ const SurveyApp = {
         // Minimum and maximum height
         let height = 100;
         if(isPie) {
-            height = 250;
+            height = 300;
         }
         else {
             height = (numBars * 45) + (numBars * 8 * (maxLabelLines-1));
