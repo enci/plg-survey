@@ -483,7 +483,7 @@ class SurveyPlotter:
                         filtered: bool = True, top_n: Optional[int] = None,
                         horizontal: bool = True, figsize: tuple = (10, 6),
                         save_path: Optional[str] = None, colormap: str = 'Dark2',
-                        show_percentages: bool = False) -> mpl_figure.Figure:
+                        show_percentages: bool = False, label_wrap_width: Optional[int] = None) -> mpl_figure.Figure:
         """
         Create a bar chart for a question's response distribution.
         
@@ -497,6 +497,7 @@ class SurveyPlotter:
             save_path: Path to save the chart (optional)
             colormap: Matplotlib colormap name for bar colors
             show_percentages: If True, show percentages instead of counts
+            label_wrap_width: Width for label wrapping (None = no wrapping)
             
         Returns:
             matplotlib Figure object
@@ -513,8 +514,11 @@ class SurveyPlotter:
         
         labels, values = zip(*sorted_items) if sorted_items else ([], [])
         
-        # Wrap long labels for better display
-        wrapped_labels = [textwrap.fill(label, width=20, break_long_words=False) for label in labels]
+        # Wrap long labels for better display only if label_wrap_width is specified
+        if label_wrap_width:
+            wrapped_labels = [textwrap.fill(label, width=label_wrap_width, break_long_words=False) for label in labels]
+        else:
+            wrapped_labels = labels
         
         # Convert to percentages if requested
         if show_percentages:
@@ -896,7 +900,7 @@ class SurveyPlotter:
     def create_matrix_stacked_bar_chart(self, matrix_question: str, title: Optional[str] = None,
                                        filtered: bool = True, figsize: tuple = (14, 10),
                                        save_path: Optional[str] = None, colormap: str = 'Set3',
-                                       horizontal: bool = True) -> mpl_figure.Figure:
+                                       horizontal: bool = True, label_wrap_width: Optional[int] = None) -> mpl_figure.Figure:
         """
         Create a stacked bar chart for matrix-type questions (like Likert scales).
         Each bar represents one item (tool/feature) with segments for each rating level.
@@ -909,6 +913,7 @@ class SurveyPlotter:
             save_path: Path to save the chart (optional)
             colormap: Matplotlib colormap name
             horizontal: If True, create horizontal bars
+            label_wrap_width: Width for label wrapping (None = default wrapping)
             
         Returns:
             matplotlib Figure object
@@ -928,9 +933,12 @@ class SurveyPlotter:
             all_ratings.update(item_counts.keys())
         all_ratings = sorted(all_ratings)
         
-        # Get all items (tools/features) and wrap long names
+        # Get all items (tools/features) and wrap long names if specified
         items = sorted(matrix_counts.keys())
-        wrapped_items = [textwrap.fill(item, width=25, break_long_words=False) for item in items]
+        if label_wrap_width:
+            wrapped_items = [textwrap.fill(item, width=label_wrap_width, break_long_words=False) for item in items]
+        else:
+            wrapped_items = [textwrap.fill(item, width=25, break_long_words=False) for item in items]
         
         # Prepare data for stacked bar chart
         data = {}

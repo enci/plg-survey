@@ -67,16 +67,24 @@ def plot_professional_role(analyzer, plotter, output_dir):
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
     
-    # Wrap the title text for better display
-    wrapped_title = wrap_text(question_text, width=60)
+    # Local wrapping settings for this chart
+    title_wrap_width = None  # No title wrapping
+    label_wrap_width = None  # No label wrapping
+    
+    # Wrap the title text for better display if specified
+    if title_wrap_width:
+        wrapped_title = wrap_text(question_text, width=title_wrap_width)
+    else:
+        wrapped_title = question_text
         
     fig = plotter.create_bar_chart(
         question_key,
         title=wrapped_title,
         horizontal=True,
-        figsize=(12, 6),  # Increased height for wrapped labels
+        figsize=(12, 5),  # Back to original size
         colormap='Dark2',
-        show_percentages=True
+        show_percentages=True,
+        label_wrap_width=label_wrap_width
     )
     
     pdf_path = os.path.join(output_dir, f"{question_key}.pdf")
@@ -92,8 +100,15 @@ def plot_years_experience(analyzer, plotter, output_dir):
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
     
-    # Wrap the title text for better display
-    wrapped_title = wrap_text(question_text, width=60)
+    # Local wrapping settings for this chart
+    title_wrap_width = None  # No title wrapping
+    label_wrap_width = None  # No label wrapping
+    
+    # Wrap the title text for better display if specified
+    if title_wrap_width:
+        wrapped_title = wrap_text(question_text, width=title_wrap_width)
+    else:
+        wrapped_title = question_text
     
     print(f"Creating plot for: {question_text}")
     
@@ -101,9 +116,10 @@ def plot_years_experience(analyzer, plotter, output_dir):
         question_key,
         title=wrapped_title,
         horizontal=True,
-        figsize=(12, 8),
-        colormap='plasma',
-        show_percentages=True
+        figsize=(12, 3.5),
+        colormap='Dark2',
+        show_percentages=True,
+        label_wrap_width=label_wrap_width
     )
     
     pdf_path = os.path.join(output_dir, f"{question_key}.pdf")
@@ -119,8 +135,15 @@ def plot_game_engines(analyzer, plotter, output_dir):
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
     
-    # Wrap the title text for better display
-    wrapped_title = wrap_text(question_text, width=60)
+    # Local wrapping settings for this chart
+    title_wrap_width = None  # No title wrapping
+    label_wrap_width = None  # No label wrapping
+    
+    # Wrap the title text for better display if specified
+    if title_wrap_width:
+        wrapped_title = wrap_text(question_text, width=title_wrap_width)
+    else:
+        wrapped_title = question_text
     
     print(f"Creating plot for: {question_text}")
     
@@ -128,9 +151,10 @@ def plot_game_engines(analyzer, plotter, output_dir):
         question_key,
         title=wrapped_title,
         horizontal=True,
-        figsize=(12, 8),
-        colormap='tab10',
-        show_percentages=True
+        figsize=(12, 4),  # Back to original size
+        colormap='Dark2',
+        show_percentages=True,
+        label_wrap_width=label_wrap_width
     )
     
     pdf_path = os.path.join(output_dir, f"{question_key}.pdf")
@@ -146,8 +170,15 @@ def plot_procedural_tools_experience(analyzer, plotter, output_dir):
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
     
-    # Wrap the title text for better display
-    wrapped_title = wrap_text(question_text, width=60)
+    # Local wrapping settings for this chart
+    title_wrap_width = None   # Wrap titles for better readability
+    label_wrap_width = 30   # Wrap tool names for matrix chart
+    
+    # Wrap the title text for better display if specified
+    if title_wrap_width:
+        wrapped_title = wrap_text(question_text, width=title_wrap_width)
+    else:
+        wrapped_title = question_text
     
     print(f"Creating plot for: {question_text}")
     
@@ -155,9 +186,10 @@ def plot_procedural_tools_experience(analyzer, plotter, output_dir):
     fig = plotter.create_matrix_stacked_bar_chart(
         question_key,
         title=wrapped_title,
-        figsize=(14, 10),
-        colormap='RdYlBu_r',
-        horizontal=True
+        figsize=(14, 6),
+        colormap='bwr',
+        horizontal=True,
+        label_wrap_width=label_wrap_width
     )
     
     pdf_path = os.path.join(output_dir, f"{question_key}.pdf")
@@ -173,8 +205,15 @@ def plot_current_pcg_usage(analyzer, plotter, output_dir):
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
     
-    # Wrap the title text for better display
-    wrapped_title = wrap_text(question_text, width=60)
+    # Local wrapping settings for this chart
+    title_wrap_width = None   # Wrap long titles
+    label_wrap_width = 30   # Wrap category labels
+    
+    # Wrap the title text for better display if specified
+    if title_wrap_width:
+        wrapped_title = wrap_text(question_text, width=title_wrap_width)
+    else:
+        wrapped_title = question_text
     
     print(f"Creating plot for: {question_text}")
     
@@ -182,9 +221,9 @@ def plot_current_pcg_usage(analyzer, plotter, output_dir):
         question_key,
         title=wrapped_title,
         horizontal=True,
-        figsize=(12, 8),
-        colormap='Set2',
-        show_percentages=True
+        figsize=(12, 6),
+        show_percentages=True,
+        label_wrap_width=label_wrap_width
     )
     
     pdf_path = os.path.join(output_dir, f"{question_key}.pdf")
@@ -212,7 +251,8 @@ def main():
             
     created_files = []
     
-    # Create plots using individual functions
+    # Create plots using individual functions with local wrapping settings
+    # Questions 1-3: No title wrapping, no label wrapping (original sizes)
     pdf_path = plot_professional_role(analyzer, plotter, output_dir)
     created_files.append(pdf_path)
     
@@ -222,11 +262,13 @@ def main():
     pdf_path = plot_game_engines(analyzer, plotter, output_dir)
     created_files.append(pdf_path)
     
+    # Question 4: Matrix chart with wrapping for better readability
     pdf_path = plot_procedural_tools_experience(analyzer, plotter, output_dir)
     created_files.append(pdf_path)
     
+    # Question 5: Regular chart with wrapping
     pdf_path = plot_current_pcg_usage(analyzer, plotter, output_dir)
-    created_files.append(pdf_path)
+    created_files.append(pdf_path)    
     
     # Summary
     print("=== Summary ===")
