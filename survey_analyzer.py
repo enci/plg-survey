@@ -394,6 +394,68 @@ class SurveyAnalyzer:
         
         return matrix_counts
     
+    def get_ranking_scores(self, question: str, filtered: bool = True, max_rank: int = 3) -> Dict[str, float]:
+        """
+        Get weighted scores for ranking-type questions.
+        
+        Args:
+            question: Ranking question key to analyze
+            filtered: If True, use filtered data; if False, use all data
+            max_rank: Maximum rank to consider (default 3 for "top 3" rankings)
+            
+        Returns:
+            Dictionary mapping items to their weighted scores
+        """
+        values = self.get_question_values(question, filtered)
+        
+        # Verify this is a ranking question
+        question_type = self.get_question_type(question)
+        if question_type != 'ranking':
+            raise ValueError(f"Question '{question}' is not a ranking-type question")
+        
+        ranking_scores = {}
+        
+        for value in values:
+            if isinstance(value, list):
+                # Calculate weighted scores: rank 1 = max_rank points, rank 2 = max_rank-1 points, etc.
+                for rank, item in enumerate(value[:max_rank], 1):  # Only consider top max_rank items
+                    if item not in ranking_scores:
+                        ranking_scores[item] = 0.0
+                    # Higher ranks get more points (rank 1 = max_rank points, rank 2 = max_rank-1 points, etc.)
+                    ranking_scores[item] += max_rank - rank + 1
+        
+        return ranking_scores
+    
+    def get_ranking_positions(self, question: str, filtered: bool = True, max_rank: int = 3) -> Dict[str, Dict[int, int]]:
+        """
+        Get position distribution for ranking-type questions.
+        
+        Args:
+            question: Ranking question key to analyze
+            filtered: If True, use filtered data; if False, use all data
+            max_rank: Maximum rank to consider (default 3 for "top 3" rankings)
+            
+        Returns:
+            Dictionary mapping items to position counts {item: {1: count, 2: count, 3: count}}
+        """
+        values = self.get_question_values(question, filtered)
+        
+        # Verify this is a ranking question
+        question_type = self.get_question_type(question)
+        if question_type != 'ranking':
+            raise ValueError(f"Question '{question}' is not a ranking-type question")
+        
+        position_counts = {}
+        
+        for value in values:
+            if isinstance(value, list):
+                for rank, item in enumerate(value[:max_rank], 1):  # Only consider top max_rank items
+                    if item not in position_counts:
+                        position_counts[item] = {i: 0 for i in range(1, max_rank + 1)}
+                    position_counts[item][rank] += 1
+        
+        return position_counts
+    
     def get_summary(self) -> Dict[str, Any]:
         """
         Get a summary of the current state of the analyzer.
@@ -994,6 +1056,183 @@ class SurveyPlotter:
         if save_path:
             fig.savefig(save_path, dpi=300, bbox_inches='tight')
             print(f"Matrix stacked bar chart saved to {save_path}")
+        
+        return fig
+    
+    def create_ranking_weighted_chart(self, ranking_question: str, title: Optional[str] = None,
+                                     filtered: bool = True, figsize: tuple = (14, 8),
+                                     save_path: Optional[str] = None, colormap: str = 'viridis',
+                                     horizontal: bool = True, max_rank: int = 3,
+                                     label_wrap_width: Optional[int] = None) -> mpl_figure.Figure:
+        """
+        Create a weighted score chart for ranking-type questions.
+        
+        Args:
+            ranking_question: Ranking question key to plot
+            title: Chart title (auto-generated if None)
+            filtered: Use filtered data if True
+            figsize: Figure size tuple
+            save_path: Path to save the chart (optional)
+            colormap: Matplotlib colormap name
+            horizontal: If True, create horizontal bars
+            max_rank: Maximum rank to consider (e.g., 3 for "top 3")
+            label_wrap_width: Width for label wrapping (None = default wrapping)
+            
+        Returns:
+            matplotlib Figure object
+        """
+        # Get weighted scores for ranking
+        scores = self.analyzer.get_ranking_scores(ranking_question, filtered, max_rank)
+        
+        if not scores:
+            raise ValueError(f"No data found for ranking question '{ranking_question}'")
+        
+        # Sort by score (highest first)
+        sorted_items = sorted(scores.items(), key=lambda x: x[1], reverse=True)
+        items, values = zip(*sorted_items) if sorted_items else ([], [])
+        
+        # Wrap long labels for better display if specified
+        if label_wrap_width:
+            wrapped_items = [textwrap.fill(item, width=label_wrap_width, break_long_words=False) for item in items]
+        else:
+            wrapped_items = [textwrap.fill(item, width=30, break_long_words=False) for item in items]
+        
+        # Create the plot
+        fig, ax = plt.subplots(figsize=figsize)
+        
+        # Generate colors using colormap
+        colors = plt.cm.get_cmap(colormap)(np.linspace(0, 1, len(items)))
+        
+        if horizontal:
+            bars = ax.barh(wrapped_items, values, color=colors, alpha=0.8)
+            ax.set_xlabel('Weighted Score')
+            ax.set_ylabel('Features')
+            ax.invert_yaxis()  # Top item at top
+            
+            # Add value labels on bars
+            max_value = max(values) if values else 0
+            for i, bar in enumerate(bars):
+                width = bar.get_width()
+                ax.text(width + max_value * 0.01, bar.get_y() + bar.get_height()/2, 
+                       f'{values[i]:.1f}', ha='left', va='center', fontweight='bold')
+        else:
+            bars = ax.bar(wrapped_items, values, color=colors, alpha=0.8)
+            ax.set_xlabel('Features')
+            ax.set_ylabel('Weighted Score')
+            plt.xticks(rotation=45, ha='right')
+            
+            # Add value labels on bars
+            max_value = max(values) if values else 0
+            for i, bar in enumerate(bars):
+                height = bar.get_height()
+                ax.text(bar.get_x() + bar.get_width()/2., height + max_value * 0.01,
+                       f'{values[i]:.1f}', ha='center', va='bottom', fontweight='bold')
+        
+        # Set title
+        if title is None:
+            question_info = self.analyzer.get_question_info(ranking_question)
+            title = question_info.get('question', ranking_question)
+        
+        # Add subtitle explaining the scoring
+        full_title = f"{title}\n(Weighted scores: Rank 1 = {max_rank} pts, Rank 2 = {max_rank-1} pts, etc.)"
+        ax.set_title(full_title)
+        
+        plt.tight_layout()
+        
+        if save_path:
+            fig.savefig(save_path, dpi=300, bbox_inches='tight')
+            print(f"Ranking weighted chart saved to {save_path}")
+        
+        return fig
+    
+    def create_ranking_position_chart(self, ranking_question: str, title: Optional[str] = None,
+                                     filtered: bool = True, figsize: tuple = (14, 8),
+                                     save_path: Optional[str] = None, colormap: str = 'Set3',
+                                     horizontal: bool = True, max_rank: int = 3,
+                                     label_wrap_width: Optional[int] = None) -> mpl_figure.Figure:
+        """
+        Create a stacked position chart for ranking-type questions.
+        Shows how often each item appears in rank 1, 2, 3, etc.
+        
+        Args:
+            ranking_question: Ranking question key to plot
+            title: Chart title (auto-generated if None)
+            filtered: Use filtered data if True
+            figsize: Figure size tuple
+            save_path: Path to save the chart (optional)
+            colormap: Matplotlib colormap name
+            horizontal: If True, create horizontal bars
+            max_rank: Maximum rank to consider (e.g., 3 for "top 3")
+            label_wrap_width: Width for label wrapping (None = default wrapping)
+            
+        Returns:
+            matplotlib Figure object
+        """
+        # Get position distribution for ranking
+        positions = self.analyzer.get_ranking_positions(ranking_question, filtered, max_rank)
+        
+        if not positions:
+            raise ValueError(f"No data found for ranking question '{ranking_question}'")
+        
+        # Sort by total appearances (sum of all positions)
+        total_mentions = {item: sum(pos_counts.values()) for item, pos_counts in positions.items()}
+        sorted_items = sorted(total_mentions.items(), key=lambda x: x[1], reverse=True)
+        items = [item for item, _ in sorted_items]
+        
+        # Wrap long labels for better display if specified
+        if label_wrap_width:
+            wrapped_items = [textwrap.fill(item, width=label_wrap_width, break_long_words=False) for item in items]
+        else:
+            wrapped_items = [textwrap.fill(item, width=30, break_long_words=False) for item in items]
+        
+        # Prepare data for stacked bar chart
+        rank_data = {}
+        for rank in range(1, max_rank + 1):
+            rank_data[f'Rank {rank}'] = [positions.get(item, {}).get(rank, 0) for item in items]
+        
+        # Create the plot
+        fig, ax = plt.subplots(figsize=figsize)
+        
+        # Generate colors for different ranks
+        colors = plt.cm.get_cmap(colormap)(np.linspace(0, 1, max_rank))
+        
+        if horizontal:
+            # Create horizontal stacked bars
+            bottom = np.zeros(len(items))
+            bars = []
+            for i, (rank_name, values) in enumerate(rank_data.items()):
+                bars.append(ax.barh(wrapped_items, values, left=bottom, 
+                                   label=rank_name, color=colors[i], alpha=0.8))
+                bottom += values
+            ax.set_xlabel('Number of Times Ranked')
+            ax.set_ylabel('Features')
+            ax.invert_yaxis()  # Top item at top
+        else:
+            # Create vertical stacked bars
+            bottom = np.zeros(len(items))
+            bars = []
+            for i, (rank_name, values) in enumerate(rank_data.items()):
+                bars.append(ax.bar(wrapped_items, values, bottom=bottom, 
+                                  label=rank_name, color=colors[i], alpha=0.8))
+                bottom += values
+            ax.set_xlabel('Features')
+            ax.set_ylabel('Number of Times Ranked')
+            plt.xticks(rotation=45, ha='right')
+        
+        # Add legend positioned in bottom right (empty space in horizontal charts)
+        ax.legend(title='Ranking Position', bbox_to_anchor=(1.0, 0.0), loc='lower right')
+        
+        # Set title
+        if title is None:
+            question_info = self.analyzer.get_question_info(ranking_question)
+            title = question_info.get('question', ranking_question)
+        
+        ax.set_title(title)
+        plt.tight_layout()
+        
+        if save_path:
+            fig.savefig(save_path, dpi=300, bbox_inches='tight')
+            print(f"Ranking position chart saved to {save_path}")
         
         return fig
 
