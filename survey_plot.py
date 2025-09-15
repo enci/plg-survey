@@ -9,21 +9,56 @@ from survey_analyzer import SurveyAnalyzer, SurveyPlotter
 import matplotlib.pyplot as plt
 import matplotlib.backends.backend_pdf as pdf_backend
 import os
+import textwrap
+
+def wrap_text(text, width=30):
+    """
+    Wrap text to specified width, breaking on word boundaries.
+    
+    Args:
+        text: Text to wrap
+        width: Maximum characters per line
+        
+    Returns:
+        String with newlines inserted for wrapping
+    """
+    if len(text) <= width:
+        return text
+    
+    # Use textwrap to break on word boundaries
+    wrapped_lines = textwrap.wrap(text, width=width, break_long_words=False)
+    return '\n'.join(wrapped_lines)
+
+def wrap_labels(labels, width=25):
+    """
+    Wrap a list of labels for better display on axes.
+    
+    Args:
+        labels: List of label strings
+        width: Maximum characters per line
+        
+    Returns:
+        List of wrapped label strings
+    """
+    return [wrap_text(label, width) for label in labels]
 
 # Configure matplotlib for consistent styling across all plots
 plt.rcParams.update({
     'font.family': 'serif',
     'font.serif': ['Times New Roman', 'DejaVu Serif', 'Bitstream Vera Serif', 'serif'],
-    'font.size': 14,
+    'font.size': 16,
     'axes.titlesize': 18,
     'axes.labelsize': 16,
-    'xtick.labelsize': 14,
-    'ytick.labelsize': 14,
-    'legend.fontsize': 14,
+    'xtick.labelsize': 18,
+    'ytick.labelsize': 18,
+    'legend.fontsize': 16,
     'figure.titlesize': 20,
     'axes.grid': True,
     'grid.alpha': 0.3,
-    'axes.axisbelow': True
+    'axes.axisbelow': True,
+    'axes.titlelocation': 'center',
+    'axes.titlesize': 0,
+    'font.weight': 'bold'  # Make heatmap labels bold
 })
 
 def plot_professional_role(analyzer, plotter, output_dir):
@@ -32,14 +67,15 @@ def plot_professional_role(analyzer, plotter, output_dir):
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
     
-    print(f"Creating plot for: {question_text}")
-    
+    # Wrap the title text for better display
+    wrapped_title = wrap_text(question_text, width=60)
+        
     fig = plotter.create_bar_chart(
         question_key,
-        title=question_text,
+        title=wrapped_title,
         horizontal=True,
-        figsize=(12, 8),
-        colormap='viridis',
+        figsize=(12, 6),  # Increased height for wrapped labels
+        colormap='Dark2',
         show_percentages=True
     )
     
@@ -56,11 +92,14 @@ def plot_years_experience(analyzer, plotter, output_dir):
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
     
+    # Wrap the title text for better display
+    wrapped_title = wrap_text(question_text, width=60)
+    
     print(f"Creating plot for: {question_text}")
     
     fig = plotter.create_bar_chart(
         question_key,
-        title=question_text,
+        title=wrapped_title,
         horizontal=True,
         figsize=(12, 8),
         colormap='plasma',
@@ -80,11 +119,14 @@ def plot_game_engines(analyzer, plotter, output_dir):
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
     
+    # Wrap the title text for better display
+    wrapped_title = wrap_text(question_text, width=60)
+    
     print(f"Creating plot for: {question_text}")
     
     fig = plotter.create_bar_chart(
         question_key,
-        title=question_text,
+        title=wrapped_title,
         horizontal=True,
         figsize=(12, 8),
         colormap='tab10',
@@ -104,13 +146,18 @@ def plot_procedural_tools_experience(analyzer, plotter, output_dir):
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
     
+    # Wrap the title text for better display
+    wrapped_title = wrap_text(question_text, width=60)
+    
     print(f"Creating plot for: {question_text}")
     
-    fig = plotter.create_matrix_heatmap(
+    # Use stacked bar chart for better readability of matrix data
+    fig = plotter.create_matrix_stacked_bar_chart(
         question_key,
-        title=question_text,
+        title=wrapped_title,
         figsize=(14, 10),
-        colormap='RdYlBu_r'
+        colormap='RdYlBu_r',
+        horizontal=True
     )
     
     pdf_path = os.path.join(output_dir, f"{question_key}.pdf")
@@ -126,11 +173,14 @@ def plot_current_pcg_usage(analyzer, plotter, output_dir):
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
     
+    # Wrap the title text for better display
+    wrapped_title = wrap_text(question_text, width=60)
+    
     print(f"Creating plot for: {question_text}")
     
     fig = plotter.create_bar_chart(
         question_key,
-        title=question_text,
+        title=wrapped_title,
         horizontal=True,
         figsize=(12, 8),
         colormap='Set2',
@@ -159,40 +209,24 @@ def main():
         'procedural-level-generation-survey.json'
     )
     plotter = SurveyPlotter(analyzer)
-    
-    # Get all questions from schema
-    all_questions = analyzer.get_available_questions()
-    
-    print(f"Found {len(all_questions)} total questions in survey")
-    print(f"Plotting first 5 questions...\n")
-    
+            
     created_files = []
     
     # Create plots using individual functions
-    print("1. Professional Role")
     pdf_path = plot_professional_role(analyzer, plotter, output_dir)
     created_files.append(pdf_path)
-    print()
     
-    print("2. Years of Experience")
     pdf_path = plot_years_experience(analyzer, plotter, output_dir)
     created_files.append(pdf_path)
-    print()
     
-    print("3. Game Engines")
     pdf_path = plot_game_engines(analyzer, plotter, output_dir)
     created_files.append(pdf_path)
-    print()
     
-    print("4. Procedural Tools Experience")
     pdf_path = plot_procedural_tools_experience(analyzer, plotter, output_dir)
     created_files.append(pdf_path)
-    print()
     
-    print("5. Current PCG Usage")
     pdf_path = plot_current_pcg_usage(analyzer, plotter, output_dir)
     created_files.append(pdf_path)
-    print()
     
     # Summary
     print("=== Summary ===")
@@ -202,21 +236,6 @@ def main():
     for file_path in created_files:
         filename = os.path.basename(file_path)
         print(f"  - {filename}")
-    
-    print(f"\nAll plots saved as vector PDFs in '{output_dir}/' directory.")
-    
-    # Show basic survey statistics
-    summary = analyzer.get_summary()
-    print(f"\nSurvey statistics:")
-    print(f"  - Total responses: {summary['total_responses']}")
-    print(f"  - Total questions: {summary['available_questions']}")
-    
-    # Show data for first question as example
-    example_question = 'professional_role'
-    counts = analyzer.get_question_counts(example_question, filtered=False)
-    print(f"\nExample data for '{example_question}':")
-    for value, count in sorted(counts.items(), key=lambda x: x[1], reverse=True):
-        print(f"  - {value}: {count} responses")
 
 if __name__ == "__main__":
     main()

@@ -14,6 +14,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.figure as mpl_figure
 import numpy as np
+import textwrap
 from typing import Dict, List, Any, Optional, Union, Set
 from dataclasses import dataclass
 from enum import Enum
@@ -23,7 +24,7 @@ from collections import Counter
 plt.rcParams.update({
     'font.family': 'serif',
     'font.serif': ['Times New Roman', 'DejaVu Serif', 'Bitstream Vera Serif', 'serif'],
-    'font.size': 14,
+    'font.size': 10,
     'axes.titlesize': 18,
     'axes.labelsize': 16,
     'xtick.labelsize': 14,
@@ -321,6 +322,21 @@ class SurveyAnalyzer:
         """
         values = self.get_question_values(question, filtered)
         
+        # Handle matrix-type questions separately
+        question_type = self.get_question_type(question)
+        if question_type == 'matrix':
+            # For matrix questions, flatten the dictionary responses
+            flattened_values = []
+            for value in values:
+                if isinstance(value, dict):
+                    # Extract all the individual responses from the matrix
+                    for item, rating in value.items():
+                        if rating is not None:
+                            flattened_values.append(f"{item}: {rating}")
+                else:
+                    flattened_values.append(str(value))
+            values = flattened_values
+        
         # Get valid options from schema if grouping "Other"
         valid_options = set()
         if group_other:
@@ -333,16 +349,50 @@ class SurveyAnalyzer:
         other_count = 0
         
         for value in values:
-            if group_other and valid_options and value not in valid_options:
+            # Convert to string to ensure hashability
+            value_str = str(value) if not isinstance(value, str) else value
+            
+            if group_other and valid_options and value_str not in valid_options:
                 other_count += 1
             else:
-                counts[value] = counts.get(value, 0) + 1
+                counts[value_str] = counts.get(value_str, 0) + 1
         
         # Add "Other" category if there are ungrouped values
         if other_count > 0:
             counts["Other"] = other_count
         
         return counts
+    
+    def get_matrix_counts(self, question: str, filtered: bool = True) -> Dict[str, Dict[str, int]]:
+        """
+        Get count distribution for matrix-type questions, organized by item and rating.
+        
+        Args:
+            question: Matrix question key to analyze
+            filtered: If True, use filtered data; if False, use all data
+            
+        Returns:
+            Dictionary mapping items to rating counts
+        """
+        values = self.get_question_values(question, filtered)
+        
+        # Verify this is a matrix question
+        question_type = self.get_question_type(question)
+        if question_type != 'matrix':
+            raise ValueError(f"Question '{question}' is not a matrix-type question")
+        
+        matrix_counts = {}
+        
+        for value in values:
+            if isinstance(value, dict):
+                for item, rating in value.items():
+                    if rating is not None:
+                        if item not in matrix_counts:
+                            matrix_counts[item] = {}
+                        rating_str = str(rating)
+                        matrix_counts[item][rating_str] = matrix_counts[item].get(rating_str, 0) + 1
+        
+        return matrix_counts
     
     def get_summary(self) -> Dict[str, Any]:
         """
@@ -432,7 +482,7 @@ class SurveyPlotter:
     def create_bar_chart(self, question: str, title: Optional[str] = None, 
                         filtered: bool = True, top_n: Optional[int] = None,
                         horizontal: bool = True, figsize: tuple = (10, 6),
-                        save_path: Optional[str] = None, colormap: str = 'viridis',
+                        save_path: Optional[str] = None, colormap: str = 'Dark2',
                         show_percentages: bool = False) -> mpl_figure.Figure:
         """
         Create a bar chart for a question's response distribution.
@@ -463,6 +513,9 @@ class SurveyPlotter:
         
         labels, values = zip(*sorted_items) if sorted_items else ([], [])
         
+        # Wrap long labels for better display
+        wrapped_labels = [textwrap.fill(label, width=20, break_long_words=False) for label in labels]
+        
         # Convert to percentages if requested
         if show_percentages:
             total = sum(values)
@@ -484,7 +537,7 @@ class SurveyPlotter:
         if horizontal:
             bars = ax.barh(range(len(labels)), display_values, color=colors)
             ax.set_yticks(range(len(labels)))
-            ax.set_yticklabels(labels)
+            ax.set_yticklabels(wrapped_labels)
             ax.set_xlabel(y_label)
             ax.invert_yaxis()  # Top item at top
             
@@ -496,17 +549,12 @@ class SurveyPlotter:
             for i, bar in enumerate(bars):
                 width = bar.get_width()
                 label_text = value_format(display_values[i])
-                # Position label inside the bar if it's long enough, otherwise outside
-                if width > max_value * 0.1:  # If bar is longer than 10% of max
-                    ax.text(width * 0.95, bar.get_y() + bar.get_height()/2, 
-                           label_text, ha='right', va='center', fontweight='bold', color='white')
-                else:
-                    ax.text(width + max_value * 0.01, bar.get_y() + bar.get_height()/2, 
-                           label_text, ha='left', va='center', fontweight='bold')
+                ax.text(width + max_value * 0.01, bar.get_y() + bar.get_height()/2, 
+                    label_text, ha='left', va='center', fontweight='bold')
         else:
             bars = ax.bar(range(len(labels)), display_values, color=colors)
             ax.set_xticks(range(len(labels)))
-            ax.set_xticklabels(labels, rotation=45, ha='right')
+            ax.set_xticklabels(wrapped_labels, rotation=45, ha='right')
             ax.set_ylabel(y_label)
             
             # Extend y-axis to make room for labels
@@ -517,13 +565,8 @@ class SurveyPlotter:
             for i, bar in enumerate(bars):
                 height = bar.get_height()
                 label_text = value_format(display_values[i])
-                # Position label inside the bar if it's tall enough, otherwise outside
-                if height > max_value * 0.1:  # If bar is taller than 10% of max
-                    ax.text(bar.get_x() + bar.get_width()/2., height * 0.95,
-                           label_text, ha='center', va='top', fontweight='bold', color='white')
-                else:
-                    ax.text(bar.get_x() + bar.get_width()/2., height + max_value * 0.01,
-                           label_text, ha='center', va='bottom', fontweight='bold')
+                ax.text(bar.get_x() + bar.get_width()/2., height + max_value * 0.01,
+                    label_text, ha='center', va='bottom', fontweight='bold')
         
         # Set title
         if title is None:
@@ -849,6 +892,102 @@ class SurveyPlotter:
             print(f"Heatmap saved to {save_path}")
         
         return fig
+    
+    def create_matrix_stacked_bar_chart(self, matrix_question: str, title: Optional[str] = None,
+                                       filtered: bool = True, figsize: tuple = (14, 10),
+                                       save_path: Optional[str] = None, colormap: str = 'Set3',
+                                       horizontal: bool = True) -> mpl_figure.Figure:
+        """
+        Create a stacked bar chart for matrix-type questions (like Likert scales).
+        Each bar represents one item (tool/feature) with segments for each rating level.
+        
+        Args:
+            matrix_question: Matrix question key to plot
+            title: Chart title (auto-generated if None)
+            filtered: Use filtered data if True
+            figsize: Figure size tuple
+            save_path: Path to save the chart (optional)
+            colormap: Matplotlib colormap name
+            horizontal: If True, create horizontal bars
+            
+        Returns:
+            matplotlib Figure object
+        """
+        self.analyzer._ensure_loaded()
+        assert self.analyzer.df is not None and self.analyzer.filtered_data is not None
+        
+        # Get the matrix counts using our new method
+        matrix_counts = self.analyzer.get_matrix_counts(matrix_question, filtered)
+        
+        if not matrix_counts:
+            raise ValueError(f"No data found for matrix question '{matrix_question}'")
+        
+        # Get all possible rating levels across all items
+        all_ratings = set()
+        for item_counts in matrix_counts.values():
+            all_ratings.update(item_counts.keys())
+        all_ratings = sorted(all_ratings)
+        
+        # Get all items (tools/features) and wrap long names
+        items = sorted(matrix_counts.keys())
+        wrapped_items = [textwrap.fill(item, width=25, break_long_words=False) for item in items]
+        
+        # Prepare data for stacked bar chart
+        data = {}
+        for rating in all_ratings:
+            data[rating] = [matrix_counts[item].get(rating, 0) for item in items]
+        
+        # Create the plot
+        fig, ax = plt.subplots(figsize=figsize)
+        
+        # Generate colors for different rating levels
+        colors = plt.cm.get_cmap(colormap)(np.linspace(0, 1, len(all_ratings)))
+        
+        if horizontal:
+            # Create horizontal stacked bars
+            bottom = np.zeros(len(items))
+            bars = []
+            for i, rating in enumerate(all_ratings):
+                bars.append(ax.barh(wrapped_items, data[rating], left=bottom, 
+                                   label=rating, color=colors[i], alpha=0.8))
+                bottom += data[rating]
+        else:
+            # Create vertical stacked bars
+            bottom = np.zeros(len(items))
+            bars = []
+            for i, rating in enumerate(all_ratings):
+                bars.append(ax.bar(wrapped_items, data[rating], bottom=bottom, 
+                                  label=rating, color=colors[i], alpha=0.8))
+                bottom += data[rating]
+        
+        # Customize the plot
+        if horizontal:
+            ax.set_xlabel('Number of Responses')
+            ax.set_ylabel('Tools/Features')
+            # Rotate item labels if they're long
+            plt.setp(ax.get_yticklabels(), rotation=0)
+        else:
+            ax.set_xlabel('Tools/Features')
+            ax.set_ylabel('Number of Responses')
+            # Rotate item labels if they're long
+            plt.setp(ax.get_xticklabels(), rotation=45, ha='right')
+        
+        # Add legend
+        ax.legend(title='Experience Level', bbox_to_anchor=(1.05, 1), loc='upper left')
+        
+        # Set title
+        if title is None:
+            question_info = self.analyzer.get_question_info(matrix_question)
+            title = question_info.get('question', matrix_question)
+        
+        ax.set_title(title or matrix_question)
+        plt.tight_layout()
+        
+        if save_path:
+            fig.savefig(save_path, dpi=300, bbox_inches='tight')
+            print(f"Matrix stacked bar chart saved to {save_path}")
+        
+        return fig
 
 
 def main():
@@ -898,7 +1037,3 @@ def main():
     print("\nGame engine preferences (beginners OR very experienced):")
     for engine, count in sorted(engine_counts.items(), key=lambda x: x[1], reverse=True):
         print(f"{engine}: {count}")
-
-
-if __name__ == "__main__":
-    main()
