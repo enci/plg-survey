@@ -199,6 +199,46 @@ def plot_procedural_tools_experience(analyzer, plotter, output_dir):
     print(f"  Saved as: {pdf_path}")
     return pdf_path
 
+def plot_procedural_tools_experience_comparison(analyzer, plotter, output_dir):
+    """Create comparison plot for procedural tools experience between artist and designer/programmer roles."""
+    question_key = 'procedural_tools_experience'
+    question_info = analyzer.get_question_info(question_key)
+    question_text = question_info.get('question', question_key)
+    
+    print(f"Creating comparison plot for: {question_text}")
+    
+    # Define role groups for comparison
+    artist_roles = ['Technical Artist', 'Environment Artist']
+    designer_programmer_roles = ['Level Designer', 'Game Designer', 'Programmer/Technical Designer']
+    
+    # Create filter configurations for comparison
+    filter_configs = [
+        {'filters': [{'question': 'professional_role', 'value': artist_roles}]},
+        {'filters': [{'question': 'professional_role', 'value': designer_programmer_roles}]}
+    ]
+    
+    labels = ['Artist Roles', 'Designer/Programmer Roles']
+    
+    # Create comparison chart
+    title = f"Procedural Tools Experience:\nArtist vs Designer/Programmer Roles"
+    
+    fig = plotter.create_comparison_chart(
+        question_key,
+        filter_configs,
+        labels,
+        title=title,
+        figsize=(16, 10),
+        show_percentages=True,
+        label_wrap_width=30
+    )
+    
+    pdf_path = os.path.join(output_dir, f"q4_comparison_{question_key}.pdf")
+    fig.savefig(pdf_path, format='pdf', bbox_inches='tight', dpi=300)
+    plt.close(fig)
+    
+    print(f"  Saved as: {pdf_path}")
+    return pdf_path
+
 def plot_current_pcg_usage(analyzer, plotter, output_dir):
     """Create plot for current PCG usage question."""
     question_key = 'current_pcg_usage'
@@ -297,6 +337,46 @@ def plot_primary_concerns(analyzer, plotter, output_dir):
     )
     
     pdf_path = os.path.join(output_dir, f"q7_{question_key}.pdf")
+    fig.savefig(pdf_path, format='pdf', bbox_inches='tight', dpi=300)
+    plt.close(fig)
+    
+    print(f"  Saved as: {pdf_path}")
+    return pdf_path
+
+def plot_primary_concerns_comparison(analyzer, plotter, output_dir):
+    """Create comparison plot for primary concerns between design and artist roles."""
+    question_key = 'primary_concerns'
+    question_info = analyzer.get_question_info(question_key)
+    question_text = question_info.get('question', question_key)
+    
+    print(f"Creating comparison plot for: {question_text}")
+    
+    # Define role groups for comparison - design roles vs artist roles
+    design_roles = ['Level Designer', 'Game Designer', 'Programmer/Technical Designer']
+    artist_roles = ['Technical Artist', 'Environment Artist']
+    
+    # Create filter configurations for comparison
+    filter_configs = [
+        {'filters': [{'question': 'professional_role', 'value': design_roles}]},
+        {'filters': [{'question': 'professional_role', 'value': artist_roles}]}
+    ]
+    
+    labels = ['Design Roles', 'Artist Roles']
+    
+    # Create comparison chart
+    title = f"Primary Concerns When Considering Procedural Level Generation:\nDesign vs Artist Roles"
+    
+    fig = plotter.create_comparison_chart(
+        question_key,
+        filter_configs,
+        labels,
+        title=title,
+        figsize=(16, 10),
+        show_percentages=True,
+        label_wrap_width=30
+    )
+    
+    pdf_path = os.path.join(output_dir, f"q7_comparison_{question_key}.pdf")
     fig.savefig(pdf_path, format='pdf', bbox_inches='tight', dpi=300)
     plt.close(fig)
     
@@ -792,6 +872,10 @@ def main():
     pdf_path = plot_procedural_tools_experience(analyzer, plotter, output_dir)
     created_files.append(pdf_path)
     
+    # Question 4 Comparison: Artist vs Designer/Programmer roles
+    pdf_path = plot_procedural_tools_experience_comparison(analyzer, plotter, output_dir)
+    created_files.append(pdf_path)
+    
     # Question 5: Regular chart with wrapping
     pdf_path = plot_current_pcg_usage(analyzer, plotter, output_dir)
     created_files.append(pdf_path)    
@@ -802,6 +886,10 @@ def main():
     
     # Questions 7
     pdf_path = plot_primary_concerns(analyzer, plotter, output_dir)
+    created_files.append(pdf_path)
+    
+    # Question 7 Comparison: Primary concerns across professional roles
+    pdf_path = plot_primary_concerns_comparison(analyzer, plotter, output_dir)
     created_files.append(pdf_path)
     
     # Questions 8

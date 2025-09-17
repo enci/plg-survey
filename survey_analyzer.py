@@ -655,7 +655,8 @@ class SurveyPlotter:
     
     def create_comparison_chart(self, question: str, filter_configs: List[Dict], 
                                labels: List[str], title: Optional[str] = None,
-                               figsize: tuple = (14, 8), save_path: Optional[str] = None) -> mpl_figure.Figure:
+                               figsize: tuple = (14, 8), save_path: Optional[str] = None,
+                               show_percentages: bool = False, label_wrap_width: Optional[int] = None) -> mpl_figure.Figure:
         """
         Create a comparison chart for the same question across different filter conditions.
         
@@ -666,6 +667,8 @@ class SurveyPlotter:
             title: Chart title (auto-generated if None)
             figsize: Figure size tuple
             save_path: Path to save the chart (optional)
+            show_percentages: Show percentages instead of raw counts
+            label_wrap_width: Width for wrapping x-axis labels (optional)
             
         Returns:
             matplotlib Figure object
@@ -706,7 +709,17 @@ class SurveyPlotter:
                 
                 # Get counts for the question
                 counts = self.analyzer.get_question_counts(question)
-                data_sets.append((label, counts))
+                
+                # Calculate total for percentage conversion if needed
+                if show_percentages:
+                    total = sum(counts.values())
+                    if total > 0:
+                        percentages = {k: (v / total) * 100 for k, v in counts.items()}
+                        data_sets.append((label, percentages))
+                    else:
+                        data_sets.append((label, {}))
+                else:
+                    data_sets.append((label, counts))
         
         finally:
             # Restore original state
@@ -721,36 +734,58 @@ class SurveyPlotter:
             all_options.update(counts.keys())
         all_options = sorted(all_options)
         
+        # Apply label wrapping if specified
+        if label_wrap_width:
+            import textwrap
+            wrapped_options = [textwrap.fill(option, width=label_wrap_width, break_long_words=False) 
+                              for option in all_options]
+        else:
+            wrapped_options = all_options
+        
         # Prepare data for plotting
         x = np.arange(len(all_options))
         width = 0.8 / len(data_sets)  # Adjust width based on number of datasets
         
         fig, ax = plt.subplots(figsize=figsize)
         
-        for i, (label, counts) in enumerate(data_sets):
-            values = [counts.get(option, 0) for option in all_options]
+        # Generate colors using consistent colormap approach
+        import matplotlib.cm as cm
+        colormap = cm.get_cmap('Dark2')
+        colors = [colormap(i / len(data_sets)) for i in range(len(data_sets))]
+        
+        for i, (label, values_dict) in enumerate(data_sets):
+            values = [values_dict.get(option, 0) for option in all_options]
             offset = width * (i - len(data_sets)/2 + 0.5)
-            bars = ax.bar(x + offset, values, width, label=label, alpha=0.8)
+            bars = ax.bar(x + offset, values, width, label=label, color=colors[i])
             
-            # Add value labels on bars
+            # Add value labels on bars with consistent styling
             for bar in bars:
                 height = bar.get_height()
                 if height > 0:
-                    ax.text(bar.get_x() + bar.get_width()/2., height,
-                           f'{int(height)}', ha='center', va='bottom', fontsize=8)
+                    if show_percentages:
+                        label_text = f'{height:.1f}%'
+                    else:
+                        label_text = str(int(height))
+                    ax.text(bar.get_x() + bar.get_width()/2., height + max(values) * 0.01,
+                           label_text, ha='center', va='bottom', fontweight='bold')
         
         ax.set_xlabel('Options')
-        ax.set_ylabel('Count')
+        ax.set_ylabel('Percentage' if show_percentages else 'Count')
         ax.set_xticks(x)
-        ax.set_xticklabels(all_options, rotation=45, ha='right')
+        ax.set_xticklabels(wrapped_options, rotation=45, ha='right')
         ax.legend()
         
         if title is None:
             question_info = self.analyzer.get_question_info(question)
-            title = f"{question_info.get('question', question)}\nComparison"
+            base_title = question_info.get('question', question)
+            title = f"{base_title}\nComparison"
         
-        ax.set_title(title)
-        plt.tight_layout()
+        # Ensure title is not None
+        final_title = title if title is not None else "Comparison Chart"
+        ax.set_title(final_title)
+        
+        # Use tight_layout with padding to prevent label cutoff (consistent with other methods)
+        plt.tight_layout(pad=2.0)
         
         if save_path:
             fig.savefig(save_path, dpi=300, bbox_inches='tight')
