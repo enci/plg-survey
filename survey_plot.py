@@ -46,12 +46,12 @@ def wrap_labels(labels, width=25):
 plt.rcParams.update({
     'font.family': 'serif',
     'font.serif': ['Times New Roman', 'DejaVu Serif', 'Bitstream Vera Serif', 'serif'],
-    'font.size': 16,
+    'font.size': 20,
     'axes.titlesize': 18,
-    'axes.labelsize': 16,
-    'xtick.labelsize': 18,
-    'ytick.labelsize': 18,
-    'legend.fontsize': 16,
+    'axes.labelsize': 20,
+    'xtick.labelsize': 16,
+    'ytick.labelsize': 20,
+    'legend.fontsize': 18,
     'figure.titlesize': 20,
     'axes.grid': True,
     'grid.alpha': 0.3,
@@ -76,16 +76,16 @@ def plot_professional_role(analyzer, plotter, output_dir):
         wrapped_title = wrap_text(question_text, width=title_wrap_width)
     else:
         wrapped_title = question_text
-        
+
     fig = plotter.create_bar_chart(
         question_key,
         title=wrapped_title,
         horizontal=True,
-        figsize=(12, 5),  # Back to original size
-        colormap='Dark2',
+        figsize=(12, 6),
         show_percentages=True,
         label_wrap_width=label_wrap_width
     )
+
     
     pdf_path = os.path.join(output_dir, f"q1_{question_key}.pdf")
     fig.savefig(pdf_path, format='pdf', bbox_inches='tight', dpi=300)
@@ -116,10 +116,10 @@ def plot_years_experience(analyzer, plotter, output_dir):
         question_key,
         title=wrapped_title,
         horizontal=True,
-        figsize=(12, 3.5),
-        colormap='Dark2',
+        figsize=(12, 4.5),
         show_percentages=True,
-        label_wrap_width=label_wrap_width
+        label_wrap_width=label_wrap_width,
+        colormap='Blues'
     )
     
     pdf_path = os.path.join(output_dir, f"q2_{question_key}.pdf")
@@ -137,7 +137,7 @@ def plot_game_engines(analyzer, plotter, output_dir):
     
     # Local wrapping settings for this chart
     title_wrap_width = None  # No title wrapping
-    label_wrap_width = None  # No label wrapping
+    label_wrap_width = 25   # Wrap long engine names
     
     # Wrap the title text for better display if specified
     if title_wrap_width:
@@ -147,12 +147,12 @@ def plot_game_engines(analyzer, plotter, output_dir):
     
     print(f"Creating plot for: {question_text}")
     
-    fig = plotter.create_bar_chart(
+    # Create role stacked chart showing cumulative professional role breakdown
+    fig = plotter.create_role_stacked_chart(
         question_key,
         title=wrapped_title,
         horizontal=True,
-        figsize=(12, 4),  # Back to original size
-        colormap='Dark2',
+        figsize=(12, 5),
         show_percentages=True,
         label_wrap_width=label_wrap_width
     )
@@ -186,7 +186,7 @@ def plot_procedural_tools_experience(analyzer, plotter, output_dir):
     fig = plotter.create_matrix_stacked_bar_chart(
         question_key,
         title=wrapped_title,
-        figsize=(14, 6),
+        figsize=(12, 6),
         colormap='bwr',
         horizontal=True,
         label_wrap_width=label_wrap_width
@@ -227,7 +227,7 @@ def plot_procedural_tools_experience_comparison(analyzer, plotter, output_dir):
         filter_configs,
         labels,
         title=title,
-        figsize=(16, 10),
+        figsize=(12, 10),
         show_percentages=True,
         label_wrap_width=30
     )
@@ -246,20 +246,13 @@ def plot_current_pcg_usage(analyzer, plotter, output_dir):
     question_text = question_info.get('question', question_key)
     
     # Local wrapping settings for this chart
-    title_wrap_width = None   # Wrap long titles
     label_wrap_width = 30   # Wrap category labels
-    
-    # Wrap the title text for better display if specified
-    if title_wrap_width:
-        wrapped_title = wrap_text(question_text, width=title_wrap_width)
-    else:
-        wrapped_title = question_text
     
     print(f"Creating plot for: {question_text}")
     
-    fig = plotter.create_bar_chart(
+    fig = plotter.create_role_stacked_chart(
         question_key,
-        title=wrapped_title,
+        title=question_text,
         horizontal=True,
         figsize=(12, 6),
         show_percentages=True,
@@ -279,26 +272,14 @@ def plot_level_generation_frequency(analyzer, plotter, output_dir):
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
     
-    # Local wrapping settings for this chart
-    title_wrap_width = 50   # Wrap long title
-    label_wrap_width = None  # No label wrapping
-    
-    # Wrap the title text for better display if specified
-    if title_wrap_width:
-        wrapped_title = wrap_text(question_text, width=title_wrap_width)
-    else:
-        wrapped_title = question_text
-    
     print(f"Creating plot for: {question_text}")
     
-    fig = plotter.create_bar_chart(
+    fig = plotter.create_role_stacked_chart(
         question_key,
-        title=wrapped_title,
+        title=question_text,
         horizontal=True,
-        figsize=(12, 3.5),
-        colormap='Dark2',
-        show_percentages=True,
-        label_wrap_width=label_wrap_width
+        figsize=(12, 4.5),
+        show_percentages=True
     )
     
     pdf_path = os.path.join(output_dir, f"q6_{question_key}.pdf")
@@ -336,7 +317,7 @@ def plot_level_generation_frequency_comparison(analyzer, plotter, output_dir):
         filter_configs,
         labels,
         title=title,
-        figsize=(16, 8),
+        figsize=(12, 8),
         show_percentages=True,
         label_wrap_width=18
     )
@@ -355,23 +336,15 @@ def plot_primary_concerns(analyzer, plotter, output_dir):
     question_text = question_info.get('question', question_key)
     
     # Local wrapping settings for this chart
-    title_wrap_width = 50   # Wrap long title
     label_wrap_width = 30   # Wrap long labels for concerns
-    
-    # Wrap the title text for better display if specified
-    if title_wrap_width:
-        wrapped_title = wrap_text(question_text, width=title_wrap_width)
-    else:
-        wrapped_title = question_text
     
     print(f"Creating plot for: {question_text}")
     
-    fig = plotter.create_bar_chart(
+    fig = plotter.create_role_stacked_chart(
         question_key,
-        title=wrapped_title,
+        title=question_text,
         horizontal=True,
-        figsize=(14, 8),
-        colormap='Dark2',
+        figsize=(12, 8),
         show_percentages=True,
         label_wrap_width=label_wrap_width
     )
@@ -411,7 +384,7 @@ def plot_primary_concerns_comparison(analyzer, plotter, output_dir):
         filter_configs,
         labels,
         title=title,
-        figsize=(16, 10),
+        figsize=(12, 8),
         show_percentages=True,
         label_wrap_width=30
     )
@@ -430,23 +403,15 @@ def plot_tool_view(analyzer, plotter, output_dir):
     question_text = question_info.get('question', question_key)
     
     # Local wrapping settings for this chart
-    title_wrap_width = 50   # Wrap long title
     label_wrap_width = 35   # Wrap long labels for tool views
-    
-    # Wrap the title text for better display if specified
-    if title_wrap_width:
-        wrapped_title = wrap_text(question_text, width=title_wrap_width)
-    else:
-        wrapped_title = question_text
     
     print(f"Creating plot for: {question_text}")
     
-    fig = plotter.create_bar_chart(
+    fig = plotter.create_role_stacked_chart(
         question_key,
-        title=wrapped_title,
+        title=question_text,
         horizontal=True,
-        figsize=(14, 7),
-        colormap='Dark2',
+        figsize=(12, 8),
         show_percentages=True,
         label_wrap_width=label_wrap_width
     )
@@ -465,23 +430,15 @@ def plot_critical_factors(analyzer, plotter, output_dir):
     question_text = question_info.get('question', question_key)
     
     # Local wrapping settings for this chart
-    title_wrap_width = 50   # Wrap long title
     label_wrap_width = 30   # Wrap labels for factors
-    
-    # Wrap the title text for better display if specified
-    if title_wrap_width:
-        wrapped_title = wrap_text(question_text, width=title_wrap_width)
-    else:
-        wrapped_title = question_text
     
     print(f"Creating plot for: {question_text}")
     
-    fig = plotter.create_bar_chart(
+    fig = plotter.create_role_stacked_chart(
         question_key,
-        title=wrapped_title,
+        title=question_text,
         horizontal=True,
-        figsize=(14, 8),
-        colormap='Dark2',
+        figsize=(12, 8),
         show_percentages=True,
         label_wrap_width=label_wrap_width
     )
@@ -516,7 +473,7 @@ def plot_node_tool_features(analyzer, plotter, output_dir):
         question_key,
         title=wrapped_title,
         horizontal=True,
-        figsize=(16, 9),
+        figsize=(12, 9),
         colormap='Set3',
         max_rank=3,  # Top 3 ranking as specified in the question
         label_wrap_width=label_wrap_width
@@ -535,26 +492,14 @@ def plot_realtime_feedback_importance(analyzer, plotter, output_dir):
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
     
-    # Local wrapping settings for this chart
-    title_wrap_width = 50   # Wrap long title
-    label_wrap_width = None  # No label wrapping needed for short options
-    
-    # Wrap the title text for better display if specified
-    if title_wrap_width:
-        wrapped_title = wrap_text(question_text, width=title_wrap_width)
-    else:
-        wrapped_title = question_text
-    
     print(f"Creating plot for: {question_text}")
     
-    fig = plotter.create_bar_chart(
+    fig = plotter.create_role_stacked_chart(
         question_key,
-        title=wrapped_title,
+        title=question_text,
         horizontal=True,
         figsize=(12, 4),
-        colormap='Dark2',
-        show_percentages=True,
-        label_wrap_width=label_wrap_width
+        show_percentages=True
     )
     
     pdf_path = os.path.join(output_dir, f"q11_{question_key}.pdf")
@@ -571,23 +516,15 @@ def plot_preferred_approach(analyzer, plotter, output_dir):
     question_text = question_info.get('question', question_key)
     
     # Local wrapping settings for this chart
-    title_wrap_width = 50   # Wrap long title
     label_wrap_width = 40   # Wrap long labels for approaches
-    
-    # Wrap the title text for better display if specified
-    if title_wrap_width:
-        wrapped_title = wrap_text(question_text, width=title_wrap_width)
-    else:
-        wrapped_title = question_text
     
     print(f"Creating plot for: {question_text}")
     
-    fig = plotter.create_bar_chart(
+    fig = plotter.create_role_stacked_chart(
         question_key,
-        title=wrapped_title,
+        title=question_text,
         horizontal=True,
-        figsize=(16, 7),
-        colormap='Dark2',
+        figsize=(12, 7),
         show_percentages=True,
         label_wrap_width=label_wrap_width
     )
@@ -606,23 +543,15 @@ def plot_integration_preference(analyzer, plotter, output_dir):
     question_text = question_info.get('question', question_key)
     
     # Local wrapping settings for this chart
-    title_wrap_width = 50   # Wrap long title
     label_wrap_width = 35   # Wrap labels for integration options
-    
-    # Wrap the title text for better display if specified
-    if title_wrap_width:
-        wrapped_title = wrap_text(question_text, width=title_wrap_width)
-    else:
-        wrapped_title = question_text
     
     print(f"Creating plot for: {question_text}")
     
-    fig = plotter.create_bar_chart(
+    fig = plotter.create_role_stacked_chart(
         question_key,
-        title=wrapped_title,
+        title=question_text,
         horizontal=True,
-        figsize=(14, 5),
-        colormap='Dark2',
+        figsize=(12, 5),
         show_percentages=True,
         label_wrap_width=label_wrap_width
     )
@@ -656,7 +585,7 @@ def plot_genre_interest(analyzer, plotter, output_dir):
     fig = plotter.create_matrix_stacked_bar_chart(
         question_key,
         title=wrapped_title,
-        figsize=(14, 6),
+        figsize=(12, 6),
         colormap='RdYlGn',  # Green for interested, red for not interested
         horizontal=True,
         label_wrap_width=label_wrap_width
@@ -691,7 +620,7 @@ def plot_level_representation(analyzer, plotter, output_dir):
         question_key,
         title=wrapped_title,
         horizontal=True,
-        figsize=(16, 7),
+        figsize=(12, 7),
         colormap='Dark2',
         show_percentages=True,
         label_wrap_width=label_wrap_width
@@ -726,8 +655,7 @@ def plot_most_useful_approach(analyzer, plotter, output_dir):
         question_key,
         title=wrapped_title,
         horizontal=True,
-        figsize=(14, 6),
-        colormap='Dark2',
+        figsize=(12, 6),
         show_percentages=True,
         label_wrap_width=label_wrap_width
     )
@@ -761,7 +689,7 @@ def plot_ai_role_preference(analyzer, plotter, output_dir):
         question_key,
         title=wrapped_title,
         horizontal=True,
-        figsize=(16, 7),
+        figsize=(12, 7),
         colormap='Dark2',
         show_percentages=True,
         label_wrap_width=label_wrap_width
@@ -796,8 +724,7 @@ def plot_ai_importance_factors(analyzer, plotter, output_dir):
         question_key,
         title=wrapped_title,
         horizontal=True,
-        figsize=(14, 6.5),
-        colormap='Dark2',
+        figsize=(12, 6.5),
         show_percentages=True,
         label_wrap_width=label_wrap_width
     )
@@ -831,7 +758,7 @@ def plot_ai_concerns(analyzer, plotter, output_dir):
         question_key,
         title=wrapped_title,
         horizontal=True,
-        figsize=(16, 8),
+        figsize=(12, 8),
         colormap='Dark2',
         show_percentages=True,
         label_wrap_width=label_wrap_width
@@ -866,7 +793,7 @@ def plot_desired_solutions(analyzer, plotter, output_dir):
         question_key,
         title=wrapped_title,
         horizontal=True,
-        figsize=(16, 8),
+        figsize=(12, 8),
         colormap='Dark2',
         show_percentages=True,
         label_wrap_width=label_wrap_width
@@ -898,91 +825,97 @@ def main():
     created_files = []
     
     # Create plots using individual functions with local wrapping settings
-    # Questions 1-3: No title wrapping, no label wrapping (original sizes)
-    pdf_path = plot_professional_role(analyzer, plotter, output_dir)
-    created_files.append(pdf_path)
+    # Questions 1
+    #pdf_path = plot_professional_role(analyzer, plotter, output_dir)
+    #created_files.append(pdf_path)
     
+    # Question 2
     pdf_path = plot_years_experience(analyzer, plotter, output_dir)
     created_files.append(pdf_path)
     
-    pdf_path = plot_game_engines(analyzer, plotter, output_dir)
-    created_files.append(pdf_path)
+    # Question 3
+    #pdf_path = plot_game_engines(analyzer, plotter, output_dir)
+    #created_files.append(pdf_path)
     
     # Question 4: Matrix chart with wrapping for better readability
-    pdf_path = plot_procedural_tools_experience(analyzer, plotter, output_dir)
-    created_files.append(pdf_path)
+    #pdf_path = plot_procedural_tools_experience(analyzer, plotter, output_dir)
+    #created_files.append(pdf_path)
     
     # Question 4 Comparison: Artist vs Designer/Programmer roles
-    pdf_path = plot_procedural_tools_experience_comparison(analyzer, plotter, output_dir)
-    created_files.append(pdf_path)
+    #pdf_path = plot_procedural_tools_experience_comparison(analyzer, plotter, output_dir)
+    #created_files.append(pdf_path)
     
-    # Question 5: Regular chart with wrapping
-    pdf_path = plot_current_pcg_usage(analyzer, plotter, output_dir)
-    created_files.append(pdf_path)    
+    # Question 5: Role stacked chart
+    #pdf_path = plot_current_pcg_usage(analyzer, plotter, output_dir)
+    #created_files.append(pdf_path)    
     
-    # Questions 6
-    pdf_path = plot_level_generation_frequency(analyzer, plotter, output_dir)
-    created_files.append(pdf_path)
+    # Question 6: Role stacked chart
+    #pdf_path = plot_level_generation_frequency(analyzer, plotter, output_dir)
+    #created_files.append(pdf_path)
     
     # Question 6 Comparison: Level generation frequency across professional roles
-    pdf_path = plot_level_generation_frequency_comparison(analyzer, plotter, output_dir)
-    created_files.append(pdf_path)
+    #pdf_path = plot_level_generation_frequency_comparison(analyzer, plotter, output_dir)
+    #created_files.append(pdf_path)
     
-    # Questions 7
-    pdf_path = plot_primary_concerns(analyzer, plotter, output_dir)
-    created_files.append(pdf_path)
+    # Question 7: Role stacked chart
+    #pdf_path = plot_primary_concerns(analyzer, plotter, output_dir)
+    #created_files.append(pdf_path)
     
     # Question 7 Comparison: Primary concerns across professional roles
-    pdf_path = plot_primary_concerns_comparison(analyzer, plotter, output_dir)
-    created_files.append(pdf_path)
+    #pdf_path = plot_primary_concerns_comparison(analyzer, plotter, output_dir)
+    #created_files.append(pdf_path)
     
-    # Questions 8
+    # Question 8: Role stacked chart
     pdf_path = plot_tool_view(analyzer, plotter, output_dir)
     created_files.append(pdf_path)
     
-    # Questions 9
+    # Question 9: Role stacked chart
     pdf_path = plot_critical_factors(analyzer, plotter, output_dir)
     created_files.append(pdf_path)
     
     # Questions 10: Ranking question with position distribution
-    pdf_path = plot_node_tool_features(analyzer, plotter, output_dir)
-    created_files.append(pdf_path)
+    # pdf_path = plot_node_tool_features(analyzer, plotter, output_dir)
+    #created_files.append(pdf_path)
     
-    # Questions 11: Regular chart with wrapping
+    # Question 11: Role stacked chart
     pdf_path = plot_realtime_feedback_importance(analyzer, plotter, output_dir)
     created_files.append(pdf_path)
     
-    # Questions 12: Regular charts with wrapping
+    # Question 12: Role stacked chart
     pdf_path = plot_preferred_approach(analyzer, plotter, output_dir)
     created_files.append(pdf_path)
     
-    # Questions 13
+    # Question 13: Role stacked chart
     pdf_path = plot_integration_preference(analyzer, plotter, output_dir)
     created_files.append(pdf_path)
     
     # Questions 14
-    pdf_path = plot_genre_interest(analyzer, plotter, output_dir)
-    created_files.append(pdf_path)
+    #pdf_path = plot_genre_interest(analyzer, plotter, output_dir)
+    #created_files.append(pdf_path)
     
     # Questions 15
-    pdf_path = plot_level_representation(analyzer, plotter, output_dir)
-    created_files.append(pdf_path)
+    #pdf_path = plot_level_representation(analyzer, plotter, output_dir)
+    #created_files.append(pdf_path)
     
-    # Questions 16-20: Additional questions
-    pdf_path = plot_most_useful_approach(analyzer, plotter, output_dir)
-    created_files.append(pdf_path)
+    # Questions 16
+    #pdf_path = plot_most_useful_approach(analyzer, plotter, output_dir)
+    #created_files.append(pdf_path)
     
-    pdf_path = plot_ai_role_preference(analyzer, plotter, output_dir)
-    created_files.append(pdf_path)
+    # Questions 17
+    #pdf_path = plot_ai_role_preference(analyzer, plotter, output_dir)
+    #created_files.append(pdf_path)
     
-    pdf_path = plot_ai_importance_factors(analyzer, plotter, output_dir)
-    created_files.append(pdf_path)
+    # Questions 18
+    #pdf_path = plot_ai_importance_factors(analyzer, plotter, output_dir)
+    #created_files.append(pdf_path)
     
-    pdf_path = plot_ai_concerns(analyzer, plotter, output_dir)
-    created_files.append(pdf_path)
+    # Questions 19
+    #pdf_path = plot_ai_concerns(analyzer, plotter, output_dir)
+    #created_files.append(pdf_path)
     
-    pdf_path = plot_desired_solutions(analyzer, plotter, output_dir)
-    created_files.append(pdf_path)
+    # Questions 20
+    #pdf_path = plot_desired_solutions(analyzer, plotter, output_dir)
+    #created_files.append(pdf_path)
     
     # Summary
     print("=== Summary ===")
