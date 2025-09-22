@@ -728,11 +728,24 @@ class SurveyPlotter:
             if original_filters:
                 self.analyzer.apply_filters()
         
-        # Find all unique options
-        all_options = set()
+        # Find all unique options and preserve original survey order
+        all_options_set = set()
         for _, counts in data_sets:
-            all_options.update(counts.keys())
-        all_options = sorted(all_options)
+            all_options_set.update(counts.keys())
+        
+        # Get the original order from the survey schema
+        question_info = self.analyzer.get_question_info(question)
+        schema_options = question_info.get('options', [])
+        
+        # Preserve original schema order, then add any unexpected options at the end
+        all_options = []
+        for option in schema_options:
+            if option in all_options_set:
+                all_options.append(option)
+                all_options_set.remove(option)
+        
+        # Add any remaining options (e.g., "Other") that weren't in the schema
+        all_options.extend(sorted(all_options_set))
         
         # Apply label wrapping if specified
         if label_wrap_width:
@@ -748,10 +761,31 @@ class SurveyPlotter:
         
         fig, ax = plt.subplots(figsize=figsize)
         
-        # Generate colors using consistent colormap approach
+        # Generate colors using highly contrasting colors for better comparison visibility
         import matplotlib.cm as cm
-        colormap = cm.get_cmap('Dark2')
-        colors = [colormap(i / len(data_sets)) for i in range(len(data_sets))]
+        
+        # Define high-contrast color palette for comparison charts
+        # These colors are specifically chosen for maximum visual distinction
+        contrast_colors = [
+            '#1f77b4',  # Strong blue
+            '#ff7f0e',  # Strong orange
+            '#2ca02c',  # Strong green
+            '#d62728',  # Strong red
+            '#9467bd',  # Strong purple
+            '#8c564b',  # Strong brown
+            '#e377c2',  # Strong pink
+            '#7f7f7f',  # Strong gray
+            '#bcbd22',  # Strong olive
+            '#17becf'   # Strong cyan
+        ]
+        
+        # Use high-contrast colors if we have enough, otherwise fall back to Dark2 with better spacing
+        if len(data_sets) <= len(contrast_colors):
+            colors = [contrast_colors[i] for i in range(len(data_sets))]
+        else:
+            # For more than 10 categories, use Dark2 with maximum spacing
+            colormap = cm.get_cmap('Dark2')
+            colors = [colormap(i / max(len(data_sets)-1, 1)) for i in range(len(data_sets))]
         
         for i, (label, values_dict) in enumerate(data_sets):
             values = [values_dict.get(option, 0) for option in all_options]
@@ -766,8 +800,17 @@ class SurveyPlotter:
                         label_text = f'{height:.1f}%'
                     else:
                         label_text = str(int(height))
-                    ax.text(bar.get_x() + bar.get_width()/2., height + max(values) * 0.01,
+                    ax.text(bar.get_x() + bar.get_width()/2., height + max(values) * 0.02,
                            label_text, ha='center', va='bottom', fontweight='bold')
+        
+        # Find the maximum value across all datasets for proper y-axis scaling
+        all_values = []
+        for _, values_dict in data_sets:
+            all_values.extend(values_dict.values())
+        max_value = max(all_values) if all_values else 0
+        
+        # Set y-axis limits with extra space for percentage labels (20% padding)
+        ax.set_ylim(0, max_value * 1.2)
         
         ax.set_xlabel('Options')
         ax.set_ylabel('Percentage' if show_percentages else 'Count')
@@ -785,7 +828,7 @@ class SurveyPlotter:
         ax.set_title(final_title)
         
         # Use tight_layout with padding to prevent label cutoff (consistent with other methods)
-        plt.tight_layout(pad=2.0)
+        plt.tight_layout(pad=3.0)
         
         if save_path:
             fig.savefig(save_path, dpi=300, bbox_inches='tight')

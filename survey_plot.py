@@ -304,6 +304,46 @@ def plot_level_generation_frequency(analyzer, plotter, output_dir):
     pdf_path = os.path.join(output_dir, f"q6_{question_key}.pdf")
     fig.savefig(pdf_path, format='pdf', bbox_inches='tight', dpi=300)
     plt.close(fig)
+
+    print(f"  Saved as: {pdf_path}")
+    return pdf_path
+
+def plot_level_generation_frequency_comparison(analyzer, plotter, output_dir):
+    """Create comparison plot for level generation frequency between design and artist roles."""
+    question_key = 'level_generation_frequency'
+    question_info = analyzer.get_question_info(question_key)
+    question_text = question_info.get('question', question_key)
+    
+    print(f"Creating comparison plot for: {question_text}")
+    
+    # Define role groups for comparison - design roles vs artist roles
+    design_roles = ['Level Designer', 'Game Designer']
+    artist_roles = ['Technical Artist', 'Environment Artist']
+    
+    # Create filter configurations for comparison
+    filter_configs = [
+        {'filters': [{'question': 'professional_role', 'value': design_roles}]},
+        {'filters': [{'question': 'professional_role', 'value': artist_roles}]}
+    ]
+    
+    labels = ['Design Roles', 'Artist Roles']
+    
+    # Create comparison chart
+    title = f"Frequency of Procedural Level Generation Usage:\nDesign vs Artist Roles"
+    
+    fig = plotter.create_comparison_chart(
+        question_key,
+        filter_configs,
+        labels,
+        title=title,
+        figsize=(16, 8),
+        show_percentages=True,
+        label_wrap_width=18
+    )
+    
+    pdf_path = os.path.join(output_dir, f"q6_comparison_{question_key}.pdf")
+    fig.savefig(pdf_path, format='pdf', bbox_inches='tight', dpi=300)
+    plt.close(fig)
     
     print(f"  Saved as: {pdf_path}")
     return pdf_path
@@ -884,6 +924,10 @@ def main():
     pdf_path = plot_level_generation_frequency(analyzer, plotter, output_dir)
     created_files.append(pdf_path)
     
+    # Question 6 Comparison: Level generation frequency across professional roles
+    pdf_path = plot_level_generation_frequency_comparison(analyzer, plotter, output_dir)
+    created_files.append(pdf_path)
+    
     # Questions 7
     pdf_path = plot_primary_concerns(analyzer, plotter, output_dir)
     created_files.append(pdf_path)
@@ -912,12 +956,15 @@ def main():
     pdf_path = plot_preferred_approach(analyzer, plotter, output_dir)
     created_files.append(pdf_path)
     
+    # Questions 13
     pdf_path = plot_integration_preference(analyzer, plotter, output_dir)
     created_files.append(pdf_path)
     
+    # Questions 14
     pdf_path = plot_genre_interest(analyzer, plotter, output_dir)
     created_files.append(pdf_path)
     
+    # Questions 15
     pdf_path = plot_level_representation(analyzer, plotter, output_dir)
     created_files.append(pdf_path)
     
