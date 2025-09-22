@@ -15,27 +15,10 @@ import matplotlib.pyplot as plt
 import matplotlib.figure as mpl_figure
 import numpy as np
 import textwrap
-from typing import Dict, List, Any, Optional, Union, Set
+from typing import Dict, List, Any, Optional, Union, Set, Tuple
 from dataclasses import dataclass
 from enum import Enum
 from collections import Counter
-
-# Configure matplotlib for better-looking plots
-plt.rcParams.update({
-    'font.family': 'serif',
-    'font.serif': ['Times New Roman', 'DejaVu Serif', 'Bitstream Vera Serif', 'serif'],
-    'font.size': 10,
-    'axes.titlesize': 18,
-    'axes.labelsize': 16,
-    'xtick.labelsize': 14,
-    'ytick.labelsize': 14,
-    'legend.fontsize': 14,
-    'figure.titlesize': 20,
-    'axes.grid': True,
-    'grid.alpha': 0.3,
-    'axes.axisbelow': True
-})
-
 
 class FilterLogic(Enum):
     """Enum for filter logic operations"""
@@ -540,11 +523,139 @@ class SurveyPlotter:
             analyzer: SurveyAnalyzer instance to use for data
         """
         self.analyzer = analyzer
+        # Pre-generate color palette using golden ratio for consistent coloring
+        self.colors = self._generate_base_colors(50)  # Generate 50 base colors
+        
+        # Define role-specific color mapping for consistent professional role colors
+        self.role_colors = {
+            'Programmer/Technical Designer': '#0051CC',    # Blue
+            'Technical Artist': '#8DCC00',                # Green
+            'Environment Artist': '#CC00C8',              # Magenta
+            'Game Designer': '#00CC93',                   # Teal
+            'Academic/Researcher': '#CC5800',             # Orange
+            'Level Designer': '#1C00CC',                  # Purple
+            'Other': '#1ECC00'                           # Light Green
+        }
+        
+    def _hsv_to_rgb(self, h: float, s: float, v: float) -> tuple:
+        """
+        Convert HSV color values to RGB.
+        
+        Args:
+            h: Hue (0-1)
+            s: Saturation (0-1) 
+            v: Value/Brightness (0-1)
+            
+        Returns:
+            Tuple of (r, g, b) values (0-255)
+        """
+        i = int(h * 6)
+        f = h * 6 - i
+        p = v * (1 - s)
+        q = v * (1 - f * s)
+        t = v * (1 - (1 - f) * s)
+        
+        remainder = i % 6
+        if remainder == 0:
+            r, g, b = v, t, p
+        elif remainder == 1:
+            r, g, b = q, v, p
+        elif remainder == 2:
+            r, g, b = p, v, t
+        elif remainder == 3:
+            r, g, b = p, q, v
+        elif remainder == 4:
+            r, g, b = t, p, v
+        else:  # remainder == 5
+            r, g, b = v, p, q
+            
+        return (int(r * 255), int(g * 255), int(b * 255))
+    
+    def _rgb_to_hex(self, r: int, g: int, b: int) -> str:
+        """
+        Convert RGB values to hex color string.
+        
+        Args:
+            r, g, b: RGB values (0-255)
+            
+        Returns:
+            Hex color string (e.g., '#FF0000')
+        """
+        return f'#{r:02X}{g:02X}{b:02X}'
+    
+    def _generate_base_colors(self, count: int) -> List[str]:
+        """
+        Generate a palette of colors using golden ratio distribution for optimal visual separation.
+        Based on the JavaScript generateColors function.
+        
+        Args:
+            count: Number of colors to generate
+            
+        Returns:
+            List of hex color strings
+        """
+        colors = []
+        hue = 0.6  # Starting hue
+        hue_increment = 0.618033988749895  # Golden ratio for optimal distribution
+        
+        for i in range(count):
+            saturation = 1.0  # Full saturation for vibrant colors
+            value = 0.8  # Slightly dimmed for better readability
+            
+            # Convert HSV to RGB and then to hex
+            r, g, b = self._hsv_to_rgb(hue, saturation, value)
+            color = self._rgb_to_hex(r, g, b)
+            colors.append(color)
+            
+            # Increment hue by golden ratio for optimal color separation
+            hue += hue_increment
+            hue %= 1.0  # Wrap around to stay within [0, 1]
+            
+        return colors
+    
+    def get_colors(self, count: int, alpha: float = 1.0, colormap: Optional[str] = None) -> List[str]:
+        """
+        Get a list of colors for plotting.
+        
+        Args:
+            count: Number of colors needed
+            alpha: Transparency level (0.0-1.0, default 1.0 for opaque)
+            colormap: Optional matplotlib colormap name. If None, uses golden ratio system.
+            
+        Returns:
+            List of color strings (hex if alpha=1.0, rgba if alpha<1.0)
+        """
+        if colormap is not None:
+            # Use matplotlib colormap
+            import matplotlib.cm as cm
+            import matplotlib.colors as mcolors
+            cmap = cm.get_cmap(colormap)
+            colors = [mcolors.to_hex(cmap(i / count)) for i in range(count)]
+        else:
+            # Use golden ratio color generation (default)
+            if count <= len(self.colors):
+                colors = self.colors[:count]
+            else:
+                # If we need more colors than pre-generated, generate more
+                colors = self._generate_base_colors(count)
+            
+        if alpha == 1.0:
+            return colors
+        else:
+            # Convert to RGBA format for transparency
+            rgba_colors = []
+            for hex_color in colors:
+                # Convert hex to RGB
+                r = int(hex_color[1:3], 16)
+                g = int(hex_color[3:5], 16)
+                b = int(hex_color[5:7], 16)
+                rgba_colors.append(f'rgba({r}, {g}, {b}, {alpha})')
+            return rgba_colors
         
     def create_bar_chart(self, question: str, title: Optional[str] = None, 
                         filtered: bool = True, top_n: Optional[int] = None,
                         horizontal: bool = True, figsize: tuple = (10, 6),
-                        save_path: Optional[str] = None, colormap: str = 'Dark2',
+                        save_path: Optional[str] = None, colormap: Optional[str] = None,
                         show_percentages: bool = False, label_wrap_width: Optional[int] = None) -> mpl_figure.Figure:
         """
         Create a bar chart for a question's response distribution.
@@ -557,7 +668,7 @@ class SurveyPlotter:
             horizontal: Create horizontal bar chart if True
             figsize: Figure size tuple
             save_path: Path to save the chart (optional)
-            colormap: Matplotlib colormap name for bar colors
+            colormap: Optional matplotlib colormap name (defaults to golden ratio system)
             show_percentages: If True, show percentages instead of counts
             label_wrap_width: Width for label wrapping (None = no wrapping)
             
@@ -596,9 +707,8 @@ class SurveyPlotter:
         
         fig, ax = plt.subplots(figsize=figsize)
         
-        # Generate colors using the specified colormap
-        import matplotlib.cm as cm
-        colors = cm.get_cmap(colormap)(np.linspace(0, 1, len(labels)))
+        # Generate colors using colormap if specified, otherwise golden ratio system
+        colors = self.get_colors(len(labels), colormap=colormap)
         
         if horizontal:
             bars = ax.barh(range(len(labels)), display_values, color=colors)
@@ -609,7 +719,7 @@ class SurveyPlotter:
             
             # Extend x-axis to make room for labels
             max_value = max(display_values) if display_values else 0
-            ax.set_xlim(0, max_value * 1.15)  # Add 15% padding
+            ax.set_xlim(0, max_value * 1.22)  # Add 15% padding
             
             # Add value labels on bars
             for i, bar in enumerate(bars):
@@ -761,31 +871,8 @@ class SurveyPlotter:
         
         fig, ax = plt.subplots(figsize=figsize)
         
-        # Generate colors using highly contrasting colors for better comparison visibility
-        import matplotlib.cm as cm
-        
-        # Define high-contrast color palette for comparison charts
-        # These colors are specifically chosen for maximum visual distinction
-        contrast_colors = [
-            '#1f77b4',  # Strong blue
-            '#ff7f0e',  # Strong orange
-            '#2ca02c',  # Strong green
-            '#d62728',  # Strong red
-            '#9467bd',  # Strong purple
-            '#8c564b',  # Strong brown
-            '#e377c2',  # Strong pink
-            '#7f7f7f',  # Strong gray
-            '#bcbd22',  # Strong olive
-            '#17becf'   # Strong cyan
-        ]
-        
-        # Use high-contrast colors if we have enough, otherwise fall back to Dark2 with better spacing
-        if len(data_sets) <= len(contrast_colors):
-            colors = [contrast_colors[i] for i in range(len(data_sets))]
-        else:
-            # For more than 10 categories, use Dark2 with maximum spacing
-            colormap = cm.get_cmap('Dark2')
-            colors = [colormap(i / max(len(data_sets)-1, 1)) for i in range(len(data_sets))]
+        # Generate colors using golden ratio color system for optimal visual separation
+        colors = self.get_colors(len(data_sets), colormap=None)  # Always use golden ratio for comparison clarity
         
         for i, (label, values_dict) in enumerate(data_sets):
             values = [values_dict.get(option, 0) for option in all_options]
@@ -888,7 +975,8 @@ class SurveyPlotter:
     def create_pie_chart(self, question: str, title: Optional[str] = None,
                         filtered: bool = True, top_n: Optional[int] = None,
                         figsize: tuple = (8, 8), save_path: Optional[str] = None,
-                        colormap: str = 'Set3') -> mpl_figure.Figure:
+                        colormap: Optional[str] = None, show_percentages: bool = True,
+                        show_counts: bool = False, label_wrap_width: Optional[int] = None) -> mpl_figure.Figure:
         """
         Create a pie chart for a question's response distribution.
         
@@ -899,7 +987,10 @@ class SurveyPlotter:
             top_n: Show only top N responses, group others as "Other"
             figsize: Figure size tuple
             save_path: Path to save the chart (optional)
-            colormap: Matplotlib colormap name for slice colors
+            colormap: Optional matplotlib colormap name (defaults to golden ratio system)
+            show_percentages: If True, show percentages on pie slices
+            show_counts: If True, show counts on pie slices (in addition to or instead of percentages)
+            label_wrap_width: Width for wrapping pie slice labels (None = no wrapping)
             
         Returns:
             matplotlib Figure object
@@ -921,14 +1012,38 @@ class SurveyPlotter:
         
         labels, values = zip(*sorted_items) if sorted_items else ([], [])
         
+        # Wrap long labels for better display if specified
+        if label_wrap_width:
+            wrapped_labels = [textwrap.fill(label, width=label_wrap_width, break_long_words=False) for label in labels]
+        else:
+            wrapped_labels = labels
+        
         fig, ax = plt.subplots(figsize=figsize)
         
-        # Generate colors using the specified colormap
-        import matplotlib.cm as cm
-        colors = [cm.get_cmap(colormap)(i / len(labels)) for i in range(len(labels))]
+        # Generate colors using colormap if specified, otherwise golden ratio system
+        colors = self.get_colors(len(labels), colormap=colormap)
         
-        pie_result = ax.pie(values, labels=labels, autopct='%1.1f%%', startangle=90,
-                           colors=colors, shadow=True, explode=[0.05] * len(labels))
+        # Configure autopct based on show_percentages and show_counts parameters
+        autopct_format = None
+        if show_percentages and show_counts:
+            # Show both percentages and counts
+            def autopct_both(pct):
+                absolute = int(pct/100. * sum(values))
+                return f'{pct:.1f}%\n({absolute})'
+            autopct_format = autopct_both
+        elif show_percentages:
+            # Show only percentages
+            autopct_format = '%1.1f%%'
+        elif show_counts:
+            # Show only counts
+            def autopct_counts(pct):
+                absolute = int(pct/100. * sum(values))
+                return f'{absolute}'
+            autopct_format = autopct_counts
+        # If neither is True, autopct_format remains None (no labels)
+        
+        pie_result = ax.pie(values, labels=wrapped_labels, autopct=autopct_format, startangle=90,
+                           colors=colors, shadow=True, explode=[0.05] * len(wrapped_labels))
         
         if title is None:
             question_info = self.analyzer.get_question_info(question)
@@ -1039,7 +1154,7 @@ class SurveyPlotter:
     
     def create_matrix_stacked_bar_chart(self, matrix_question: str, title: Optional[str] = None,
                                        filtered: bool = True, figsize: tuple = (14, 10),
-                                       save_path: Optional[str] = None, colormap: str = 'Set3',
+                                       save_path: Optional[str] = None, colormap: Optional[str] = None,
                                        horizontal: bool = True, label_wrap_width: Optional[int] = None) -> mpl_figure.Figure:
         """
         Create a stacked bar chart for matrix-type questions (like Likert scales).
@@ -1051,7 +1166,7 @@ class SurveyPlotter:
             filtered: Use filtered data if True
             figsize: Figure size tuple
             save_path: Path to save the chart (optional)
-            colormap: Matplotlib colormap name
+            colormap: Optional matplotlib colormap name (defaults to golden ratio system)
             horizontal: If True, create horizontal bars
             label_wrap_width: Width for label wrapping (None = default wrapping)
             
@@ -1088,8 +1203,8 @@ class SurveyPlotter:
         # Create the plot
         fig, ax = plt.subplots(figsize=figsize)
         
-        # Generate colors for different rating levels
-        colors = plt.cm.get_cmap(colormap)(np.linspace(0, 1, len(all_ratings)))
+        # Generate colors using colormap if specified, otherwise golden ratio system
+        colors = self.get_colors(len(all_ratings), colormap=colormap)
         
         if horizontal:
             # Create horizontal stacked bars
@@ -1139,7 +1254,7 @@ class SurveyPlotter:
     
     def create_ranking_weighted_chart(self, ranking_question: str, title: Optional[str] = None,
                                      filtered: bool = True, figsize: tuple = (14, 8),
-                                     save_path: Optional[str] = None, colormap: str = 'viridis',
+                                     save_path: Optional[str] = None, colormap: Optional[str] = None,
                                      horizontal: bool = True, max_rank: int = 3,
                                      label_wrap_width: Optional[int] = None) -> mpl_figure.Figure:
         """
@@ -1151,7 +1266,7 @@ class SurveyPlotter:
             filtered: Use filtered data if True
             figsize: Figure size tuple
             save_path: Path to save the chart (optional)
-            colormap: Matplotlib colormap name
+            colormap: Optional matplotlib colormap name (defaults to golden ratio system)
             horizontal: If True, create horizontal bars
             max_rank: Maximum rank to consider (e.g., 3 for "top 3")
             label_wrap_width: Width for label wrapping (None = default wrapping)
@@ -1178,8 +1293,8 @@ class SurveyPlotter:
         # Create the plot
         fig, ax = plt.subplots(figsize=figsize)
         
-        # Generate colors using colormap
-        colors = plt.cm.get_cmap(colormap)(np.linspace(0, 1, len(items)))
+        # Generate colors using colormap if specified, otherwise golden ratio system
+        colors = self.get_colors(len(items), colormap=colormap)
         
         if horizontal:
             bars = ax.barh(wrapped_items, values, color=colors, alpha=0.8)
@@ -1225,7 +1340,7 @@ class SurveyPlotter:
     
     def create_ranking_position_chart(self, ranking_question: str, title: Optional[str] = None,
                                      filtered: bool = True, figsize: tuple = (14, 8),
-                                     save_path: Optional[str] = None, colormap: str = 'Set3',
+                                     save_path: Optional[str] = None, colormap: Optional[str] = None,
                                      horizontal: bool = True, max_rank: int = 3,
                                      label_wrap_width: Optional[int] = None) -> mpl_figure.Figure:
         """
@@ -1238,7 +1353,7 @@ class SurveyPlotter:
             filtered: Use filtered data if True
             figsize: Figure size tuple
             save_path: Path to save the chart (optional)
-            colormap: Matplotlib colormap name
+            colormap: Optional matplotlib colormap name (defaults to golden ratio system)
             horizontal: If True, create horizontal bars
             max_rank: Maximum rank to consider (e.g., 3 for "top 3")
             label_wrap_width: Width for label wrapping (None = default wrapping)
@@ -1271,8 +1386,8 @@ class SurveyPlotter:
         # Create the plot
         fig, ax = plt.subplots(figsize=figsize)
         
-        # Generate colors for different ranks
-        colors = plt.cm.get_cmap(colormap)(np.linspace(0, 1, max_rank))
+        # Generate colors using colormap if specified, otherwise golden ratio system
+        colors = self.get_colors(max_rank, colormap=colormap)
         
         if horizontal:
             # Create horizontal stacked bars
@@ -1311,6 +1426,314 @@ class SurveyPlotter:
         if save_path:
             fig.savefig(save_path, dpi=300, bbox_inches='tight')
             print(f"Ranking position chart saved to {save_path}")
+        
+        return fig
+
+    def create_demographic_breakdown_chart(self, question: str, demographic_question: str = 'professional_role',
+                                          title: Optional[str] = None, horizontal: bool = True,
+                                          figsize: Tuple[int, int] = (12, 8), colormap: Optional[str] = None,
+                                          show_percentages: bool = False, label_wrap_width: Optional[int] = None,
+                                          save_path: Optional[str] = None) -> plt.Figure:
+        """
+        Create a chart showing responses broken down by demographics (e.g., professional roles).
+        
+        Args:
+            question: Main question to analyze
+            demographic_question: Question to use for demographic breakdown (default: 'professional_role')
+            title: Chart title (optional)
+            horizontal: Whether to create horizontal bars
+            figsize: Figure size tuple
+            colormap: Matplotlib colormap to use (optional)
+            show_percentages: Whether to show percentages on bars
+            label_wrap_width: Width for wrapping labels
+            save_path: Path to save the figure
+            
+        Returns:
+            matplotlib Figure object
+        """
+        # Get demographic categories (e.g., professional roles)
+        demographic_data = self.analyzer.get_question_counts(demographic_question)
+        demographic_categories = list(demographic_data.keys())
+        
+        # Get main question data broken down by demographics
+        main_question_data = self.analyzer.get_question_counts(question)
+        main_categories = list(main_question_data.keys())
+        
+        # Create matrix: main_categories x demographic_categories
+        breakdown_data = {}
+        
+        for demographic in demographic_categories:
+            # Filter by this demographic
+            self.analyzer.clear_filters()
+            self.analyzer.add_filter(demographic_question, demographic)
+            filtered_responses = self.analyzer.apply_filters()
+            
+            # Get counts for main question in this demographic
+            demographic_counts = self.analyzer.get_question_counts(question, filtered=True)
+            breakdown_data[demographic] = demographic_counts
+        
+        # Clear filters
+        self.analyzer.clear_filters()
+        
+        # Prepare data for plotting
+        # Matrix where rows are main categories, columns are demographics
+        plot_data = []
+        for main_cat in main_categories:
+            row = []
+            for demo_cat in demographic_categories:
+                count = breakdown_data[demo_cat].get(main_cat, 0)
+                row.append(count)
+            plot_data.append(row)
+        
+        plot_data = np.array(plot_data)
+        
+        # Get colors - use same colors as the demographic question would use
+        colors = self.get_colors(len(demographic_categories), colormap=colormap)
+        
+        # Wrap labels if specified
+        if label_wrap_width:
+            wrapped_main_categories = [textwrap.fill(cat, width=label_wrap_width, break_long_words=False) for cat in main_categories]
+            wrapped_demographic_categories = [textwrap.fill(cat, width=label_wrap_width, break_long_words=False) for cat in demographic_categories]
+        else:
+            wrapped_main_categories = main_categories
+            wrapped_demographic_categories = demographic_categories
+        
+        # Create figure
+        fig, ax = plt.subplots(figsize=figsize)
+        
+        if horizontal:
+            # Create horizontal grouped bars
+            bar_width = 0.8 / len(demographic_categories)
+            y_positions = np.arange(len(main_categories))
+            
+            for i, demographic in enumerate(demographic_categories):
+                values = plot_data[:, i]
+                y_pos = y_positions + i * bar_width - (len(demographic_categories) - 1) * bar_width / 2
+                
+                bars = ax.barh(y_pos, values, bar_width, 
+                              label=wrapped_demographic_categories[i], 
+                              color=colors[i], alpha=0.8)
+                
+                if show_percentages:
+                    total = np.sum(values)
+                    if total > 0:
+                        for j, (bar, value) in enumerate(zip(bars, values)):
+                            if value > 0:
+                                percentage = (value / total) * 100
+                                ax.text(bar.get_width() + 0.1, bar.get_y() + bar.get_height()/2,
+                                       f'{percentage:.1f}%', ha='left', va='center', fontsize=10)
+            
+            ax.set_yticks(y_positions)
+            ax.set_yticklabels(wrapped_main_categories)
+            ax.set_xlabel('Number of Responses')
+            ax.set_ylabel(question.replace('_', ' ').title())
+            ax.invert_yaxis()
+            
+        else:
+            # Create vertical grouped bars
+            bar_width = 0.8 / len(demographic_categories)
+            x_positions = np.arange(len(main_categories))
+            
+            for i, demographic in enumerate(demographic_categories):
+                values = plot_data[:, i]
+                x_pos = x_positions + i * bar_width - (len(demographic_categories) - 1) * bar_width / 2
+                
+                bars = ax.bar(x_pos, values, bar_width, 
+                             label=wrapped_demographic_categories[i], 
+                             color=colors[i], alpha=0.8)
+                
+                if show_percentages:
+                    total = np.sum(values)
+                    if total > 0:
+                        for j, (bar, value) in enumerate(zip(bars, values)):
+                            if value > 0:
+                                percentage = (value / total) * 100
+                                ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.1,
+                                       f'{percentage:.1f}%', ha='center', va='bottom', fontsize=10)
+            
+            ax.set_xticks(x_positions)
+            ax.set_xticklabels(wrapped_main_categories, rotation=45, ha='right')
+            ax.set_ylabel('Number of Responses')
+            ax.set_xlabel(question.replace('_', ' ').title())
+        
+        # Add legend
+        ax.legend(title=demographic_question.replace('_', ' ').title(), 
+                 bbox_to_anchor=(1.05, 1), loc='upper left')
+        
+        # Set title
+        if title is None:
+            question_info = self.analyzer.get_question_info(question)
+            demo_info = self.analyzer.get_question_info(demographic_question)
+            title = f"{question_info.get('question', question)}\nBreakdown by {demo_info.get('question', demographic_question)}"
+        
+        ax.set_title(title)
+        plt.tight_layout()
+        
+        if save_path:
+            fig.savefig(save_path, dpi=300, bbox_inches='tight')
+            print(f"Demographic breakdown chart saved to {save_path}")
+        
+        return fig
+
+    def create_role_stacked_chart(self, question: str, title: Optional[str] = None,
+                                 horizontal: bool = True, figsize: Tuple[int, int] = (12, 8),
+                                 show_percentages: bool = True, label_wrap_width: Optional[int] = None,
+                                 save_path: Optional[str] = None) -> plt.Figure:
+        """
+        Create a stacked bar chart showing responses broken down by professional roles.
+        Each role is stacked cumulatively to show the percentage distribution.
+        
+        Args:
+            question: Question key to analyze
+            title: Chart title (optional)
+            horizontal: Whether to create horizontal bars
+            figsize: Figure size tuple
+            show_percentages: Whether to show cumulative percentages at end of bars
+            label_wrap_width: Width for wrapping labels
+            save_path: Path to save the figure
+            
+        Returns:
+            matplotlib Figure object
+        """
+        # Get all professional roles in the dataset
+        role_data = self.analyzer.get_question_counts('professional_role')
+        roles = list(role_data.keys())
+        
+        # Get main question data
+        main_question_data = self.analyzer.get_question_counts(question)
+        main_categories = list(main_question_data.keys())
+        
+        # Calculate total responses for percentage calculation
+        total_responses = len(self.analyzer.responses)
+        
+        # Create data matrix: main_categories x roles
+        role_breakdown = {}
+        
+        for role in roles:
+            # Filter by this role
+            self.analyzer.clear_filters()
+            
+            if role == 'Other':
+                # For "Other" category, we need to filter by actual role values that get grouped as "Other"
+                # These are roles not in the standard set
+                standard_roles = {'Programmer/Technical Designer', 'Technical Artist', 'Environment Artist',
+                                'Game Designer', 'Academic/Researcher', 'Level Designer'}
+                
+                # Find all non-standard role values
+                other_role_values = []
+                for response in self.analyzer.responses:
+                    resp_role = response.get('professional_role')
+                    if resp_role and resp_role not in standard_roles:
+                        other_role_values.append(resp_role)
+                
+                # Filter by any of these "other" role values
+                if other_role_values:
+                    # Use OR logic for multiple role values
+                    self.analyzer.set_filter_logic('OR')
+                    for other_role in set(other_role_values):  # Remove duplicates
+                        self.analyzer.add_filter('professional_role', other_role)
+                    filtered_responses = self.analyzer.apply_filters()
+                else:
+                    # No "other" roles found
+                    filtered_responses = pd.DataFrame()
+            else:
+                # Standard role filtering
+                self.analyzer.add_filter('professional_role', role)
+                filtered_responses = self.analyzer.apply_filters()
+            
+            # Get counts for main question in this role
+            role_counts = self.analyzer.get_question_counts(question, filtered=True)
+            role_breakdown[role] = role_counts
+        
+        # Clear filters and reset logic
+        self.analyzer.clear_filters()
+        self.analyzer.set_filter_logic('AND')  # Reset to default
+        
+        # Prepare stacked percentage data
+        # Each main category will have a stack of role contributions as percentages
+        stack_data = {}
+        for role in roles:
+            stack_data[role] = [(role_breakdown[role].get(cat, 0) / total_responses) * 100 for cat in main_categories]
+        
+        # Get role colors
+        role_colors = [self.role_colors.get(role, '#CCCCCC') for role in roles]
+        
+        # Wrap labels if specified
+        if label_wrap_width:
+            wrapped_main_categories = [textwrap.fill(cat, width=label_wrap_width, break_long_words=False) for cat in main_categories]
+        else:
+            wrapped_main_categories = main_categories
+        
+        # Create figure
+        fig, ax = plt.subplots(figsize=figsize)
+        
+        if horizontal:
+            # Create horizontal stacked bars
+            left = np.zeros(len(main_categories))
+            bars = []
+            
+            for i, role in enumerate(roles):
+                values = stack_data[role]
+                bars.append(ax.barh(wrapped_main_categories, values, left=left, 
+                                   label=role, color=role_colors[i], alpha=0.8))
+                left += values
+            
+            # Show cumulative percentages at the end of bars if requested
+            if show_percentages:
+                max_percentage = max(left) if len(left) > 0 else 0
+                for j, cumulative_percentage in enumerate(left):
+                    if cumulative_percentage > 0:
+                        ax.text(cumulative_percentage + 0.5, j, f'{cumulative_percentage:.1f}%', 
+                               ha='left', va='center', fontsize=20, fontweight='bold')
+                
+                # Extend x-axis to accommodate percentage text within chart area
+                if max_percentage > 0:
+                    ax.set_xlim(0, max_percentage + 12)  # Add extra space for text
+            
+            ax.set_xlabel('Percentage of Total Responses')
+            # Remove y-axis label as requested
+            ax.invert_yaxis()  # Top category at top
+            
+        else:
+            # Create vertical stacked bars
+            bottom = np.zeros(len(main_categories))
+            bars = []
+            
+            for i, role in enumerate(roles):
+                values = stack_data[role]
+                bars.append(ax.bar(wrapped_main_categories, values, bottom=bottom,
+                                  label=role, color=role_colors[i], alpha=0.8))
+                bottom += values
+            
+            # Show cumulative percentages at the end of bars if requested
+            if show_percentages:
+                max_percentage = max(bottom) if len(bottom) > 0 else 0
+                for j, cumulative_percentage in enumerate(bottom):
+                    if cumulative_percentage > 0:
+                        ax.text(j, cumulative_percentage + 0.5, f'{cumulative_percentage:.1f}%', 
+                               ha='center', va='bottom', fontsize=10, fontweight='bold')
+                
+                # Extend y-axis to accommodate percentage text within chart area
+                if max_percentage > 0:
+                    ax.set_ylim(0, max_percentage + 8)  # Add extra space for text
+            
+            ax.set_ylabel('Percentage of Total Responses')
+            # Remove x-axis label as requested when horizontal=False
+            plt.xticks(rotation=45, ha='right')
+        
+        # Remove legend as requested - colors are consistent with role mapping
+        
+        # Set title
+        if title is None:
+            question_info = self.analyzer.get_question_info(question)
+            title = f"{question_info.get('question', question)}\nBreakdown by Professional Role"
+        
+        ax.set_title(title)
+        plt.tight_layout()
+        
+        if save_path:
+            fig.savefig(save_path, dpi=300, bbox_inches='tight')
+            print(f"Role stacked chart saved to {save_path}")
         
         return fig
 
