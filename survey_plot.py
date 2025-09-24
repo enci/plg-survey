@@ -134,7 +134,7 @@ def plot_game_engines(analyzer, plotter, output_dir):
     question_key = 'game_engines'
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
-    
+
     # Local wrapping settings for this chart
     title_wrap_width = None  # No title wrapping
     label_wrap_width = 25   # Wrap long engine names
@@ -244,7 +244,8 @@ def plot_current_pcg_usage(analyzer, plotter, output_dir):
     question_key = 'current_pcg_usage'
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
-    
+    analyzer.clear_filters()
+
     # Local wrapping settings for this chart
     label_wrap_width = 30   # Wrap category labels
     
