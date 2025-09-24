@@ -64,22 +64,43 @@ class SurveyAnalyzer:
         self._load_data()
     
     def _load_data(self):
-        """Load schema and survey response data from JSON files."""
+        """Load schema and survey response data from JSON files. Non-standard answers are stored as 'Other'."""
         try:
             with open(self.schema_path, 'r', encoding='utf-8') as f:
                 self.schema = json.load(f)
-            
+
             with open(self.data_path, 'r', encoding='utf-8') as f:
-                self.responses = json.load(f)
-            
-            # Convert to DataFrame for easier analysis
+                raw_responses = json.load(f)
+
+            # Clean responses: replace non-standard answers with 'Other'
+            cleaned_responses = []
+            if self.schema is not None:
+                for response in raw_responses:
+                    cleaned = response.copy()
+                    for q_key, q_info in self.schema['questions'].items():
+                        options = q_info.get('options', [])
+                        q_type = q_info.get('type', '')
+                        if q_key in cleaned:
+                            val = cleaned[q_key]
+                            if options:
+                                if q_type == 'multiple_choice' and isinstance(val, list):
+                                    cleaned[q_key] = [v if v in options else 'Other' for v in val]
+                                elif q_type == 'single_choice' and isinstance(val, str):
+                                    if val not in options:
+                                        cleaned[q_key] = 'Other'
+                                # For other types, leave as is
+                    cleaned_responses.append(cleaned)
+            else:
+                cleaned_responses = raw_responses
+
+            self.responses = cleaned_responses
             self.df = pd.DataFrame(self.responses)
             self.filtered_data = self.df.copy()
-            
+
             if self.responses and self.schema:
                 print(f"Loaded {len(self.responses)} survey responses")
                 print(f"Available questions: {list(self.schema['questions'].keys())}")
-            
+
         except FileNotFoundError as e:
             raise FileNotFoundError(f"Could not find file: {e}")
         except json.JSONDecodeError as e:
@@ -291,7 +312,7 @@ class SurveyAnalyzer:
         
         return values
     
-    def get_question_counts(self, question: str, filtered: bool = True, group_other: bool = True) -> Dict[str, int]:
+    def get_question_counts(self, question: str, filtered: bool = True, group_other: bool = False) -> Dict[str, int]:
         """
         Get count distribution for a specific question.
         
@@ -320,30 +341,11 @@ class SurveyAnalyzer:
                     flattened_values.append(str(value))
             values = flattened_values
         
-        # Get valid options from schema if grouping "Other"
-        valid_options = set()
-        if group_other:
-            schema_options = self.get_question_options(question)
-            if schema_options:  # Only apply if options are defined in schema
-                valid_options = set(schema_options)
-        
         # Count occurrences
         counts = {}
-        other_count = 0
-        
         for value in values:
-            # Convert to string to ensure hashability
             value_str = str(value) if not isinstance(value, str) else value
-            
-            if group_other and valid_options and value_str not in valid_options:
-                other_count += 1
-            else:
-                counts[value_str] = counts.get(value_str, 0) + 1
-        
-        # Add "Other" category if there are ungrouped values
-        if other_count > 0:
-            counts["Other"] = other_count
-        
+            counts[value_str] = counts.get(value_str, 0) + 1
         return counts
     
     def get_matrix_counts(self, question: str, filtered: bool = True) -> Dict[str, Dict[str, int]]:
@@ -458,24 +460,6 @@ class SurveyAnalyzer:
             'available_questions': len(self.schema['questions'])
         }
     
-    def print_summary(self):
-        """Print a formatted summary of the analyzer state."""
-        summary = self.get_summary()
-        
-        print("\n=== Survey Analyzer Summary ===")
-        print(f"Total responses: {summary['total_responses']}")
-        print(f"Filtered responses: {summary['filtered_responses']}")
-        print(f"Active filters: {summary['active_filters']}")
-        print(f"Filter logic: {summary['filter_logic']}")
-        print(f"Available questions: {summary['available_questions']}")
-        
-        if self.filters:
-            print("\nActive filters:")
-            for i, filter_str in enumerate(summary['filters']):
-                print(f"  {i}: {filter_str}")
-        else:
-            print("\nNo active filters")
-    
     def get_filtered_dataframe(self) -> pd.DataFrame:
         """
         Get the current filtered DataFrame.
@@ -486,28 +470,6 @@ class SurveyAnalyzer:
         self._ensure_loaded()
         assert self.filtered_data is not None
         return self.filtered_data.copy()
-    
-    def export_filtered_data(self, output_path: str, format: str = 'json'):
-        """
-        Export filtered data to a file.
-        
-        Args:
-            output_path: Path to save the filtered data
-            format: Output format ('json', 'csv', 'excel')
-        """
-        self._ensure_loaded()
-        assert self.filtered_data is not None
-        
-        if format.lower() == 'json':
-            self.filtered_data.to_json(output_path, orient='records', indent=2)
-        elif format.lower() == 'csv':
-            self.filtered_data.to_csv(output_path, index=False)
-        elif format.lower() == 'excel':
-            self.filtered_data.to_excel(output_path, index=False)
-        else:
-            raise ValueError(f"Unsupported format: {format}")
-        
-        print(f"Exported {len(self.filtered_data)} filtered responses to {output_path}")
 
 
 class SurveyPlotter:
@@ -655,7 +617,7 @@ class SurveyPlotter:
     def create_bar_chart(self, question: str, title: Optional[str] = None, 
                         filtered: bool = True, top_n: Optional[int] = None,
                         horizontal: bool = True, figsize: tuple = (10, 6),
-                        save_path: Optional[str] = None, colormap: Optional[str] = None,
+                        colormap: Optional[str] = None,
                         show_percentages: bool = False, label_wrap_width: Optional[int] = None) -> mpl_figure.Figure:
         """
         Create a bar chart for a question's response distribution.
@@ -757,15 +719,13 @@ class SurveyPlotter:
         # Use tight_layout with padding to prevent label cutoff
         plt.tight_layout(pad=2.0)
         
-        if save_path:
-            fig.savefig(save_path, dpi=300, bbox_inches='tight')
-            print(f"Chart saved to {save_path}")
+        # ...existing code...
         
         return fig
     
     def create_comparison_chart(self, question: str, filter_configs: List[Dict], 
                                labels: List[str], title: Optional[str] = None,
-                               figsize: tuple = (14, 8), save_path: Optional[str] = None,
+                               figsize: tuple = (14, 8),
                                show_percentages: bool = False, label_wrap_width: Optional[int] = None) -> mpl_figure.Figure:
         """
         Create a comparison chart for the same question across different filter conditions.
@@ -917,15 +877,13 @@ class SurveyPlotter:
         # Use tight_layout with padding to prevent label cutoff (consistent with other methods)
         plt.tight_layout(pad=3.0)
         
-        if save_path:
-            fig.savefig(save_path, dpi=300, bbox_inches='tight')
-            print(f"Comparison chart saved to {save_path}")
+        # ...existing code...
         
         return fig
     
     def create_stacked_bar_chart(self, question: str, stack_by: str, 
                                 title: Optional[str] = None, filtered: bool = True,
-                                figsize: tuple = (12, 8), save_path: Optional[str] = None) -> mpl_figure.Figure:
+                                figsize: tuple = (12, 8)) -> mpl_figure.Figure:
         """
         Create a stacked bar chart showing question responses broken down by another variable.
         
@@ -966,195 +924,15 @@ class SurveyPlotter:
         plt.legend(title=stack_by.replace('_', ' ').title(), bbox_to_anchor=(1.05, 1), loc='upper left')
         plt.tight_layout(pad=2.0)
         
-        if save_path:
-            fig.savefig(save_path, dpi=300, bbox_inches='tight')
-            print(f"Stacked bar chart saved to {save_path}")
+        # ...existing code...
         
         return fig
     
-    def create_pie_chart(self, question: str, title: Optional[str] = None,
-                        filtered: bool = True, top_n: Optional[int] = None,
-                        figsize: tuple = (8, 8), save_path: Optional[str] = None,
-                        colormap: Optional[str] = None, show_percentages: bool = True,
-                        show_counts: bool = False, label_wrap_width: Optional[int] = None) -> mpl_figure.Figure:
-        """
-        Create a pie chart for a question's response distribution.
-        
-        Args:
-            question: Question key to plot
-            title: Chart title (auto-generated if None)
-            filtered: Use filtered data if True
-            top_n: Show only top N responses, group others as "Other"
-            figsize: Figure size tuple
-            save_path: Path to save the chart (optional)
-            colormap: Optional matplotlib colormap name (defaults to golden ratio system)
-            show_percentages: If True, show percentages on pie slices
-            show_counts: If True, show counts on pie slices (in addition to or instead of percentages)
-            label_wrap_width: Width for wrapping pie slice labels (None = no wrapping)
-            
-        Returns:
-            matplotlib Figure object
-        """
-        counts = self.analyzer.get_question_counts(question, filtered)
-        
-        if not counts:
-            raise ValueError(f"No data found for question '{question}'")
-        
-        # Sort by count
-        sorted_items = sorted(counts.items(), key=lambda x: x[1], reverse=True)
-        
-        if top_n and len(sorted_items) > top_n:
-            top_items = sorted_items[:top_n]
-            other_count = sum(count for _, count in sorted_items[top_n:])
-            if other_count > 0:
-                top_items.append(("Other", other_count))
-            sorted_items = top_items
-        
-        labels, values = zip(*sorted_items) if sorted_items else ([], [])
-        
-        # Wrap long labels for better display if specified
-        if label_wrap_width:
-            wrapped_labels = [textwrap.fill(label, width=label_wrap_width, break_long_words=False) for label in labels]
-        else:
-            wrapped_labels = labels
-        
-        fig, ax = plt.subplots(figsize=figsize)
-        
-        # Generate colors using colormap if specified, otherwise golden ratio system
-        colors = self.get_colors(len(labels), colormap=colormap)
-        
-        # Configure autopct based on show_percentages and show_counts parameters
-        autopct_format = None
-        if show_percentages and show_counts:
-            # Show both percentages and counts
-            def autopct_both(pct):
-                absolute = int(pct/100. * sum(values))
-                return f'{pct:.1f}%\n({absolute})'
-            autopct_format = autopct_both
-        elif show_percentages:
-            # Show only percentages
-            autopct_format = '%1.1f%%'
-        elif show_counts:
-            # Show only counts
-            def autopct_counts(pct):
-                absolute = int(pct/100. * sum(values))
-                return f'{absolute}'
-            autopct_format = autopct_counts
-        # If neither is True, autopct_format remains None (no labels)
-        
-        pie_result = ax.pie(values, labels=wrapped_labels, autopct=autopct_format, startangle=90,
-                           colors=colors, shadow=True, explode=[0.05] * len(wrapped_labels))
-        
-        if title is None:
-            question_info = self.analyzer.get_question_info(question)
-            title = question_info.get('question', question)
-        
-        if filtered and len(self.analyzer.filters) > 0 and self.analyzer.filtered_data is not None:
-            title = f"{title}\n(Filtered: {len(self.analyzer.filtered_data)} responses)"
-        
-        ax.set_title(title or question)
-        
-        # Use tight_layout with padding for pie charts
-        plt.tight_layout(pad=2.0)
-        
-        if save_path:
-            fig.savefig(save_path, dpi=300, bbox_inches='tight')
-            print(f"Pie chart saved to {save_path}")
-        
-        return fig
     
-    def create_matrix_heatmap(self, matrix_question: str, title: Optional[str] = None,
-                             filtered: bool = True, figsize: tuple = (12, 8),
-                             save_path: Optional[str] = None, colormap: str = 'Blues') -> mpl_figure.Figure:
-        """
-        Create a heatmap for matrix-type questions (like Likert scales).
-        
-        Args:
-            matrix_question: Matrix question key to plot
-            title: Chart title (auto-generated if None)
-            filtered: Use filtered data if True
-            figsize: Figure size tuple
-            save_path: Path to save the chart (optional)
-            colormap: Matplotlib colormap name for heatmap colors
-            
-        Returns:
-            matplotlib Figure object
-        """
-        self.analyzer._ensure_loaded()
-        assert self.analyzer.df is not None and self.analyzer.filtered_data is not None
-        
-        data = self.analyzer.filtered_data if filtered else self.analyzer.df
-        
-        if matrix_question not in data.columns:
-            raise ValueError(f"Question '{matrix_question}' not found in data")
-        
-        # Extract matrix data
-        matrix_data = data[matrix_question].dropna()
-        
-        if len(matrix_data) == 0:
-            raise ValueError(f"No data found for matrix question '{matrix_question}'")
-        
-        # Build matrix from responses
-        all_tools = set()
-        all_levels = set()
-        for response in matrix_data:
-            if isinstance(response, dict):
-                for tool, level in response.items():
-                    if level is not None:  # Skip None values
-                        all_tools.add(tool)
-                        all_levels.add(level)
-        
-        all_tools = sorted(all_tools)
-        all_levels = sorted(all_levels)
-        
-        # Create count matrix
-        matrix = np.zeros((len(all_tools), len(all_levels)))
-        
-        for response in matrix_data:
-            if isinstance(response, dict):
-                for tool, level in response.items():
-                    if tool in all_tools and level in all_levels and level is not None:
-                        tool_idx = all_tools.index(tool)
-                        level_idx = all_levels.index(level)
-                        matrix[tool_idx][level_idx] += 1
-        
-        fig, ax = plt.subplots(figsize=figsize)
-        im = ax.imshow(matrix, cmap=colormap, aspect='auto')
-        
-        # Set ticks and labels
-        ax.set_xticks(np.arange(len(all_levels)))
-        ax.set_yticks(np.arange(len(all_tools)))
-        ax.set_xticklabels(all_levels, rotation=45, ha='right')
-        ax.set_yticklabels(all_tools)
-        
-        # Add text annotations with contrasting colors
-        for i in range(len(all_tools)):
-            for j in range(len(all_levels)):
-                value = int(matrix[i, j])
-                # Choose text color based on background intensity
-                text_color = 'white' if value > matrix.max() * 0.5 else 'black'
-                ax.text(j, i, str(value), ha="center", va="center", 
-                       color=text_color, fontweight='bold', fontsize=10)
-        
-        # Add colorbar
-        plt.colorbar(im, ax=ax, label='Count')
-        
-        if title is None:
-            question_info = self.analyzer.get_question_info(matrix_question)
-            title = question_info.get('question', matrix_question)
-        
-        ax.set_title(title or matrix_question)
-        plt.tight_layout(pad=2.0)
-        
-        if save_path:
-            fig.savefig(save_path, dpi=300, bbox_inches='tight')
-            print(f"Heatmap saved to {save_path}")
-        
-        return fig
     
     def create_matrix_stacked_bar_chart(self, matrix_question: str, title: Optional[str] = None,
                                        filtered: bool = True, figsize: tuple = (14, 10),
-                                       save_path: Optional[str] = None, colormap: Optional[str] = None,
+                                       colormap: Optional[str] = None,
                                        horizontal: bool = True, label_wrap_width: Optional[int] = None) -> mpl_figure.Figure:
         """
         Create a stacked bar chart for matrix-type questions (like Likert scales).
@@ -1246,101 +1024,14 @@ class SurveyPlotter:
         ax.set_title(title or matrix_question)
         plt.tight_layout()
         
-        if save_path:
-            fig.savefig(save_path, dpi=300, bbox_inches='tight')
-            print(f"Matrix stacked bar chart saved to {save_path}")
+        # ...existing code...
         
         return fig
     
-    def create_ranking_weighted_chart(self, ranking_question: str, title: Optional[str] = None,
-                                     filtered: bool = True, figsize: tuple = (14, 8),
-                                     save_path: Optional[str] = None, colormap: Optional[str] = None,
-                                     horizontal: bool = True, max_rank: int = 3,
-                                     label_wrap_width: Optional[int] = None) -> mpl_figure.Figure:
-        """
-        Create a weighted score chart for ranking-type questions.
-        
-        Args:
-            ranking_question: Ranking question key to plot
-            title: Chart title (auto-generated if None)
-            filtered: Use filtered data if True
-            figsize: Figure size tuple
-            save_path: Path to save the chart (optional)
-            colormap: Optional matplotlib colormap name (defaults to golden ratio system)
-            horizontal: If True, create horizontal bars
-            max_rank: Maximum rank to consider (e.g., 3 for "top 3")
-            label_wrap_width: Width for label wrapping (None = default wrapping)
-            
-        Returns:
-            matplotlib Figure object
-        """
-        # Get weighted scores for ranking
-        scores = self.analyzer.get_ranking_scores(ranking_question, filtered, max_rank)
-        
-        if not scores:
-            raise ValueError(f"No data found for ranking question '{ranking_question}'")
-        
-        # Sort by score (highest first)
-        sorted_items = sorted(scores.items(), key=lambda x: x[1], reverse=True)
-        items, values = zip(*sorted_items) if sorted_items else ([], [])
-        
-        # Wrap long labels for better display if specified
-        if label_wrap_width:
-            wrapped_items = [textwrap.fill(item, width=label_wrap_width, break_long_words=False) for item in items]
-        else:
-            wrapped_items = [textwrap.fill(item, width=30, break_long_words=False) for item in items]
-        
-        # Create the plot
-        fig, ax = plt.subplots(figsize=figsize)
-        
-        # Generate colors using colormap if specified, otherwise golden ratio system
-        colors = self.get_colors(len(items), colormap=colormap)
-        
-        if horizontal:
-            bars = ax.barh(wrapped_items, values, color=colors, alpha=0.8)
-            ax.set_xlabel('Weighted Score')
-            ax.set_ylabel('Features')
-            ax.invert_yaxis()  # Top item at top
-            
-            # Add value labels on bars
-            max_value = max(values) if values else 0
-            for i, bar in enumerate(bars):
-                width = bar.get_width()
-                ax.text(width + max_value * 0.01, bar.get_y() + bar.get_height()/2, 
-                       f'{values[i]:.1f}', ha='left', va='center', fontweight='bold')
-        else:
-            bars = ax.bar(wrapped_items, values, color=colors, alpha=0.8)
-            ax.set_xlabel('Features')
-            ax.set_ylabel('Weighted Score')
-            plt.xticks(rotation=45, ha='right')
-            
-            # Add value labels on bars
-            max_value = max(values) if values else 0
-            for i, bar in enumerate(bars):
-                height = bar.get_height()
-                ax.text(bar.get_x() + bar.get_width()/2., height + max_value * 0.01,
-                       f'{values[i]:.1f}', ha='center', va='bottom', fontweight='bold')
-        
-        # Set title
-        if title is None:
-            question_info = self.analyzer.get_question_info(ranking_question)
-            title = question_info.get('question', ranking_question)
-        
-        # Add subtitle explaining the scoring
-        full_title = f"{title}\n(Weighted scores: Rank 1 = {max_rank} pts, Rank 2 = {max_rank-1} pts, etc.)"
-        ax.set_title(full_title)
-        
-        plt.tight_layout()
-        
-        if save_path:
-            fig.savefig(save_path, dpi=300, bbox_inches='tight')
-            print(f"Ranking weighted chart saved to {save_path}")
-        
-        return fig
     
     def create_ranking_position_chart(self, ranking_question: str, title: Optional[str] = None,
                                      filtered: bool = True, figsize: tuple = (14, 8),
-                                     save_path: Optional[str] = None, colormap: Optional[str] = None,
+                                     colormap: Optional[str] = None,
                                      horizontal: bool = True, max_rank: int = 3,
                                      label_wrap_width: Optional[int] = None) -> mpl_figure.Figure:
         """
@@ -1420,165 +1111,17 @@ class SurveyPlotter:
             question_info = self.analyzer.get_question_info(ranking_question)
             title = question_info.get('question', ranking_question)
         
-        ax.set_title(title)
+        ax.set_title(title or "")
         plt.tight_layout()
         
-        if save_path:
-            fig.savefig(save_path, dpi=300, bbox_inches='tight')
-            print(f"Ranking position chart saved to {save_path}")
+        # ...existing code...
         
         return fig
 
-    def create_demographic_breakdown_chart(self, question: str, demographic_question: str = 'professional_role',
-                                          title: Optional[str] = None, horizontal: bool = True,
-                                          figsize: Tuple[int, int] = (12, 8), colormap: Optional[str] = None,
-                                          show_percentages: bool = False, label_wrap_width: Optional[int] = None,
-                                          save_path: Optional[str] = None) -> plt.Figure:
-        """
-        Create a chart showing responses broken down by demographics (e.g., professional roles).
-        
-        Args:
-            question: Main question to analyze
-            demographic_question: Question to use for demographic breakdown (default: 'professional_role')
-            title: Chart title (optional)
-            horizontal: Whether to create horizontal bars
-            figsize: Figure size tuple
-            colormap: Matplotlib colormap to use (optional)
-            show_percentages: Whether to show percentages on bars
-            label_wrap_width: Width for wrapping labels
-            save_path: Path to save the figure
-            
-        Returns:
-            matplotlib Figure object
-        """
-        # Get demographic categories (e.g., professional roles)
-        demographic_data = self.analyzer.get_question_counts(demographic_question)
-        demographic_categories = list(demographic_data.keys())
-        
-        # Get main question data broken down by demographics
-        main_question_data = self.analyzer.get_question_counts(question)
-        main_categories = list(main_question_data.keys())
-        
-        # Create matrix: main_categories x demographic_categories
-        breakdown_data = {}
-        
-        for demographic in demographic_categories:
-            # Filter by this demographic
-            self.analyzer.clear_filters()
-            self.analyzer.add_filter(demographic_question, demographic)
-            filtered_responses = self.analyzer.apply_filters()
-            
-            # Get counts for main question in this demographic
-            demographic_counts = self.analyzer.get_question_counts(question, filtered=True)
-            breakdown_data[demographic] = demographic_counts
-        
-        # Clear filters
-        self.analyzer.clear_filters()
-        
-        # Prepare data for plotting
-        # Matrix where rows are main categories, columns are demographics
-        plot_data = []
-        for main_cat in main_categories:
-            row = []
-            for demo_cat in demographic_categories:
-                count = breakdown_data[demo_cat].get(main_cat, 0)
-                row.append(count)
-            plot_data.append(row)
-        
-        plot_data = np.array(plot_data)
-        
-        # Get colors - use same colors as the demographic question would use
-        colors = self.get_colors(len(demographic_categories), colormap=colormap)
-        
-        # Wrap labels if specified
-        if label_wrap_width:
-            wrapped_main_categories = [textwrap.fill(cat, width=label_wrap_width, break_long_words=False) for cat in main_categories]
-            wrapped_demographic_categories = [textwrap.fill(cat, width=label_wrap_width, break_long_words=False) for cat in demographic_categories]
-        else:
-            wrapped_main_categories = main_categories
-            wrapped_demographic_categories = demographic_categories
-        
-        # Create figure
-        fig, ax = plt.subplots(figsize=figsize)
-        
-        if horizontal:
-            # Create horizontal grouped bars
-            bar_width = 0.8 / len(demographic_categories)
-            y_positions = np.arange(len(main_categories))
-            
-            for i, demographic in enumerate(demographic_categories):
-                values = plot_data[:, i]
-                y_pos = y_positions + i * bar_width - (len(demographic_categories) - 1) * bar_width / 2
-                
-                bars = ax.barh(y_pos, values, bar_width, 
-                              label=wrapped_demographic_categories[i], 
-                              color=colors[i], alpha=0.8)
-                
-                if show_percentages:
-                    total = np.sum(values)
-                    if total > 0:
-                        for j, (bar, value) in enumerate(zip(bars, values)):
-                            if value > 0:
-                                percentage = (value / total) * 100
-                                ax.text(bar.get_width() + 0.1, bar.get_y() + bar.get_height()/2,
-                                       f'{percentage:.1f}%', ha='left', va='center', fontsize=10)
-            
-            ax.set_yticks(y_positions)
-            ax.set_yticklabels(wrapped_main_categories)
-            ax.set_xlabel('Number of Responses')
-            ax.set_ylabel(question.replace('_', ' ').title())
-            ax.invert_yaxis()
-            
-        else:
-            # Create vertical grouped bars
-            bar_width = 0.8 / len(demographic_categories)
-            x_positions = np.arange(len(main_categories))
-            
-            for i, demographic in enumerate(demographic_categories):
-                values = plot_data[:, i]
-                x_pos = x_positions + i * bar_width - (len(demographic_categories) - 1) * bar_width / 2
-                
-                bars = ax.bar(x_pos, values, bar_width, 
-                             label=wrapped_demographic_categories[i], 
-                             color=colors[i], alpha=0.8)
-                
-                if show_percentages:
-                    total = np.sum(values)
-                    if total > 0:
-                        for j, (bar, value) in enumerate(zip(bars, values)):
-                            if value > 0:
-                                percentage = (value / total) * 100
-                                ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.1,
-                                       f'{percentage:.1f}%', ha='center', va='bottom', fontsize=10)
-            
-            ax.set_xticks(x_positions)
-            ax.set_xticklabels(wrapped_main_categories, rotation=45, ha='right')
-            ax.set_ylabel('Number of Responses')
-            ax.set_xlabel(question.replace('_', ' ').title())
-        
-        # Add legend
-        ax.legend(title=demographic_question.replace('_', ' ').title(), 
-                 bbox_to_anchor=(1.05, 1), loc='upper left')
-        
-        # Set title
-        if title is None:
-            question_info = self.analyzer.get_question_info(question)
-            demo_info = self.analyzer.get_question_info(demographic_question)
-            title = f"{question_info.get('question', question)}\nBreakdown by {demo_info.get('question', demographic_question)}"
-        
-        ax.set_title(title)
-        plt.tight_layout()
-        
-        if save_path:
-            fig.savefig(save_path, dpi=300, bbox_inches='tight')
-            print(f"Demographic breakdown chart saved to {save_path}")
-        
-        return fig
 
     def create_role_stacked_chart(self, question: str, title: Optional[str] = None,
                                  horizontal: bool = True, figsize: Tuple[int, int] = (12, 8),
-                                 show_percentages: bool = True, label_wrap_width: Optional[int] = None,
-                                 save_path: Optional[str] = None) -> plt.Figure:
+                                 show_percentages: bool = True, label_wrap_width: Optional[int] = None) -> mpl_figure.Figure:
         """
         Create a stacked bar chart showing responses broken down by professional roles.
         Each role is stacked cumulatively to show the percentage distribution.
@@ -1604,44 +1147,15 @@ class SurveyPlotter:
         main_categories = list(main_question_data.keys())
         
         # Calculate total responses for percentage calculation
-        total_responses = len(self.analyzer.responses)
+        total_responses = len(self.analyzer.responses) if self.analyzer.responses is not None else 0
         
         # Create data matrix: main_categories x roles
         role_breakdown = {}
         
         for role in roles:
-            # Filter by this role
             self.analyzer.clear_filters()
-            
-            if role == 'Other':
-                # For "Other" category, we need to filter by actual role values that get grouped as "Other"
-                # These are roles not in the standard set
-                standard_roles = {'Programmer/Technical Designer', 'Technical Artist', 'Environment Artist',
-                                'Game Designer', 'Academic/Researcher', 'Level Designer'}
-                
-                # Find all non-standard role values
-                other_role_values = []
-                for response in self.analyzer.responses:
-                    resp_role = response.get('professional_role')
-                    if resp_role and resp_role not in standard_roles:
-                        other_role_values.append(resp_role)
-                
-                # Filter by any of these "other" role values
-                if other_role_values:
-                    # Use OR logic for multiple role values
-                    self.analyzer.set_filter_logic('OR')
-                    for other_role in set(other_role_values):  # Remove duplicates
-                        self.analyzer.add_filter('professional_role', other_role)
-                    filtered_responses = self.analyzer.apply_filters()
-                else:
-                    # No "other" roles found
-                    filtered_responses = pd.DataFrame()
-            else:
-                # Standard role filtering
-                self.analyzer.add_filter('professional_role', role)
-                filtered_responses = self.analyzer.apply_filters()
-            
-            # Get counts for main question in this role
+            self.analyzer.add_filter('professional_role', role)
+            self.analyzer.apply_filters()
             role_counts = self.analyzer.get_question_counts(question, filtered=True)
             role_breakdown[role] = role_counts
         
@@ -1728,60 +1242,16 @@ class SurveyPlotter:
             question_info = self.analyzer.get_question_info(question)
             title = f"{question_info.get('question', question)}\nBreakdown by Professional Role"
         
-        ax.set_title(title)
+        ax.set_title(title or "")
         plt.tight_layout()
         
-        if save_path:
-            fig.savefig(save_path, dpi=300, bbox_inches='tight')
-            print(f"Role stacked chart saved to {save_path}")
+        # ...existing code...
         
         return fig
 
 
 def main():
-    """Example usage of the SurveyAnalyzer"""
-    
-    # Initialize analyzer
-    analyzer = SurveyAnalyzer(
-        schema_path='survey-questions-schema.json',
-        data_path='procedural-level-generation-survey.json'
-    )
-    
-    # Show initial summary
-    analyzer.print_summary()
-    
-    # Example: Filter for experienced programmers/technical designers
-    print("\n=== Example: Filtering for experienced technical roles ===")
-    
-    # Add filters
-    analyzer.add_filter('professional_role', 'Programmer/Technical Designer')
-    analyzer.add_filter('years_experience', ['6-10 years', '10+ years'])
-    
-    # Set filter logic to AND (default)
-    analyzer.set_filter_logic('AND')
-    
-    # Apply filters
-    filtered_data = analyzer.apply_filters()
-    
-    # Get values for a specific question from filtered data
-    print("\n=== Primary concerns of experienced technical designers ===")
-    concerns = analyzer.get_question_counts('primary_concerns', filtered=True)
-    for concern, count in sorted(concerns.items(), key=lambda x: x[1], reverse=True):
-        print(f"{concern}: {count}")
-    
-    # Show summary again
-    analyzer.print_summary()
-    
-    # Clear filters and try OR logic
-    print("\n=== Example: OR logic with multiple experience levels ===")
-    analyzer.clear_filters()
-    analyzer.add_filter('years_experience', '0-2 years')
-    analyzer.add_filter('years_experience', '10+ years')
-    analyzer.set_filter_logic('OR')
-    analyzer.apply_filters()
-    
-    # Analyze game engine preferences for beginners OR very experienced developers
-    engine_counts = analyzer.get_question_counts('game_engines', filtered=True)
-    print("\nGame engine preferences (beginners OR very experienced):")
-    for engine, count in sorted(engine_counts.items(), key=lambda x: x[1], reverse=True):
-        print(f"{engine}: {count}")
+    assert False
+
+if __name__ == "__main__":
+    main()

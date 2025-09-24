@@ -58,7 +58,7 @@ plt.rcParams.update({
     'axes.axisbelow': True,
     'axes.titlelocation': 'center',
     'axes.titlesize': 0,
-    'font.weight': 'bold'  # Make heatmap labels bold
+    #'font.weight': 'bold'  # Make heatmap labels bold
 })
 
 def plot_professional_role(analyzer, plotter, output_dir):
@@ -826,96 +826,96 @@ def main():
     
     # Create plots using individual functions with local wrapping settings
     # Questions 1
-    #pdf_path = plot_professional_role(analyzer, plotter, output_dir)
-    #created_files.append(pdf_path)
-    
+    pdf_path = plot_professional_role(analyzer, plotter, output_dir)
+    created_files.append(pdf_path)
+
     # Question 2
     pdf_path = plot_years_experience(analyzer, plotter, output_dir)
     created_files.append(pdf_path)
-    
+
     # Question 3
-    #pdf_path = plot_game_engines(analyzer, plotter, output_dir)
-    #created_files.append(pdf_path)
-    
+    pdf_path = plot_game_engines(analyzer, plotter, output_dir)
+    created_files.append(pdf_path)
+
     # Question 4: Matrix chart with wrapping for better readability
-    #pdf_path = plot_procedural_tools_experience(analyzer, plotter, output_dir)
-    #created_files.append(pdf_path)
-    
+    pdf_path = plot_procedural_tools_experience(analyzer, plotter, output_dir)
+    created_files.append(pdf_path)
+
     # Question 4 Comparison: Artist vs Designer/Programmer roles
-    #pdf_path = plot_procedural_tools_experience_comparison(analyzer, plotter, output_dir)
-    #created_files.append(pdf_path)
-    
+    pdf_path = plot_procedural_tools_experience_comparison(analyzer, plotter, output_dir)
+    created_files.append(pdf_path)
+
     # Question 5: Role stacked chart
-    #pdf_path = plot_current_pcg_usage(analyzer, plotter, output_dir)
-    #created_files.append(pdf_path)    
-    
+    pdf_path = plot_current_pcg_usage(analyzer, plotter, output_dir)
+    created_files.append(pdf_path)    
+
     # Question 6: Role stacked chart
-    #pdf_path = plot_level_generation_frequency(analyzer, plotter, output_dir)
-    #created_files.append(pdf_path)
-    
+    pdf_path = plot_level_generation_frequency(analyzer, plotter, output_dir)
+    created_files.append(pdf_path)
+
     # Question 6 Comparison: Level generation frequency across professional roles
-    #pdf_path = plot_level_generation_frequency_comparison(analyzer, plotter, output_dir)
-    #created_files.append(pdf_path)
-    
+    pdf_path = plot_level_generation_frequency_comparison(analyzer, plotter, output_dir)
+    created_files.append(pdf_path)
+
     # Question 7: Role stacked chart
-    #pdf_path = plot_primary_concerns(analyzer, plotter, output_dir)
-    #created_files.append(pdf_path)
-    
+    pdf_path = plot_primary_concerns(analyzer, plotter, output_dir)
+    created_files.append(pdf_path)
+
     # Question 7 Comparison: Primary concerns across professional roles
-    #pdf_path = plot_primary_concerns_comparison(analyzer, plotter, output_dir)
-    #created_files.append(pdf_path)
-    
+    pdf_path = plot_primary_concerns_comparison(analyzer, plotter, output_dir)
+    created_files.append(pdf_path)
+
     # Question 8: Role stacked chart
     pdf_path = plot_tool_view(analyzer, plotter, output_dir)
     created_files.append(pdf_path)
-    
+
     # Question 9: Role stacked chart
     pdf_path = plot_critical_factors(analyzer, plotter, output_dir)
     created_files.append(pdf_path)
-    
+
     # Questions 10: Ranking question with position distribution
-    # pdf_path = plot_node_tool_features(analyzer, plotter, output_dir)
-    #created_files.append(pdf_path)
-    
+    pdf_path = plot_node_tool_features(analyzer, plotter, output_dir)
+    created_files.append(pdf_path)
+
     # Question 11: Role stacked chart
     pdf_path = plot_realtime_feedback_importance(analyzer, plotter, output_dir)
     created_files.append(pdf_path)
-    
+
     # Question 12: Role stacked chart
     pdf_path = plot_preferred_approach(analyzer, plotter, output_dir)
     created_files.append(pdf_path)
-    
+
     # Question 13: Role stacked chart
     pdf_path = plot_integration_preference(analyzer, plotter, output_dir)
     created_files.append(pdf_path)
-    
+
     # Questions 14
-    #pdf_path = plot_genre_interest(analyzer, plotter, output_dir)
-    #created_files.append(pdf_path)
-    
+    pdf_path = plot_genre_interest(analyzer, plotter, output_dir)
+    created_files.append(pdf_path)
+
     # Questions 15
-    #pdf_path = plot_level_representation(analyzer, plotter, output_dir)
-    #created_files.append(pdf_path)
-    
+    pdf_path = plot_level_representation(analyzer, plotter, output_dir)
+    created_files.append(pdf_path)
+
     # Questions 16
-    #pdf_path = plot_most_useful_approach(analyzer, plotter, output_dir)
-    #created_files.append(pdf_path)
-    
+    pdf_path = plot_most_useful_approach(analyzer, plotter, output_dir)
+    created_files.append(pdf_path)
+
     # Questions 17
-    #pdf_path = plot_ai_role_preference(analyzer, plotter, output_dir)
-    #created_files.append(pdf_path)
-    
+    pdf_path = plot_ai_role_preference(analyzer, plotter, output_dir)
+    created_files.append(pdf_path)
+
     # Questions 18
-    #pdf_path = plot_ai_importance_factors(analyzer, plotter, output_dir)
-    #created_files.append(pdf_path)
-    
+    pdf_path = plot_ai_importance_factors(analyzer, plotter, output_dir)
+    created_files.append(pdf_path)
+
     # Questions 19
-    #pdf_path = plot_ai_concerns(analyzer, plotter, output_dir)
-    #created_files.append(pdf_path)
-    
+    pdf_path = plot_ai_concerns(analyzer, plotter, output_dir)
+    created_files.append(pdf_path)
+
     # Questions 20
-    #pdf_path = plot_desired_solutions(analyzer, plotter, output_dir)
-    #created_files.append(pdf_path)
+    pdf_path = plot_desired_solutions(analyzer, plotter, output_dir)
+    created_files.append(pdf_path)
     
     # Summary
     print("=== Summary ===")
