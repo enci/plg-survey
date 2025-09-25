@@ -1,8 +1,5 @@
 """
 Survey Plot Generator
-
-Creates PDF plots for the first 15 questions of the survey using vector graphics.
-Each plot is saved as a separate PDF file with the question text as the title.
 """
 
 from survey_analyzer import SurveyAnalyzer, SurveyPlotter
@@ -42,6 +39,62 @@ def wrap_labels(labels, width=25):
     """
     return [wrap_text(label, width) for label in labels]
 
+def calculate_chart_size(num_options, base_height=0, height_per_option=1.2, max_height=12):
+    """
+    Calculate dynamic chart size based on number of response options.
+    
+    Args:
+        num_options: Number of unique response options/categories
+        base_height: Minimum height for the chart
+        height_per_option: Additional height per response option
+        max_height: Maximum height to prevent overly tall charts
+        
+    Returns:
+        Tuple of (width, height) for figsize parameter
+    """
+    width = 12  # Fixed width as requested
+    height = max(base_height, min(base_height + (num_options * height_per_option), max_height))
+    return (width, height)
+
+def get_question_options_count(analyzer, question_key):
+    """
+    Get the number of unique response options for a question.
+    
+    Args:
+        analyzer: SurveyAnalyzer instance
+        question_key: The question key to analyze
+        
+    Returns:
+        Number of unique response options
+    """
+    try:
+        # First try to get predefined options from schema
+        options = analyzer.get_question_options(question_key)
+        if options:
+            return len(options)
+        
+        # Check if this is a matrix question
+        question_type = analyzer.get_question_type(question_key)
+        if question_type == 'matrix':
+            # For matrix questions, count the number of items being rated
+            responses = analyzer.get_question_values(question_key, filtered=False)
+            if responses and isinstance(responses[0], dict):
+                # Return the number of items in the matrix (e.g., different tools)
+                return len(responses[0].keys())
+        
+        # If no predefined options, count unique actual responses
+        responses = analyzer.get_question_values(question_key, filtered=False)
+        if not responses:
+            return 5  # Default fallback
+        
+        # Handle multi-select questions (lists in responses) - already handled by get_question_values
+        unique_options = set(responses)
+        
+        return len(unique_options)
+    except Exception as e:
+        print(f"Warning: Could not get options count for {question_key}: {e}")
+        return 5  # Default fallback if there's any error
+
 # Configure matplotlib for consistent styling across all plots
 plt.rcParams.update({
     'font.family': 'serif',
@@ -68,20 +121,19 @@ def plot_professional_role(analyzer, plotter, output_dir):
     question_text = question_info.get('question', question_key)
     
     # Local wrapping settings for this chart
-    title_wrap_width = None  # No title wrapping
     label_wrap_width = None  # No label wrapping
     
-    # Wrap the title text for better display if specified
-    if title_wrap_width:
-        wrapped_title = wrap_text(question_text, width=title_wrap_width)
-    else:
-        wrapped_title = question_text
+    print(f"Creating plot for: {question_text}")
+
+    # Calculate dynamic chart size based on number of response options
+    num_options = get_question_options_count(analyzer, question_key)
+    chart_size = calculate_chart_size(num_options)
 
     fig = plotter.create_bar_chart(
         question_key,
-        title=wrapped_title,
+        title=question_text,
         horizontal=True,
-        figsize=(12, 6),
+        figsize=chart_size,
         show_percentages=True,
         label_wrap_width=label_wrap_width
     )
@@ -111,12 +163,21 @@ def plot_years_experience(analyzer, plotter, output_dir):
         wrapped_title = question_text
     
     print(f"Creating plot for: {question_text}")
+
+    # Calculate dynamic chart size based on number of response options
+    num_options = get_question_options_count(analyzer, question_key)
+    chart_size = calculate_chart_size(num_options)
+
+    
+    # Calculate dynamic chart size based on number of response options
+    num_options = get_question_options_count(analyzer, question_key)
+    chart_size = calculate_chart_size(num_options)
     
     fig = plotter.create_bar_chart(
         question_key,
         title=wrapped_title,
         horizontal=True,
-        figsize=(12, 4.5),
+        figsize=chart_size,
         show_percentages=True,
         label_wrap_width=label_wrap_width,
         colormap='Blues'
@@ -147,12 +208,16 @@ def plot_game_engines(analyzer, plotter, output_dir):
     
     print(f"Creating plot for: {question_text}")
     
+    # Calculate dynamic chart size based on number of response options
+    num_options = get_question_options_count(analyzer, question_key)
+    chart_size = calculate_chart_size(num_options)
+    
     # Create role stacked chart showing cumulative professional role breakdown
     fig = plotter.create_role_stacked_chart(
         question_key,
         title=wrapped_title,
         horizontal=True,
-        figsize=(12, 5),
+        figsize=chart_size,
         show_percentages=True,
         label_wrap_width=label_wrap_width
     )
@@ -171,22 +236,19 @@ def plot_procedural_tools_experience(analyzer, plotter, output_dir):
     question_text = question_info.get('question', question_key)
     
     # Local wrapping settings for this chart
-    title_wrap_width = None   # Wrap titles for better readability
     label_wrap_width = 30   # Wrap tool names for matrix chart
     
-    # Wrap the title text for better display if specified
-    if title_wrap_width:
-        wrapped_title = wrap_text(question_text, width=title_wrap_width)
-    else:
-        wrapped_title = question_text
-    
     print(f"Creating plot for: {question_text}")
+    
+    # Calculate dynamic chart size based on number of response options
+    num_options = get_question_options_count(analyzer, question_key)
+    chart_size = calculate_chart_size(num_options)
     
     # Use stacked bar chart for better readability of matrix data
     fig = plotter.create_matrix_stacked_bar_chart(
         question_key,
-        title=wrapped_title,
-        figsize=(12, 6),
+        title=question_text,
+        figsize=chart_size,
         colormap='bwr',
         horizontal=True,
         label_wrap_width=label_wrap_width
@@ -222,12 +284,16 @@ def plot_procedural_tools_experience_comparison(analyzer, plotter, output_dir):
     # Create comparison chart
     title = f"Procedural Tools Experience:\nArtist vs Designer/Programmer Roles"
     
+    # Calculate dynamic chart size based on number of response options
+    num_options = get_question_options_count(analyzer, question_key)
+    chart_size = calculate_chart_size(num_options, base_height=4, height_per_option=0.6)  # Comparison charts need more height
+    
     fig = plotter.create_comparison_chart(
         question_key,
         filter_configs,
         labels,
         title=title,
-        figsize=(12, 10),
+        figsize=chart_size,
         show_percentages=True,
         label_wrap_width=30
     )
@@ -250,12 +316,16 @@ def plot_current_pcg_usage(analyzer, plotter, output_dir):
     label_wrap_width = 30   # Wrap category labels
     
     print(f"Creating plot for: {question_text}")
+
+    # Calculate dynamic chart size based on number of response options
+    num_options = get_question_options_count(analyzer, question_key)
+    chart_size = calculate_chart_size(num_options)
     
     fig = plotter.create_role_stacked_chart(
         question_key,
         title=question_text,
         horizontal=True,
-        figsize=(12, 6),
+        figsize=chart_size,
         show_percentages=True,
         label_wrap_width=label_wrap_width
     )
@@ -274,12 +344,16 @@ def plot_level_generation_frequency(analyzer, plotter, output_dir):
     question_text = question_info.get('question', question_key)
     
     print(f"Creating plot for: {question_text}")
+
+    # Calculate dynamic chart size based on number of response options
+    num_options = get_question_options_count(analyzer, question_key)
+    chart_size = calculate_chart_size(num_options)
     
     fig = plotter.create_role_stacked_chart(
         question_key,
         title=question_text,
         horizontal=True,
-        figsize=(12, 4.5),
+        figsize=chart_size,
         show_percentages=True
     )
     
@@ -301,6 +375,10 @@ def plot_level_generation_frequency_comparison(analyzer, plotter, output_dir):
     # Define role groups for comparison - design roles vs artist roles
     design_roles = ['Level Designer', 'Game Designer']
     artist_roles = ['Technical Artist', 'Environment Artist']
+
+    # Calculate dynamic chart size based on number of response options
+    num_options = get_question_options_count(analyzer, question_key)
+    chart_size = calculate_chart_size(num_options)
     
     # Create filter configurations for comparison
     filter_configs = [
@@ -318,7 +396,7 @@ def plot_level_generation_frequency_comparison(analyzer, plotter, output_dir):
         filter_configs,
         labels,
         title=title,
-        figsize=(12, 8),
+        figsize=chart_size,
         show_percentages=True,
         label_wrap_width=18
     )
@@ -341,11 +419,15 @@ def plot_primary_concerns(analyzer, plotter, output_dir):
     
     print(f"Creating plot for: {question_text}")
     
+    # Calculate dynamic chart size based on number of response options
+    num_options = get_question_options_count(analyzer, question_key)
+    chart_size = calculate_chart_size(num_options)
+    
     fig = plotter.create_role_stacked_chart(
         question_key,
         title=question_text,
         horizontal=True,
-        figsize=(12, 8),
+        figsize=chart_size,
         show_percentages=True,
         label_wrap_width=label_wrap_width
     )
@@ -364,6 +446,10 @@ def plot_primary_concerns_comparison(analyzer, plotter, output_dir):
     question_text = question_info.get('question', question_key)
     
     print(f"Creating comparison plot for: {question_text}")
+
+    # Calculate dynamic chart size based on number of response options
+    num_options = get_question_options_count(analyzer, question_key)
+    chart_size = calculate_chart_size(num_options)
     
     # Define role groups for comparison - design roles vs artist roles
     design_roles = ['Level Designer', 'Game Designer', 'Programmer/Technical Designer']
@@ -385,7 +471,7 @@ def plot_primary_concerns_comparison(analyzer, plotter, output_dir):
         filter_configs,
         labels,
         title=title,
-        figsize=(12, 8),
+        figsize=chart_size,
         show_percentages=True,
         label_wrap_width=30
     )
@@ -407,12 +493,16 @@ def plot_tool_view(analyzer, plotter, output_dir):
     label_wrap_width = 35   # Wrap long labels for tool views
     
     print(f"Creating plot for: {question_text}")
+
+    # Calculate dynamic chart size based on number of response options
+    num_options = get_question_options_count(analyzer, question_key)
+    chart_size = calculate_chart_size(num_options)
     
     fig = plotter.create_role_stacked_chart(
         question_key,
         title=question_text,
         horizontal=True,
-        figsize=(12, 8),
+        figsize=chart_size,
         show_percentages=True,
         label_wrap_width=label_wrap_width
     )
@@ -434,12 +524,16 @@ def plot_critical_factors(analyzer, plotter, output_dir):
     label_wrap_width = 30   # Wrap labels for factors
     
     print(f"Creating plot for: {question_text}")
+
+    # Calculate dynamic chart size based on number of response options
+    num_options = get_question_options_count(analyzer, question_key)
+    chart_size = calculate_chart_size(num_options)
     
     fig = plotter.create_role_stacked_chart(
         question_key,
         title=question_text,
         horizontal=True,
-        figsize=(12, 8),
+        figsize=chart_size,
         show_percentages=True,
         label_wrap_width=label_wrap_width
     )
@@ -461,20 +555,21 @@ def plot_node_tool_features(analyzer, plotter, output_dir):
     title_wrap_width = 60   # Wrap long title
     label_wrap_width = 30   # Wrap long labels for features
     
-    # Wrap the title text for better display if specified
-    if title_wrap_width:
-        wrapped_title = wrap_text(question_text, width=title_wrap_width)
-    else:
-        wrapped_title = question_text
+    # Wrap the title text for better display
+    wrapped_title = wrap_text(question_text, width=title_wrap_width)
     
     print(f"Creating plot for: {question_text}")
+
+    # Calculate dynamic chart size based on number of response options
+    num_options = get_question_options_count(analyzer, question_key)
+    chart_size = calculate_chart_size(num_options)
     
     # Use position distribution visualization to show ranking patterns
     fig = plotter.create_ranking_position_chart(
         question_key,
         title=wrapped_title,
         horizontal=True,
-        figsize=(12, 9),
+        figsize=chart_size,
         colormap='Set3',
         max_rank=3,  # Top 3 ranking as specified in the question
         label_wrap_width=label_wrap_width
@@ -494,12 +589,16 @@ def plot_realtime_feedback_importance(analyzer, plotter, output_dir):
     question_text = question_info.get('question', question_key)
     
     print(f"Creating plot for: {question_text}")
+
+    # Calculate dynamic chart size based on number of response options
+    num_options = get_question_options_count(analyzer, question_key)
+    chart_size = calculate_chart_size(num_options)
     
     fig = plotter.create_role_stacked_chart(
         question_key,
         title=question_text,
         horizontal=True,
-        figsize=(12, 4),
+        figsize=chart_size,
         show_percentages=True
     )
     
@@ -520,12 +619,16 @@ def plot_preferred_approach(analyzer, plotter, output_dir):
     label_wrap_width = 40   # Wrap long labels for approaches
     
     print(f"Creating plot for: {question_text}")
+
+    # Calculate dynamic chart size based on number of response options
+    num_options = get_question_options_count(analyzer, question_key)
+    chart_size = calculate_chart_size(num_options)
     
     fig = plotter.create_role_stacked_chart(
         question_key,
         title=question_text,
         horizontal=True,
-        figsize=(12, 7),
+        figsize=chart_size,
         show_percentages=True,
         label_wrap_width=label_wrap_width
     )
@@ -548,11 +651,15 @@ def plot_integration_preference(analyzer, plotter, output_dir):
     
     print(f"Creating plot for: {question_text}")
     
+    # Calculate dynamic chart size based on number of response options
+    num_options = get_question_options_count(analyzer, question_key)
+    chart_size = calculate_chart_size(num_options)
+
     fig = plotter.create_role_stacked_chart(
         question_key,
         title=question_text,
         horizontal=True,
-        figsize=(12, 5),
+        figsize=chart_size,
         show_percentages=True,
         label_wrap_width=label_wrap_width
     )
@@ -574,19 +681,20 @@ def plot_genre_interest(analyzer, plotter, output_dir):
     title_wrap_width = 60   # Wrap long title
     label_wrap_width = 20   # Wrap genre labels
     
-    # Wrap the title text for better display if specified
-    if title_wrap_width:
-        wrapped_title = wrap_text(question_text, width=title_wrap_width)
-    else:
-        wrapped_title = question_text
+    # Wrap the title text for better display
+    wrapped_title = wrap_text(question_text, width=title_wrap_width)
     
     print(f"Creating plot for: {question_text}")
-    
+
+     # Calculate dynamic chart size based on number of response options
+    num_options = get_question_options_count(analyzer, question_key)
+    chart_size = calculate_chart_size(num_options)
+
     # Use matrix stacked bar chart for this matrix question
     fig = plotter.create_matrix_stacked_bar_chart(
         question_key,
         title=wrapped_title,
-        figsize=(12, 6),
+        figsize=chart_size,
         colormap='RdYlGn',  # Green for interested, red for not interested
         horizontal=True,
         label_wrap_width=label_wrap_width
@@ -606,23 +714,19 @@ def plot_level_representation(analyzer, plotter, output_dir):
     question_text = question_info.get('question', question_key)
     
     # Local wrapping settings for this chart
-    title_wrap_width = 60   # Wrap long title
     label_wrap_width = 35   # Wrap representation method labels
     
-    # Wrap the title text for better display if specified
-    if title_wrap_width:
-        wrapped_title = wrap_text(question_text, width=title_wrap_width)
-    else:
-        wrapped_title = question_text
-    
     print(f"Creating plot for: {question_text}")
-    
-    fig = plotter.create_bar_chart(
+
+    # Calculate dynamic chart size based on number of response options
+    num_options = get_question_options_count(analyzer, question_key)
+    chart_size = calculate_chart_size(num_options)
+
+    fig = plotter.create_role_stacked_chart(
         question_key,
-        title=wrapped_title,
+        title=question_text,
         horizontal=True,
-        figsize=(12, 7),
-        colormap='Dark2',
+        figsize=chart_size,
         show_percentages=True,
         label_wrap_width=label_wrap_width
     )
@@ -641,22 +745,19 @@ def plot_most_useful_approach(analyzer, plotter, output_dir):
     question_text = question_info.get('question', question_key)
     
     # Local wrapping settings for this chart
-    title_wrap_width = 50   # Wrap long title
     label_wrap_width = 40   # Wrap approach labels
     
-    # Wrap the title text for better display if specified
-    if title_wrap_width:
-        wrapped_title = wrap_text(question_text, width=title_wrap_width)
-    else:
-        wrapped_title = question_text
-    
     print(f"Creating plot for: {question_text}")
-    
-    fig = plotter.create_bar_chart(
+
+    # Calculate dynamic chart size based on number of response options
+    num_options = get_question_options_count(analyzer, question_key)
+    chart_size = calculate_chart_size(num_options)
+
+    fig = plotter.create_role_stacked_chart(
         question_key,
-        title=wrapped_title,
+        title=question_text,
         horizontal=True,
-        figsize=(12, 6),
+        figsize=chart_size,
         show_percentages=True,
         label_wrap_width=label_wrap_width
     )
@@ -675,23 +776,19 @@ def plot_ai_role_preference(analyzer, plotter, output_dir):
     question_text = question_info.get('question', question_key)
     
     # Local wrapping settings for this chart
-    title_wrap_width = 60   # Wrap long title
     label_wrap_width = 42   # Wrap AI role labels
-    
-    # Wrap the title text for better display if specified
-    if title_wrap_width:
-        wrapped_title = wrap_text(question_text, width=title_wrap_width)
-    else:
-        wrapped_title = question_text
     
     print(f"Creating plot for: {question_text}")
     
-    fig = plotter.create_bar_chart(
+    # Calculate dynamic chart size based on number of response options
+    num_options = get_question_options_count(analyzer, question_key)
+    chart_size = calculate_chart_size(num_options)
+
+    fig = plotter.create_role_stacked_chart(
         question_key,
-        title=wrapped_title,
+        title=question_text,
         horizontal=True,
-        figsize=(12, 7),
-        colormap='Dark2',
+        figsize=chart_size,
         show_percentages=True,
         label_wrap_width=label_wrap_width
     )
@@ -710,22 +807,19 @@ def plot_ai_importance_factors(analyzer, plotter, output_dir):
     question_text = question_info.get('question', question_key)
     
     # Local wrapping settings for this chart
-    title_wrap_width = 60   # Wrap long title
     label_wrap_width = 30   # Wrap factor labels
     
-    # Wrap the title text for better display if specified
-    if title_wrap_width:
-        wrapped_title = wrap_text(question_text, width=title_wrap_width)
-    else:
-        wrapped_title = question_text
-    
     print(f"Creating plot for: {question_text}")
-    
-    fig = plotter.create_bar_chart(
+
+     # Calculate dynamic chart size based on number of response options
+    num_options = get_question_options_count(analyzer, question_key)
+    chart_size = calculate_chart_size(num_options)
+
+    fig = plotter.create_role_stacked_chart(
         question_key,
-        title=wrapped_title,
+        title=question_text,
         horizontal=True,
-        figsize=(12, 6.5),
+        figsize=chart_size,
         show_percentages=True,
         label_wrap_width=label_wrap_width
     )
@@ -744,23 +838,19 @@ def plot_ai_concerns(analyzer, plotter, output_dir):
     question_text = question_info.get('question', question_key)
     
     # Local wrapping settings for this chart
-    title_wrap_width = 60   # Wrap long title
     label_wrap_width = 30   # Wrap concern labels
     
-    # Wrap the title text for better display if specified
-    if title_wrap_width:
-        wrapped_title = wrap_text(question_text, width=title_wrap_width)
-    else:
-        wrapped_title = question_text
-    
     print(f"Creating plot for: {question_text}")
+
+    # Calculate dynamic chart size based on number of response options
+    num_options = get_question_options_count(analyzer, question_key)
+    chart_size = calculate_chart_size(num_options)
     
-    fig = plotter.create_bar_chart(
+    fig = plotter.create_role_stacked_chart(
         question_key,
-        title=wrapped_title,
+        title=question_text,
         horizontal=True,
-        figsize=(12, 8),
-        colormap='Dark2',
+        figsize=chart_size,
         show_percentages=True,
         label_wrap_width=label_wrap_width
     )
@@ -779,23 +869,19 @@ def plot_desired_solutions(analyzer, plotter, output_dir):
     question_text = question_info.get('question', question_key)
     
     # Local wrapping settings for this chart
-    title_wrap_width = 50   # Wrap long title
     label_wrap_width = 35   # Wrap solution labels
     
-    # Wrap the title text for better display if specified
-    if title_wrap_width:
-        wrapped_title = wrap_text(question_text, width=title_wrap_width)
-    else:
-        wrapped_title = question_text
-    
     print(f"Creating plot for: {question_text}")
+
+    # Calculate dynamic chart size based on number of response options
+    num_options = get_question_options_count(analyzer, question_key)
+    chart_size = calculate_chart_size(num_options)
     
-    fig = plotter.create_bar_chart(
+    fig = plotter.create_role_stacked_chart(
         question_key,
-        title=wrapped_title,
+        title=question_text,
         horizontal=True,
-        figsize=(12, 8),
-        colormap='Dark2',
+        figsize=chart_size,
         show_percentages=True,
         label_wrap_width=label_wrap_width
     )
