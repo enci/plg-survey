@@ -39,7 +39,7 @@ def wrap_labels(labels, width=25):
     """
     return [wrap_text(label, width) for label in labels]
 
-def calculate_chart_size(num_options, base_height=0, height_per_option=1.2, max_height=12):
+def calculate_chart_size(num_options, base_height=0, height_per_option=1.2):
     """
     Calculate dynamic chart size based on number of response options.
     
@@ -53,7 +53,7 @@ def calculate_chart_size(num_options, base_height=0, height_per_option=1.2, max_
         Tuple of (width, height) for figsize parameter
     """
     width = 12  # Fixed width as requested
-    height = max(base_height, min(base_height + (num_options * height_per_option), max_height))
+    height = base_height + (num_options * height_per_option)
     return (width, height)
 
 def get_question_options_count(analyzer, question_key):
