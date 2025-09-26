@@ -13,13 +13,8 @@ from pathlib import Path
 # Hardcoded survey file path
 SURVEY_FILE = "procedural-level-generation-survey.json"
 
+# Load survey data from the hardcoded JSON file
 def load_survey_data():
-    """
-    Load survey data from the hardcoded JSON file
-    
-    Returns:
-        list of survey responses
-    """
     file_path = Path(SURVEY_FILE)
     
     if not file_path.exists():
@@ -28,17 +23,8 @@ def load_survey_data():
     with open(file_path, 'r', encoding='utf-8') as f:
         return json.load(f)
 
+# Extract frequency data from survey responses for scoring analysis
 def extract_frequency_data(survey_data, role_mapping=None):
-    """
-    Extract frequency response counts from survey data
-    
-    Args:
-        survey_data: list of survey responses
-        role_mapping: optional dict to customize role categorization
-        
-    Returns:
-        dict with frequency counts by role category
-    """
     
     # Default role categorization
     if role_mapping is None:
@@ -120,18 +106,8 @@ def calculate_weighted_score(responses, weights, total_responses):
     
     return weighted_sum * 100  # Convert to 0-100 scale
 
+# Analyze different scoring methodologies and compare results
 def analyze_scoring_methodologies(frequency_data, totals, categories_to_compare=['artists', 'designers']):
-    """
-    Test different weighting schemes and compare results
-    
-    Args:
-        frequency_data: dict with frequency counts by role category
-        totals: dict with total responses by role category
-        categories_to_compare: list of categories to compare
-        
-    Returns:
-        DataFrame with results
-    """
     
     # Define different weighting schemes
     weighting_schemes = {
@@ -208,8 +184,8 @@ def analyze_scoring_methodologies(frequency_data, totals, categories_to_compare=
     
     return pd.DataFrame(results), weighting_schemes
 
+# Create comprehensive visualizations with proper matplotlib handling
 def create_visualizations(df_results, frequency_data, totals, weighting_schemes, categories):
-    """Create comprehensive visualizations with proper matplotlib handling"""
     
     # Configure matplotlib for non-interactive environments
     plt.ioff()  # Turn off interactive mode
@@ -339,8 +315,8 @@ def create_visualizations(df_results, frequency_data, totals, weighting_schemes,
     finally:
         plt.close(fig)  # Always close the figure to prevent warnings
 
+# Print detailed analysis and recommendations
 def print_detailed_analysis(df_results, frequency_data, totals):
-    """Print detailed analysis and recommendations"""
     
     print("\n" + "="*60)
     print("DETAILED ANALYSIS")
@@ -387,8 +363,8 @@ def print_detailed_analysis(df_results, frequency_data, totals):
     print("   - Test sensitivity with different weight adjustments")
     print("   - Consider context of your research questions")
 
+# Allow testing of custom weight schemes
 def test_custom_weights(frequency_data, totals, categories):
-    """Allow testing of custom weight schemes"""
     print("\n=== CUSTOM WEIGHT TESTER ===")
     print("Define your own weights (0.0 to 1.0) for each category:")
     
@@ -436,8 +412,8 @@ def test_custom_weights(frequency_data, totals, categories):
         gap_pct = (gap / score1 * 100) if score1 > 0 else 0
         print(f"  Gap: {gap:.1f} ({gap_pct:.1f}%)")
 
+# Main function to run the complete analysis
 def main():
-    """Main function to run the complete analysis"""
     
     print("=== SURVEY SCORING METHODOLOGY ANALYZER ===\n")
     

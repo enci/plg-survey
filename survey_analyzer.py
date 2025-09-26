@@ -44,14 +44,8 @@ class SurveyAnalyzer:
     and data extraction from survey responses.
     """
     
+    # Initialize the SurveyAnalyzer with schema and data files.
     def __init__(self, schema_path: str, data_path: str):
-        """
-        Initialize the SurveyAnalyzer with schema and data files.
-        
-        Args:
-            schema_path: Path to the JSON schema file
-            data_path: Path to the JSON survey responses file
-        """
         self.schema_path = schema_path
         self.data_path = data_path
         self.schema: Optional[Dict[str, Any]] = None
@@ -63,8 +57,8 @@ class SurveyAnalyzer:
         
         self._load_data()
     
+    # Load schema and survey response data from JSON files. Non-standard answers are stored as 'Other'.
     def _load_data(self):
-        """Load schema and survey response data from JSON files. Non-standard answers are stored as 'Other'."""
         try:
             with open(self.schema_path, 'r', encoding='utf-8') as f:
                 self.schema = json.load(f)
@@ -106,21 +100,13 @@ class SurveyAnalyzer:
         except json.JSONDecodeError as e:
             raise ValueError(f"Invalid JSON format: {e}")
     
+    # Ensure data is loaded, raise error if not.
     def _ensure_loaded(self):
-        """Ensure data is loaded, raise error if not."""
         if self.schema is None or self.responses is None or self.df is None:
             raise RuntimeError("Data not loaded. Check file paths and try again.")
     
+    # Get information about a specific question from the schema.
     def get_question_info(self, question_key: str) -> Dict[str, Any]:
-        """
-        Get information about a specific question from the schema.
-        
-        Args:
-            question_key: The key of the question in the schema
-            
-        Returns:
-            Dictionary containing question information
-        """
         self._ensure_loaded()
         assert self.schema is not None  # for type checker
         
@@ -129,8 +115,8 @@ class SurveyAnalyzer:
         
         return self.schema['questions'][question_key]
     
+    # Get list of all available question keys.
     def get_available_questions(self) -> List[str]:
-        """Get list of all available question keys."""
         self._ensure_loaded()
         assert self.schema is not None  # for type checker
         return list(self.schema['questions'].keys())
@@ -148,28 +134,13 @@ class SurveyAnalyzer:
         question_info = self.get_question_info(question_key)
         return question_info.get('options', [])
     
+    # Get the type of a question.
     def get_question_type(self, question_key: str) -> str:
-        """
-        Get the type of a question.
-        
-        Args:
-            question_key: The key of the question
-            
-        Returns:
-            Question type (e.g., 'single_choice', 'multiple_choice', etc.)
-        """
         question_info = self.get_question_info(question_key)
         return question_info.get('type', 'unknown')
     
+    # Add a filter condition.
     def add_filter(self, question: str, value: Union[str, List[str]], negate: bool = False):
-        """
-        Add a filter condition.
-        
-        Args:
-            question: Question key to filter on
-            value: Value(s) to filter for
-            negate: If True, filter for responses that DON'T match the value
-        """
         self._ensure_loaded()
         assert self.schema is not None  # for type checker
         
@@ -180,21 +151,16 @@ class SurveyAnalyzer:
         self.filters.append(filter_obj)
         print(f"Added filter: {filter_obj}")
     
+    # Remove a filter by index.
     def remove_filter(self, index: int):
-        """
-        Remove a filter by index.
-        
-        Args:
-            index: Index of the filter to remove
-        """
         if 0 <= index < len(self.filters):
             removed_filter = self.filters.pop(index)
             print(f"Removed filter: {removed_filter}")
         else:
             raise IndexError(f"Filter index {index} out of range")
     
+    # Remove all filters.
     def clear_filters(self):
-        """Remove all filters."""
         self._ensure_loaded()
         assert self.df is not None  # for type checker
         
@@ -202,26 +168,16 @@ class SurveyAnalyzer:
         self.filtered_data = self.df.copy()
         print("All filters cleared")
     
+    # Set the logic for combining multiple filters.
     def set_filter_logic(self, logic: Union[FilterLogic, str]):
-        """
-        Set the logic for combining multiple filters.
-        
-        Args:
-            logic: Either FilterLogic.AND, FilterLogic.OR, or string 'AND'/'OR'
-        """
         if isinstance(logic, str):
             logic = FilterLogic(logic.upper())
         
         self.filter_logic = logic
         print(f"Filter logic set to: {logic.value}")
     
+    # Apply all current filters to the data and return filtered DataFrame.
     def apply_filters(self) -> pd.DataFrame:
-        """
-        Apply all current filters to the data and return filtered DataFrame.
-        
-        Returns:
-            Filtered DataFrame
-        """
         self._ensure_loaded()
         assert self.df is not None  # for type checker
         
@@ -273,17 +229,8 @@ class SurveyAnalyzer:
         
         return self.filtered_data
     
+    # Get all values for a specific question from the (optionally filtered) data.
     def get_question_values(self, question: str, filtered: bool = True) -> List[Any]:
-        """
-        Get all values for a specific question from the (optionally filtered) data.
-        
-        Args:
-            question: Question key to get values for
-            filtered: If True, use filtered data; if False, use all data
-            
-        Returns:
-            List of values for the specified question
-        """
         self._ensure_loaded()
         assert self.schema is not None and self.df is not None and self.filtered_data is not None
         

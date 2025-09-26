@@ -8,17 +8,8 @@ import matplotlib.backends.backend_pdf as pdf_backend
 import os
 import textwrap
 
+# Wrap text to specified width, breaking on word boundaries.
 def wrap_text(text, width=30):
-    """
-    Wrap text to specified width, breaking on word boundaries.
-    
-    Args:
-        text: Text to wrap
-        width: Maximum characters per line
-        
-    Returns:
-        String with newlines inserted for wrapping
-    """
     if len(text) <= width:
         return text
     
@@ -26,17 +17,8 @@ def wrap_text(text, width=30):
     wrapped_lines = textwrap.wrap(text, width=width, break_long_words=False)
     return '\n'.join(wrapped_lines)
 
+# Wrap a list of labels for better display on axes.
 def wrap_labels(labels, width=25):
-    """
-    Wrap a list of labels for better display on axes.
-    
-    Args:
-        labels: List of label strings
-        width: Maximum characters per line
-        
-    Returns:
-        List of wrapped label strings
-    """
     return [wrap_text(label, width) for label in labels]
 
 def calculate_chart_size(num_options, base_height=0.0, height_per_option=1.08):    
@@ -44,17 +26,8 @@ def calculate_chart_size(num_options, base_height=0.0, height_per_option=1.08):
     height = base_height + (num_options * height_per_option)
     return (width, height)
 
+# Get the number of unique response options for a question.
 def get_question_options_count(analyzer, question_key):
-    """
-    Get the number of unique response options for a question.
-    
-    Args:
-        analyzer: SurveyAnalyzer instance
-        question_key: The question key to analyze
-        
-    Returns:
-        Number of unique response options
-    """
     try:
         # First try to get predefined options from schema
         options = analyzer.get_question_options(question_key)
@@ -102,8 +75,8 @@ plt.rcParams.update({
     #'font.weight': 'bold'  # Make heatmap labels bold
 })
 
+# Create plot for professional role question.
 def plot_professional_role(analyzer, plotter, output_dir):
-    """Create plot for professional role question."""
     question_key = 'professional_role'
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
@@ -134,8 +107,8 @@ def plot_professional_role(analyzer, plotter, output_dir):
     print(f"  Saved as: {pdf_path}")
     return pdf_path
 
+# Create plot for years of experience question.
 def plot_years_experience(analyzer, plotter, output_dir):
-    """Create plot for years of experience question."""
     question_key = 'years_experience'
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
@@ -171,8 +144,8 @@ def plot_years_experience(analyzer, plotter, output_dir):
     print(f"  Saved as: {pdf_path}")
     return pdf_path
 
+# Create plot for game engines question.
 def plot_game_engines(analyzer, plotter, output_dir):
-    """Create plot for game engines question."""
     question_key = 'game_engines'
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
@@ -210,8 +183,8 @@ def plot_game_engines(analyzer, plotter, output_dir):
     print(f"  Saved as: {pdf_path}")
     return pdf_path
 
+# Create plot for procedural tools experience question.
 def plot_procedural_tools_experience(analyzer, plotter, output_dir):
-    """Create plot for procedural tools experience question."""
     question_key = 'procedural_tools_experience'
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
@@ -242,8 +215,8 @@ def plot_procedural_tools_experience(analyzer, plotter, output_dir):
     print(f"  Saved as: {pdf_path}")
     return pdf_path
 
+# Create comparison plot for procedural tools experience between artist and designer/programmer roles.
 def plot_procedural_tools_experience_comparison(analyzer, plotter, output_dir):
-    """Create comparison plot for procedural tools experience between artist and designer/programmer roles."""
     question_key = 'procedural_tools_experience'
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
@@ -286,8 +259,8 @@ def plot_procedural_tools_experience_comparison(analyzer, plotter, output_dir):
     print(f"  Saved as: {pdf_path}")
     return pdf_path
 
+# Create plot for current PCG usage question.
 def plot_current_pcg_usage(analyzer, plotter, output_dir):
-    """Create plot for current PCG usage question."""
     question_key = 'current_pcg_usage'
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
@@ -318,8 +291,8 @@ def plot_current_pcg_usage(analyzer, plotter, output_dir):
     print(f"  Saved as: {pdf_path}")
     return pdf_path
 
+# Create plot for level generation frequency question.
 def plot_level_generation_frequency(analyzer, plotter, output_dir):
-    """Create plot for level generation frequency question."""
     question_key = 'level_generation_frequency'
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
@@ -345,8 +318,8 @@ def plot_level_generation_frequency(analyzer, plotter, output_dir):
     print(f"  Saved as: {pdf_path}")
     return pdf_path
 
+# Create comparison plot for level generation frequency between design and artist roles.
 def plot_level_generation_frequency_comparison(analyzer, plotter, output_dir):
-    """Create comparison plot for level generation frequency between design and artist roles."""
     question_key = 'level_generation_frequency'
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
@@ -389,8 +362,8 @@ def plot_level_generation_frequency_comparison(analyzer, plotter, output_dir):
     print(f"  Saved as: {pdf_path}")
     return pdf_path
 
+# Create plot for primary concerns question.
 def plot_primary_concerns(analyzer, plotter, output_dir):
-    """Create plot for primary concerns question."""
     question_key = 'primary_concerns'
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
@@ -420,8 +393,8 @@ def plot_primary_concerns(analyzer, plotter, output_dir):
     print(f"  Saved as: {pdf_path}")
     return pdf_path
 
+# Create comparison plot for primary concerns between design and artist roles.
 def plot_primary_concerns_comparison(analyzer, plotter, output_dir):
-    """Create comparison plot for primary concerns between design and artist roles."""
     question_key = 'primary_concerns'
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
@@ -464,8 +437,8 @@ def plot_primary_concerns_comparison(analyzer, plotter, output_dir):
     print(f"  Saved as: {pdf_path}")
     return pdf_path
 
+# Create plot for tool view question.
 def plot_tool_view(analyzer, plotter, output_dir):
-    """Create plot for tool view question."""
     question_key = 'tool_view'
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
@@ -495,8 +468,8 @@ def plot_tool_view(analyzer, plotter, output_dir):
     print(f"  Saved as: {pdf_path}")
     return pdf_path
 
+# Create plot for critical factors question.
 def plot_critical_factors(analyzer, plotter, output_dir):
-    """Create plot for critical factors question."""
     question_key = 'critical_factors'
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
@@ -526,8 +499,8 @@ def plot_critical_factors(analyzer, plotter, output_dir):
     print(f"  Saved as: {pdf_path}")
     return pdf_path
 
+# Create plot for node tool features question using position distribution visualization.
 def plot_node_tool_features(analyzer, plotter, output_dir):
-    """Create plot for node tool features question using position distribution visualization."""
     question_key = 'node_tool_features'
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
@@ -563,8 +536,8 @@ def plot_node_tool_features(analyzer, plotter, output_dir):
     print(f"  Saved as: {pdf_path}")
     return pdf_path
 
+# Create plot for realtime feedback importance question.
 def plot_realtime_feedback_importance(analyzer, plotter, output_dir):
-    """Create plot for realtime feedback importance question."""
     question_key = 'realtime_feedback_importance'
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
@@ -590,8 +563,8 @@ def plot_realtime_feedback_importance(analyzer, plotter, output_dir):
     print(f"  Saved as: {pdf_path}")
     return pdf_path
 
+# Create plot for preferred approach question.
 def plot_preferred_approach(analyzer, plotter, output_dir):
-    """Create plot for preferred approach question."""
     question_key = 'preferred_approach'
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
@@ -621,8 +594,8 @@ def plot_preferred_approach(analyzer, plotter, output_dir):
     print(f"  Saved as: {pdf_path}")
     return pdf_path
 
+# Create plot for integration preference question.
 def plot_integration_preference(analyzer, plotter, output_dir):
-    """Create plot for integration preference question."""
     question_key = 'integration_preference'
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
@@ -652,8 +625,8 @@ def plot_integration_preference(analyzer, plotter, output_dir):
     print(f"  Saved as: {pdf_path}")
     return pdf_path
 
+# Create plot for genre interest question.
 def plot_genre_interest(analyzer, plotter, output_dir):
-    """Create plot for genre interest question."""
     question_key = 'genre_interest'
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
@@ -688,8 +661,8 @@ def plot_genre_interest(analyzer, plotter, output_dir):
     print(f"  Saved as: {pdf_path}")
     return pdf_path
 
+# Create plot for level representation question.
 def plot_level_representation(analyzer, plotter, output_dir):
-    """Create plot for level representation question."""
     question_key = 'level_representation'
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
@@ -719,8 +692,8 @@ def plot_level_representation(analyzer, plotter, output_dir):
     print(f"  Saved as: {pdf_path}")
     return pdf_path
 
+# Create plot for most useful approach question.
 def plot_most_useful_approach(analyzer, plotter, output_dir):
-    """Create plot for most useful approach question."""
     question_key = 'most_useful_approach'
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
@@ -750,8 +723,8 @@ def plot_most_useful_approach(analyzer, plotter, output_dir):
     print(f"  Saved as: {pdf_path}")
     return pdf_path
 
+# Create plot for AI role preference question.
 def plot_ai_role_preference(analyzer, plotter, output_dir):
-    """Create plot for AI role preference question."""
     question_key = 'ai_role_preference'
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
@@ -781,8 +754,8 @@ def plot_ai_role_preference(analyzer, plotter, output_dir):
     print(f"  Saved as: {pdf_path}")
     return pdf_path
 
+# Create plot for AI importance factors question.
 def plot_ai_importance_factors(analyzer, plotter, output_dir):
-    """Create plot for AI importance factors question."""
     question_key = 'ai_importance_factors'
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
@@ -812,8 +785,8 @@ def plot_ai_importance_factors(analyzer, plotter, output_dir):
     print(f"  Saved as: {pdf_path}")
     return pdf_path
 
+# Create plot for AI concerns question.
 def plot_ai_concerns(analyzer, plotter, output_dir):
-    """Create plot for AI concerns question."""
     question_key = 'ai_concerns'
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
@@ -843,8 +816,8 @@ def plot_ai_concerns(analyzer, plotter, output_dir):
     print(f"  Saved as: {pdf_path}")
     return pdf_path
 
+# Create plot for desired solutions question.
 def plot_desired_solutions(analyzer, plotter, output_dir):
-    """Create plot for desired solutions question."""
     question_key = 'desired_solutions'
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
@@ -874,8 +847,8 @@ def plot_desired_solutions(analyzer, plotter, output_dir):
     print(f"  Saved as: {pdf_path}")
     return pdf_path
 
+# Generate plots for all 20 survey questions.
 def main():
-    """Generate plots for all 20 survey questions."""
     
     print("=== Survey Plot Generator ===\n")
     

@@ -8,8 +8,8 @@ class survey_questions_synthesizer:
     def __init__(self):
         self.questions_schema = {}
     
-    def synthesize_questions(self):
-        """Create comprehensive questions schema from CSV structure"""
+    # Create comprehensive questions schema from CSV structure
+    def synthesize_schema(self):
         
         # Define the questions structure
         questions = {    
@@ -332,8 +332,8 @@ class survey_questions_synthesizer:
         
         return questions
     
+    # Save the synthesized questions schema to JSON
     def save_questions_schema(self, output_file):
-        """Save the synthesized questions schema to JSON"""
         questions = self.synthesize_questions()
         
         # Add metadata

@@ -12,8 +12,8 @@ class survey_transformer:
         # Load schema and build questions mapping
         self._load_schema(schema_file)
             
+    # Load schema and build questions mapping
     def _load_schema(self, schema_file):
-        """Load schema and build questions mapping"""
         with open(schema_file, 'r') as f:
             schema = json.load(f)
         
@@ -24,8 +24,8 @@ class survey_transformer:
             # Map key to question text for all question types
             self.questions[key] = question_info.get('question', '')
     
+    # Clean value by removing escape sequences and extra whitespace
     def _clean_value(self, value):
-        """Clean value by removing escape sequences and extra whitespace"""
         if pd.isna(value):
             return None
         
@@ -36,12 +36,12 @@ class survey_transformer:
         
         return cleaned
     
+    # Get question info from schema
     def _get_question_info(self, key):
-        """Get question info from schema"""
         return self.schema.get('questions', {}).get(key, {})
     
+    # Find CSV columns that match matrix question pattern
     def _find_matrix_columns(self, base_question, items):
-        """Find CSV columns that match matrix question pattern"""
         matching_columns = {}
         csv_columns = self.parsed_data.columns.tolist()
         
