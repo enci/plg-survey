@@ -660,7 +660,7 @@ class SurveyPlotter:
             total = sum(values)
             percentages = [(v / total) * 100 for v in values]
             display_values = percentages
-            y_label = 'Percentage (%)'
+            y_label = 'Percentage of Total Responses'
             value_format = lambda x: f'{x:.1f}%'
         else:
             display_values = values

@@ -39,19 +39,7 @@ def wrap_labels(labels, width=25):
     """
     return [wrap_text(label, width) for label in labels]
 
-def calculate_chart_size(num_options, base_height=0, height_per_option=1.2):
-    """
-    Calculate dynamic chart size based on number of response options.
-    
-    Args:
-        num_options: Number of unique response options/categories
-        base_height: Minimum height for the chart
-        height_per_option: Additional height per response option
-        max_height: Maximum height to prevent overly tall charts
-        
-    Returns:
-        Tuple of (width, height) for figsize parameter
-    """
+def calculate_chart_size(num_options, base_height=0.0, height_per_option=1.08):    
     width = 12  # Fixed width as requested
     height = base_height + (num_options * height_per_option)
     return (width, height)
@@ -153,15 +141,8 @@ def plot_years_experience(analyzer, plotter, output_dir):
     question_text = question_info.get('question', question_key)
     
     # Local wrapping settings for this chart
-    title_wrap_width = None  # No title wrapping
-    label_wrap_width = None  # No label wrapping
-    
-    # Wrap the title text for better display if specified
-    if title_wrap_width:
-        wrapped_title = wrap_text(question_text, width=title_wrap_width)
-    else:
-        wrapped_title = question_text
-    
+    label_wrap_width = None
+        
     print(f"Creating plot for: {question_text}")
 
     # Calculate dynamic chart size based on number of response options
@@ -175,7 +156,7 @@ def plot_years_experience(analyzer, plotter, output_dir):
     
     fig = plotter.create_bar_chart(
         question_key,
-        title=wrapped_title,
+        title=question_text,
         horizontal=True,
         figsize=chart_size,
         show_percentages=True,
