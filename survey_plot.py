@@ -26,6 +26,20 @@ def calculate_chart_size(num_options, base_height=0.0, height_per_option=1.08):
     height = base_height + (num_options * height_per_option)
     return (width, height)
 
+def calculate_role_stacked_chart_size(num_options):
+    """
+    Calculate chart size specifically for role stacked charts to ensure consistent bar heights.
+    """
+    width = 12
+    consistent_bar_height = 1.2  # Consistent height per bar
+    base_padding = 2.0  # Space for legend and padding
+    height = base_padding + (num_options * consistent_bar_height)
+    
+    # Ensure minimum readable size
+    height = max(height, 6.0)
+    
+    return (width, height)
+
 # Get the number of unique response options for a question.
 def get_question_options_count(analyzer, question_key):
     try:
@@ -121,11 +135,6 @@ def plot_years_experience(analyzer, plotter, output_dir):
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
     chart_size = calculate_chart_size(num_options)
-
-    
-    # Calculate dynamic chart size based on number of response options
-    num_options = get_question_options_count(analyzer, question_key)
-    chart_size = calculate_chart_size(num_options)
     
     fig = plotter.create_bar_chart(
         question_key,
@@ -164,7 +173,7 @@ def plot_game_engines(analyzer, plotter, output_dir):
     
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
-    chart_size = calculate_chart_size(num_options)
+    chart_size = calculate_role_stacked_chart_size(num_options)  # Use consistent sizing for role stacked charts
     
     # Create role stacked chart showing cumulative professional role breakdown
     fig = plotter.create_role_stacked_chart(
@@ -273,7 +282,7 @@ def plot_current_pcg_usage(analyzer, plotter, output_dir):
 
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
-    chart_size = calculate_chart_size(num_options)
+    chart_size = calculate_role_stacked_chart_size(num_options)
     
     fig = plotter.create_role_stacked_chart(
         question_key,
@@ -301,7 +310,7 @@ def plot_level_generation_frequency(analyzer, plotter, output_dir):
 
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
-    chart_size = calculate_chart_size(num_options)
+    chart_size = calculate_role_stacked_chart_size(num_options)
     
     fig = plotter.create_role_stacked_chart(
         question_key,
@@ -332,7 +341,7 @@ def plot_level_generation_frequency_comparison(analyzer, plotter, output_dir):
 
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
-    chart_size = calculate_chart_size(num_options)
+    chart_size = calculate_role_stacked_chart_size(num_options)
     
     # Create filter configurations for comparison
     filter_configs = [
@@ -375,7 +384,7 @@ def plot_primary_concerns(analyzer, plotter, output_dir):
     
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
-    chart_size = calculate_chart_size(num_options)
+    chart_size = calculate_role_stacked_chart_size(num_options)
     
     fig = plotter.create_role_stacked_chart(
         question_key,
@@ -403,7 +412,7 @@ def plot_primary_concerns_comparison(analyzer, plotter, output_dir):
 
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
-    chart_size = calculate_chart_size(num_options)
+    chart_size = calculate_role_stacked_chart_size(num_options)
     
     # Define role groups for comparison - design roles vs artist roles
     design_roles = ['Level Designer', 'Game Designer', 'Programmer/Technical Designer']
@@ -450,7 +459,7 @@ def plot_tool_view(analyzer, plotter, output_dir):
 
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
-    chart_size = calculate_chart_size(num_options)
+    chart_size = calculate_role_stacked_chart_size(num_options)
     
     fig = plotter.create_role_stacked_chart(
         question_key,
@@ -481,7 +490,7 @@ def plot_critical_factors(analyzer, plotter, output_dir):
 
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
-    chart_size = calculate_chart_size(num_options)
+    chart_size = calculate_role_stacked_chart_size(num_options)
     
     fig = plotter.create_role_stacked_chart(
         question_key,
@@ -546,7 +555,7 @@ def plot_realtime_feedback_importance(analyzer, plotter, output_dir):
 
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
-    chart_size = calculate_chart_size(num_options)
+    chart_size = calculate_role_stacked_chart_size(num_options)
     
     fig = plotter.create_role_stacked_chart(
         question_key,
@@ -576,7 +585,7 @@ def plot_preferred_approach(analyzer, plotter, output_dir):
 
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
-    chart_size = calculate_chart_size(num_options)
+    chart_size = calculate_role_stacked_chart_size(num_options)
     
     fig = plotter.create_role_stacked_chart(
         question_key,
@@ -607,7 +616,7 @@ def plot_integration_preference(analyzer, plotter, output_dir):
     
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
-    chart_size = calculate_chart_size(num_options)
+    chart_size = calculate_role_stacked_chart_size(num_options)
 
     fig = plotter.create_role_stacked_chart(
         question_key,
@@ -674,7 +683,7 @@ def plot_level_representation(analyzer, plotter, output_dir):
 
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
-    chart_size = calculate_chart_size(num_options)
+    chart_size = calculate_role_stacked_chart_size(num_options)
 
     fig = plotter.create_role_stacked_chart(
         question_key,
@@ -705,7 +714,7 @@ def plot_most_useful_approach(analyzer, plotter, output_dir):
 
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
-    chart_size = calculate_chart_size(num_options)
+    chart_size = calculate_role_stacked_chart_size(num_options)
 
     fig = plotter.create_role_stacked_chart(
         question_key,
@@ -736,7 +745,7 @@ def plot_ai_role_preference(analyzer, plotter, output_dir):
     
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
-    chart_size = calculate_chart_size(num_options)
+    chart_size = calculate_role_stacked_chart_size(num_options)
 
     fig = plotter.create_role_stacked_chart(
         question_key,
@@ -767,7 +776,7 @@ def plot_ai_importance_factors(analyzer, plotter, output_dir):
 
      # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
-    chart_size = calculate_chart_size(num_options)
+    chart_size = calculate_role_stacked_chart_size(num_options)
 
     fig = plotter.create_role_stacked_chart(
         question_key,
@@ -798,8 +807,8 @@ def plot_ai_concerns(analyzer, plotter, output_dir):
 
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
-    chart_size = calculate_chart_size(num_options)
-    
+    chart_size = calculate_role_stacked_chart_size(num_options)  # Use consistent sizing for role stacked charts
+
     fig = plotter.create_role_stacked_chart(
         question_key,
         title=question_text,
@@ -829,7 +838,7 @@ def plot_desired_solutions(analyzer, plotter, output_dir):
 
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
-    chart_size = calculate_chart_size(num_options)
+    chart_size = calculate_role_stacked_chart_size(num_options)
     
     fig = plotter.create_role_stacked_chart(
         question_key,
