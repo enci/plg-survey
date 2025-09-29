@@ -468,6 +468,7 @@ class SurveyPlotter:
                         figsize: tuple = (10, 6),
                         colormap: Optional[str] = None,
                         show_percentages: bool = False,
+                        sort: bool = False,
                         label_wrap_width: Optional[int] = None) -> mpl_figure.Figure:
         
         counts = self.analyzer.get_question_counts(question, filtered)
@@ -476,7 +477,10 @@ class SurveyPlotter:
             raise ValueError(f"No data found for question '{question}'")
         
         # Sort by count and optionally limit to top N
-        sorted_items = sorted(counts.items(), key=lambda x: x[1], reverse=True)
+        if sort:
+            sorted_items = sorted(counts.items(), key=lambda x: x[1], reverse=True)
+        else:
+            sorted_items = list(counts.items())
         
         labels, values = zip(*sorted_items) if sorted_items else ([], [])
         
@@ -752,8 +756,6 @@ class SurveyPlotter:
         plt.xticks(rotation=45, ha='right')
         plt.legend(title=stack_by.replace('_', ' ').title(), bbox_to_anchor=(1.05, 1), loc='upper left')
         plt.tight_layout(pad=2.0)
-        
-        # ...existing code...
         
         return fig
     

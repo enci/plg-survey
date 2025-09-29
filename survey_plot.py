@@ -364,11 +364,12 @@ def plot_primary_concerns(analyzer, plotter, output_dir):
     label_wrap_width = 30   # Wrap long labels for concerns
     
     print(f"Creating plot for: {question_text}")
-    
+
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
     chart_size = calculate_role_stacked_chart_size(num_options)
     
+    analyzer.clear_filters()
     fig = plotter.create_role_stacked_chart(
         question_key,
         title=question_text,
@@ -443,7 +444,8 @@ def plot_tool_view(analyzer, plotter, output_dir):
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
     chart_size = calculate_role_stacked_chart_size(num_options)
-    
+
+    analyzer.clear_filters()    
     fig = plotter.create_role_stacked_chart(
         question_key,
         title=question_text,
