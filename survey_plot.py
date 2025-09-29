@@ -26,18 +26,12 @@ def calculate_chart_size(num_options, base_height=0.0, height_per_option=1.08):
     height = base_height + (num_options * height_per_option)
     return (width, height)
 
+# Calculate chart size specifically for role stacked charts to ensure consistent bar heights.
 def calculate_role_stacked_chart_size(num_options):
-    """
-    Calculate chart size specifically for role stacked charts to ensure consistent bar heights.
-    """
     width = 12
-    consistent_bar_height = 1.2  # Consistent height per bar
-    base_padding = 2.0  # Space for legend and padding
-    height = base_padding + (num_options * consistent_bar_height)
-    
-    # Ensure minimum readable size
-    height = max(height, 6.0)
-    
+    consistent_bar_height = 0.7  # Consistent height per bar
+    base_padding = 1.0  # Space for legend and padding
+    height = base_padding + (num_options * consistent_bar_height)    
     return (width, height)
 
 # Get the number of unique response options for a question.
@@ -45,27 +39,16 @@ def get_question_options_count(analyzer, question_key):
     try:
         # First try to get predefined options from schema
         options = analyzer.get_question_options(question_key)
-        if options:
-            return len(options)
-        
-        # Check if this is a matrix question
-        question_type = analyzer.get_question_type(question_key)
-        if question_type == 'matrix':
-            # For matrix questions, count the number of items being rated
-            responses = analyzer.get_question_values(question_key, filtered=False)
-            if responses and isinstance(responses[0], dict):
-                # Return the number of items in the matrix (e.g., different tools)
-                return len(responses[0].keys())
-        
-        # If no predefined options, count unique actual responses
+
+        # check which options are actually used in responses
         responses = analyzer.get_question_values(question_key, filtered=False)
         if not responses:
-            return 5  # Default fallback
+            return len(options)  # No responses, return total options
         
         # Handle multi-select questions (lists in responses) - already handled by get_question_values
         unique_options = set(responses)
-        
         return len(unique_options)
+
     except Exception as e:
         print(f"Warning: Could not get options count for {question_key}: {e}")
         return 5  # Default fallback if there's any error

@@ -419,6 +419,29 @@ class SurveyAnalyzer:
         return self.filtered_data.copy()
 
 
+def get_colors_from_colormap(colormap_name):    
+    cmap = plt.get_cmap(colormap_name)
+    return [cmap(i / cmap.N) for i in range(cmap.N)]
+
+def get_nice_colors():
+    # High saturation, print-friendly colors
+    colors = [
+        (155/255, 75/255, 160/255, 1.0),   # Rich purple
+        (50/255, 185/255, 155/255, 1.0),   # Vibrant teal  
+        (225/255, 180/255, 40/255, 1.0),   # Golden yellow
+        (215/255, 70/255, 55/255, 1.0),    # Bold coral
+        (70/255, 130/255, 180/255, 1.0),   # Strong blue
+        (220/255, 125/255, 35/255, 1.0),   # Vibrant orange
+        (120/255, 185/255, 45/255, 1.0),   # Bright green
+        (140/255, 120/255, 190/255, 1.0),  # Rich lavender
+        (220/255, 140/255, 180/255, 1.0),  # Vibrant pink
+        (210/255, 200/255, 95/255, 1.0),   # Rich cream
+        (140/255, 140/255, 140/255, 1.0),  # Neutral gray
+        (140/255, 200/255, 130/255, 1.0),  # Vibrant mint
+    ]
+    return colors
+    
+
 class SurveyPlotter:
     """
     A plotting utility class that works with SurveyAnalyzer to create visualizations.
@@ -432,158 +455,21 @@ class SurveyPlotter:
             analyzer: SurveyAnalyzer instance to use for data
         """
         self.analyzer = analyzer
-        # Pre-generate color palette using golden ratio for consistent coloring
-        self.colors = self._generate_base_colors(50)  # Generate 50 base colors
-        
-        # Define role-specific color mapping for consistent professional role colors
-        self.role_colors = {
-            'Programmer/Technical Designer': '#0051CC',    # Blue
-            'Technical Artist': '#8DCC00',                # Green
-            'Environment Artist': '#CC00C8',              # Magenta
-            'Game Designer': '#00CC93',                   # Teal
-            'Academic/Researcher': '#CC5800',             # Orange
-            'Level Designer': '#1C00CC',                  # Purple
-            'Other': '#1ECC00'                           # Light Green
-        }
-        
-    def _hsv_to_rgb(self, h: float, s: float, v: float) -> tuple:
-        """
-        Convert HSV color values to RGB.
-        
-        Args:
-            h: Hue (0-1)
-            s: Saturation (0-1) 
-            v: Value/Brightness (0-1)
-            
-        Returns:
-            Tuple of (r, g, b) values (0-255)
-        """
-        i = int(h * 6)
-        f = h * 6 - i
-        p = v * (1 - s)
-        q = v * (1 - f * s)
-        t = v * (1 - (1 - f) * s)
-        
-        remainder = i % 6
-        if remainder == 0:
-            r, g, b = v, t, p
-        elif remainder == 1:
-            r, g, b = q, v, p
-        elif remainder == 2:
-            r, g, b = p, v, t
-        elif remainder == 3:
-            r, g, b = p, q, v
-        elif remainder == 4:
-            r, g, b = t, p, v
-        else:  # remainder == 5
-            r, g, b = v, p, q
-            
-        return (int(r * 255), int(g * 255), int(b * 255))
+
+        # self.colors = get_colors_from_colormap("tab10")
+        self.role_colors = get_nice_colors()
     
-    def _rgb_to_hex(self, r: int, g: int, b: int) -> str:
-        """
-        Convert RGB values to hex color string.
-        
-        Args:
-            r, g, b: RGB values (0-255)
-            
-        Returns:
-            Hex color string (e.g., '#FF0000')
-        """
-        return f'#{r:02X}{g:02X}{b:02X}'
-    
-    def _generate_base_colors(self, count: int) -> List[str]:
-        """
-        Generate a palette of colors using golden ratio distribution for optimal visual separation.
-        Based on the JavaScript generateColors function.
-        
-        Args:
-            count: Number of colors to generate
-            
-        Returns:
-            List of hex color strings
-        """
-        colors = []
-        hue = 0.6  # Starting hue
-        hue_increment = 0.618033988749895  # Golden ratio for optimal distribution
-        
-        for i in range(count):
-            saturation = 1.0  # Full saturation for vibrant colors
-            value = 0.8  # Slightly dimmed for better readability
-            
-            # Convert HSV to RGB and then to hex
-            r, g, b = self._hsv_to_rgb(hue, saturation, value)
-            color = self._rgb_to_hex(r, g, b)
-            colors.append(color)
-            
-            # Increment hue by golden ratio for optimal color separation
-            hue += hue_increment
-            hue %= 1.0  # Wrap around to stay within [0, 1]
-            
-        return colors
-    
-    def get_colors(self, count: int, alpha: float = 1.0, colormap: Optional[str] = None) -> List[str]:
-        """
-        Get a list of colors for plotting.
-        
-        Args:
-            count: Number of colors needed
-            alpha: Transparency level (0.0-1.0, default 1.0 for opaque)
-            colormap: Optional matplotlib colormap name. If None, uses golden ratio system.
-            
-        Returns:
-            List of color strings (hex if alpha=1.0, rgba if alpha<1.0)
-        """
-        if colormap is not None:
-            # Use matplotlib colormap
-            import matplotlib.cm as cm
-            import matplotlib.colors as mcolors
-            cmap = cm.get_cmap(colormap)
-            colors = [mcolors.to_hex(cmap(i / count)) for i in range(count)]
-        else:
-            # Use golden ratio color generation (default)
-            if count <= len(self.colors):
-                colors = self.colors[:count]
-            else:
-                # If we need more colors than pre-generated, generate more
-                colors = self._generate_base_colors(count)
-            
-        if alpha == 1.0:
-            return colors
-        else:
-            # Convert to RGBA format for transparency
-            rgba_colors = []
-            for hex_color in colors:
-                # Convert hex to RGB
-                r = int(hex_color[1:3], 16)
-                g = int(hex_color[3:5], 16)
-                b = int(hex_color[5:7], 16)
-                rgba_colors.append(f'rgba({r}, {g}, {b}, {alpha})')
-            return rgba_colors
-        
-    def create_bar_chart(self, question: str, title: Optional[str] = None, 
-                        filtered: bool = True, top_n: Optional[int] = None,
-                        horizontal: bool = True, figsize: tuple = (10, 6),
+    # Create a bar chart for a question's response distribution
+    def create_bar_chart(self,
+                        question: str,
+                        title: Optional[str] = None, 
+                        filtered: bool = True,
+                        horizontal: bool = True,
+                        figsize: tuple = (10, 6),
                         colormap: Optional[str] = None,
-                        show_percentages: bool = False, label_wrap_width: Optional[int] = None) -> mpl_figure.Figure:
-        """
-        Create a bar chart for a question's response distribution.
+                        show_percentages: bool = False,
+                        label_wrap_width: Optional[int] = None) -> mpl_figure.Figure:
         
-        Args:
-            question: Question key to plot
-            title: Chart title (auto-generated if None)
-            filtered: Use filtered data if True, all data if False
-            top_n: Show only top N responses
-            horizontal: Create horizontal bar chart if True
-            figsize: Figure size tuple
-            save_path: Path to save the chart (optional)
-            colormap: Optional matplotlib colormap name (defaults to golden ratio system)
-            show_percentages: If True, show percentages instead of counts
-            label_wrap_width: Width for label wrapping (None = no wrapping)
-            
-        Returns:
-            matplotlib Figure object
-        """
         counts = self.analyzer.get_question_counts(question, filtered)
         
         if not counts:
@@ -591,8 +477,6 @@ class SurveyPlotter:
         
         # Sort by count and optionally limit to top N
         sorted_items = sorted(counts.items(), key=lambda x: x[1], reverse=True)
-        if top_n:
-            sorted_items = sorted_items[:top_n]
         
         labels, values = zip(*sorted_items) if sorted_items else ([], [])
         
@@ -617,7 +501,7 @@ class SurveyPlotter:
         fig, ax = plt.subplots(figsize=figsize)
         
         # Generate colors using colormap if specified, otherwise golden ratio system
-        colors = self.get_colors(len(labels), colormap=colormap)
+        colors  = self.role_colors
         
         if horizontal:
             bars = ax.barh(range(len(labels)), display_values, color=colors)
@@ -628,14 +512,14 @@ class SurveyPlotter:
             
             # Extend x-axis to make room for labels
             max_value = max(display_values) if display_values else 0
-            ax.set_xlim(0, max_value * 1.22)  # Add 15% padding
+            ax.set_xlim(0, max_value * 1.22)  # Add padding
             
             # Add value labels on bars
             for i, bar in enumerate(bars):
                 width = bar.get_width()
                 label_text = value_format(display_values[i])
                 ax.text(width + max_value * 0.01, bar.get_y() + bar.get_height()/2, 
-                    label_text, ha='left', va='center', fontweight='bold')
+                    label_text, ha='left', va='center')
         else:
             bars = ax.bar(range(len(labels)), display_values, color=colors)
             ax.set_xticks(range(len(labels)))
@@ -665,8 +549,6 @@ class SurveyPlotter:
         
         # Use tight_layout with padding to prevent label cutoff
         plt.tight_layout(pad=2.0)
-        
-        # ...existing code...
         
         return fig
     
@@ -779,7 +661,7 @@ class SurveyPlotter:
         fig, ax = plt.subplots(figsize=figsize)
         
         # Generate colors using golden ratio color system for optimal visual separation
-        colors = self.get_colors(len(data_sets), colormap=None)  # Always use golden ratio for comparison clarity
+        colors = self.role_colors
         
         for i, (label, values_dict) in enumerate(data_sets):
             values = [values_dict.get(option, 0) for option in all_options]
@@ -929,7 +811,7 @@ class SurveyPlotter:
         fig, ax = plt.subplots(figsize=figsize)
         
         # Generate colors using colormap if specified, otherwise golden ratio system
-        colors = self.get_colors(len(all_ratings), colormap=colormap)
+        colors = self.role_colors
         
         if horizontal:
             # Create horizontal stacked bars
@@ -937,7 +819,7 @@ class SurveyPlotter:
             bars = []
             for i, rating in enumerate(all_ratings):
                 bars.append(ax.barh(wrapped_items, data[rating], left=bottom, 
-                                   label=rating, color=colors[i], alpha=0.8))
+                                   label=rating, color=colors[i]))
                 bottom += data[rating]
         else:
             # Create vertical stacked bars
@@ -945,7 +827,7 @@ class SurveyPlotter:
             bars = []
             for i, rating in enumerate(all_ratings):
                 bars.append(ax.bar(wrapped_items, data[rating], bottom=bottom, 
-                                  label=rating, color=colors[i], alpha=0.8))
+                                  label=rating, color=colors[i]))
                 bottom += data[rating]
         
         # Customize the plot
@@ -1025,7 +907,7 @@ class SurveyPlotter:
         fig, ax = plt.subplots(figsize=figsize)
         
         # Generate colors using colormap if specified, otherwise golden ratio system
-        colors = self.get_colors(max_rank, colormap=colormap)
+        colors = self.role_colors
         
         if horizontal:
             # Create horizontal stacked bars
@@ -1033,7 +915,7 @@ class SurveyPlotter:
             bars = []
             for i, (rank_name, values) in enumerate(rank_data.items()):
                 bars.append(ax.barh(wrapped_items, values, left=bottom, 
-                                   label=rank_name, color=colors[i], alpha=0.8))
+                                   label=rank_name, color=colors[i]))
                 bottom += values
             ax.set_xlabel('Number of Times Ranked')
             ax.set_ylabel('Features')
@@ -1044,7 +926,7 @@ class SurveyPlotter:
             bars = []
             for i, (rank_name, values) in enumerate(rank_data.items()):
                 bars.append(ax.bar(wrapped_items, values, bottom=bottom, 
-                                  label=rank_name, color=colors[i], alpha=0.8))
+                                  label=rank_name, color=colors[i]))
                 bottom += values
             ax.set_xlabel('Features')
             ax.set_ylabel('Number of Times Ranked')
@@ -1117,7 +999,8 @@ class SurveyPlotter:
             stack_data[role] = [(role_breakdown[role].get(cat, 0) / total_responses) * 100 for cat in main_categories]
         
         # Get role colors
-        role_colors = [self.role_colors.get(role, '#CCCCCC') for role in roles]
+        role_colors = self.role_colors
+        # [self.role_colors.get(role, '#CCCCCC') for role in roles]
         
         # Wrap labels if specified
         if label_wrap_width:
@@ -1136,7 +1019,7 @@ class SurveyPlotter:
             for i, role in enumerate(roles):
                 values = stack_data[role]
                 bars.append(ax.barh(wrapped_main_categories, values, left=left, 
-                                   label=role, color=role_colors[i], alpha=0.8))
+                                   label=role, color=role_colors[i]))
                 left += values
             
             # Show cumulative percentages at the end of bars if requested
@@ -1163,7 +1046,7 @@ class SurveyPlotter:
             for i, role in enumerate(roles):
                 values = stack_data[role]
                 bars.append(ax.bar(wrapped_main_categories, values, bottom=bottom,
-                                  label=role, color=role_colors[i], alpha=0.8))
+                                  label=role, color=role_colors[i]))
                 bottom += values
             
             # Show cumulative percentages at the end of bars if requested
@@ -1196,9 +1079,7 @@ class SurveyPlotter:
         
         return fig
 
-
-def main():
-    assert False
-
 if __name__ == "__main__":
+    # call the main function in survey_plot.py
+    from survey_plot import main
     main()
