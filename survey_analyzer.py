@@ -100,12 +100,12 @@ class SurveyAnalyzer:
         except json.JSONDecodeError as e:
             raise ValueError(f"Invalid JSON format: {e}")
     
-    # Ensure data is loaded, raise error if not.
+    # Ensure data is loaded, raise error if not
     def _ensure_loaded(self):
         if self.schema is None or self.responses is None or self.df is None:
             raise RuntimeError("Data not loaded. Check file paths and try again.")
     
-    # Get information about a specific question from the schema.
+    # Get information about a specific question from the schema
     def get_question_info(self, question_key: str) -> Dict[str, Any]:
         self._ensure_loaded()
         assert self.schema is not None  # for type checker
@@ -115,31 +115,23 @@ class SurveyAnalyzer:
         
         return self.schema['questions'][question_key]
     
-    # Get list of all available question keys.
+    # Get list of all available question keys
     def get_available_questions(self) -> List[str]:
         self._ensure_loaded()
         assert self.schema is not None  # for type checker
         return list(self.schema['questions'].keys())
     
+    # Get available options for a question
     def get_question_options(self, question_key: str) -> List[str]:
-        """
-        Get available options for a question.
-        
-        Args:
-            question_key: The key of the question
-            
-        Returns:
-            List of available options, or empty list if not applicable
-        """
         question_info = self.get_question_info(question_key)
         return question_info.get('options', [])
     
-    # Get the type of a question.
+    # Get the type of a question
     def get_question_type(self, question_key: str) -> str:
         question_info = self.get_question_info(question_key)
         return question_info.get('type', 'unknown')
     
-    # Add a filter condition.
+    # Add a filter condition
     def add_filter(self, question: str, value: Union[str, List[str]], negate: bool = False):
         self._ensure_loaded()
         assert self.schema is not None  # for type checker
@@ -151,7 +143,7 @@ class SurveyAnalyzer:
         self.filters.append(filter_obj)
         print(f"Added filter: {filter_obj}")
     
-    # Remove a filter by index.
+    # Remove a filter by index
     def remove_filter(self, index: int):
         if 0 <= index < len(self.filters):
             removed_filter = self.filters.pop(index)
@@ -159,7 +151,7 @@ class SurveyAnalyzer:
         else:
             raise IndexError(f"Filter index {index} out of range")
     
-    # Remove all filters.
+    # Remove all filters
     def clear_filters(self):
         self._ensure_loaded()
         assert self.df is not None  # for type checker
@@ -168,7 +160,7 @@ class SurveyAnalyzer:
         self.filtered_data = self.df.copy()
         print("All filters cleared")
     
-    # Set the logic for combining multiple filters.
+    # Set the logic for combining multiple filters
     def set_filter_logic(self, logic: Union[FilterLogic, str]):
         if isinstance(logic, str):
             logic = FilterLogic(logic.upper())
@@ -176,7 +168,7 @@ class SurveyAnalyzer:
         self.filter_logic = logic
         print(f"Filter logic set to: {logic.value}")
     
-    # Apply all current filters to the data and return filtered DataFrame.
+    # Apply all current filters to the data and return filtered DataFrame
     def apply_filters(self) -> pd.DataFrame:
         self._ensure_loaded()
         assert self.df is not None  # for type checker
@@ -229,7 +221,7 @@ class SurveyAnalyzer:
         
         return self.filtered_data
     
-    # Get all values for a specific question from the (optionally filtered) data.
+    # Get all values for a specific question from the (optionally filtered) data
     def get_question_values(self, question: str, filtered: bool = True) -> List[Any]:
         self._ensure_loaded()
         assert self.schema is not None and self.df is not None and self.filtered_data is not None
@@ -259,18 +251,8 @@ class SurveyAnalyzer:
         
         return values
     
+    # Get count distribution for a specific question
     def get_question_counts(self, question: str, filtered: bool = True, group_other: bool = False) -> Dict[str, int]:
-        """
-        Get count distribution for a specific question.
-        
-        Args:
-            question: Question key to analyze
-            filtered: If True, use filtered data; if False, use all data
-            group_other: If True, group values not in schema as "Other"
-            
-        Returns:
-            Dictionary mapping values to their counts
-        """
         values = self.get_question_values(question, filtered)
         
         # Handle matrix-type questions separately
@@ -288,24 +270,34 @@ class SurveyAnalyzer:
                     flattened_values.append(str(value))
             values = flattened_values
         
-        # Count occurrences
-        counts = {}
+        # Count occurrences while preserving schema order
+        # First get the expected order from schema
+        question_info = self.get_question_info(question)
+        schema_options = question_info.get('options', [])
+        
+        # Count all occurrences
+        raw_counts = {}
         for value in values:
             value_str = str(value) if not isinstance(value, str) else value
-            counts[value_str] = counts.get(value_str, 0) + 1
+            raw_counts[value_str] = raw_counts.get(value_str, 0) + 1
+        
+        # Build ordered counts dictionary preserving schema order
+        counts = {}
+        
+        # First add schema options in their original order (if they have counts)
+        for option in schema_options:
+            if option in raw_counts:
+                counts[option] = raw_counts[option]
+        
+        # Then add any unexpected options (like "Other") at the end
+        for value_str, count in raw_counts.items():
+            if value_str not in counts:
+                counts[value_str] = count
+        
         return counts
     
+    # Get count distribution for matrix-type questions, organized by item and rating
     def get_matrix_counts(self, question: str, filtered: bool = True) -> Dict[str, Dict[str, int]]:
-        """
-        Get count distribution for matrix-type questions, organized by item and rating.
-        
-        Args:
-            question: Matrix question key to analyze
-            filtered: If True, use filtered data; if False, use all data
-            
-        Returns:
-            Dictionary mapping items to rating counts
-        """
         values = self.get_question_values(question, filtered)
         
         # Verify this is a matrix question
@@ -326,18 +318,8 @@ class SurveyAnalyzer:
         
         return matrix_counts
     
+    # Get weighted scores for ranking-type questions
     def get_ranking_scores(self, question: str, filtered: bool = True, max_rank: int = 3) -> Dict[str, float]:
-        """
-        Get weighted scores for ranking-type questions.
-        
-        Args:
-            question: Ranking question key to analyze
-            filtered: If True, use filtered data; if False, use all data
-            max_rank: Maximum rank to consider (default 3 for "top 3" rankings)
-            
-        Returns:
-            Dictionary mapping items to their weighted scores
-        """
         values = self.get_question_values(question, filtered)
         
         # Verify this is a ranking question
@@ -358,18 +340,8 @@ class SurveyAnalyzer:
         
         return ranking_scores
     
+    # Get position distribution for ranking-type questions
     def get_ranking_positions(self, question: str, filtered: bool = True, max_rank: int = 3) -> Dict[str, Dict[int, int]]:
-        """
-        Get position distribution for ranking-type questions.
-        
-        Args:
-            question: Ranking question key to analyze
-            filtered: If True, use filtered data; if False, use all data
-            max_rank: Maximum rank to consider (default 3 for "top 3" rankings)
-            
-        Returns:
-            Dictionary mapping items to position counts {item: {1: count, 2: count, 3: count}}
-        """
         values = self.get_question_values(question, filtered)
         
         # Verify this is a ranking question
@@ -388,13 +360,8 @@ class SurveyAnalyzer:
         
         return position_counts
     
+    # Get a summary of the current state of the analyzer
     def get_summary(self) -> Dict[str, Any]:
-        """
-        Get a summary of the current state of the analyzer.
-        
-        Returns:
-            Dictionary with summary information
-        """
         self._ensure_loaded()
         assert self.df is not None and self.filtered_data is not None and self.schema is not None
         
@@ -407,13 +374,8 @@ class SurveyAnalyzer:
             'available_questions': len(self.schema['questions'])
         }
     
+    # Get the current filtered DataFrame
     def get_filtered_dataframe(self) -> pd.DataFrame:
-        """
-        Get the current filtered DataFrame.
-        
-        Returns:
-            Filtered pandas DataFrame
-        """
         self._ensure_loaded()
         assert self.filtered_data is not None
         return self.filtered_data.copy()
@@ -447,13 +409,8 @@ class SurveyPlotter:
     A plotting utility class that works with SurveyAnalyzer to create visualizations.
     """
     
+    # Initialize the plotter with a SurveyAnalyzer instance
     def __init__(self, analyzer: SurveyAnalyzer):
-        """
-        Initialize the plotter with a SurveyAnalyzer instance.
-        
-        Args:
-            analyzer: SurveyAnalyzer instance to use for data
-        """
         self.analyzer = analyzer
 
         # self.colors = get_colors_from_colormap("tab10")
@@ -556,32 +513,11 @@ class SurveyPlotter:
         
         return fig
     
+    # Create a comparison chart for the same question across different filter conditions
     def create_comparison_chart(self, question: str, filter_configs: List[Dict], 
                                labels: List[str], title: Optional[str] = None,
                                figsize: tuple = (14, 8),
                                show_percentages: bool = False, label_wrap_width: Optional[int] = None) -> mpl_figure.Figure:
-        """
-        Create a comparison chart for the same question across different filter conditions.
-        
-        Args:
-            question: Question key to analyze
-            filter_configs: List of filter configurations, each a dict with 'filters' and optional 'logic'
-            labels: Labels for each filter configuration
-            title: Chart title (auto-generated if None)
-            figsize: Figure size tuple
-            save_path: Path to save the chart (optional)
-            show_percentages: Show percentages instead of raw counts
-            label_wrap_width: Width for wrapping x-axis labels (optional)
-            
-        Returns:
-            matplotlib Figure object
-            
-        Example filter_configs:
-        [
-            {'filters': [{'question': 'years_experience', 'value': '0-2 years'}]},
-            {'filters': [{'question': 'years_experience', 'value': '10+ years'}]}
-        ]
-        """
         if len(filter_configs) != len(labels):
             raise ValueError("filter_configs and labels must have the same length")
         
@@ -714,23 +650,10 @@ class SurveyPlotter:
         
         return fig
     
+    # Create a stacked bar chart showing question responses broken down by another variable
     def create_stacked_bar_chart(self, question: str, stack_by: str, 
                                 title: Optional[str] = None, filtered: bool = True,
                                 figsize: tuple = (12, 8)) -> mpl_figure.Figure:
-        """
-        Create a stacked bar chart showing question responses broken down by another variable.
-        
-        Args:
-            question: Main question to plot
-            stack_by: Question to use for stacking/grouping
-            title: Chart title (auto-generated if None)
-            filtered: Use filtered data if True
-            figsize: Figure size tuple
-            save_path: Path to save the chart (optional)
-            
-        Returns:
-            matplotlib Figure object
-        """
         self.analyzer._ensure_loaded()
         assert self.analyzer.df is not None and self.analyzer.filtered_data is not None
         
@@ -761,27 +684,11 @@ class SurveyPlotter:
     
     
     
+    # Create a stacked bar chart for matrix-type questions (like Likert scales)
     def create_matrix_stacked_bar_chart(self, matrix_question: str, title: Optional[str] = None,
                                        filtered: bool = True, figsize: tuple = (14, 10),
                                        colormap: Optional[str] = None,
                                        horizontal: bool = True, label_wrap_width: Optional[int] = None) -> mpl_figure.Figure:
-        """
-        Create a stacked bar chart for matrix-type questions (like Likert scales).
-        Each bar represents one item (tool/feature) with segments for each rating level.
-        
-        Args:
-            matrix_question: Matrix question key to plot
-            title: Chart title (auto-generated if None)
-            filtered: Use filtered data if True
-            figsize: Figure size tuple
-            save_path: Path to save the chart (optional)
-            colormap: Optional matplotlib colormap name (defaults to golden ratio system)
-            horizontal: If True, create horizontal bars
-            label_wrap_width: Width for label wrapping (None = default wrapping)
-            
-        Returns:
-            matplotlib Figure object
-        """
         self.analyzer._ensure_loaded()
         assert self.analyzer.df is not None and self.analyzer.filtered_data is not None
         
@@ -791,14 +698,34 @@ class SurveyPlotter:
         if not matrix_counts:
             raise ValueError(f"No data found for matrix question '{matrix_question}'")
         
-        # Get all possible rating levels across all items
-        all_ratings = set()
-        for item_counts in matrix_counts.values():
-            all_ratings.update(item_counts.keys())
-        all_ratings = sorted(all_ratings)
+        # Get the schema order for ratings and items
+        question_info = self.analyzer.get_question_info(matrix_question)
+        schema_scale = question_info.get('scale', [])
+        schema_items = question_info.get('items', [])
         
-        # Get all items (tools/features) and wrap long names if specified
-        items = sorted(matrix_counts.keys())
+        # Get all possible rating levels, preserving schema order
+        all_ratings_set = set()
+        for item_counts in matrix_counts.values():
+            all_ratings_set.update(item_counts.keys())
+        
+        # Preserve schema order for ratings
+        all_ratings = []
+        for rating in schema_scale:
+            if rating in all_ratings_set:
+                all_ratings.append(rating)
+                all_ratings_set.remove(rating)
+        # Add any unexpected ratings at the end
+        all_ratings.extend(sorted(all_ratings_set))
+        
+        # Get items preserving schema order
+        items_set = set(matrix_counts.keys())
+        items = []
+        for item in schema_items:
+            if item in items_set:
+                items.append(item)
+                items_set.remove(item)
+        # Add any unexpected items at the end
+        items.extend(sorted(items_set))
         if label_wrap_width:
             wrapped_items = [textwrap.fill(item, width=label_wrap_width, break_long_words=False) for item in items]
         else:
@@ -860,29 +787,12 @@ class SurveyPlotter:
         return fig
     
     
+    # Create a stacked position chart for ranking-type questions showing distribution across ranks
     def create_ranking_position_chart(self, ranking_question: str, title: Optional[str] = None,
                                      filtered: bool = True, figsize: tuple = (14, 8),
                                      colormap: Optional[str] = None,
                                      horizontal: bool = True, max_rank: int = 3,
                                      label_wrap_width: Optional[int] = None) -> mpl_figure.Figure:
-        """
-        Create a stacked position chart for ranking-type questions.
-        Shows how often each item appears in rank 1, 2, 3, etc.
-        
-        Args:
-            ranking_question: Ranking question key to plot
-            title: Chart title (auto-generated if None)
-            filtered: Use filtered data if True
-            figsize: Figure size tuple
-            save_path: Path to save the chart (optional)
-            colormap: Optional matplotlib colormap name (defaults to golden ratio system)
-            horizontal: If True, create horizontal bars
-            max_rank: Maximum rank to consider (e.g., 3 for "top 3")
-            label_wrap_width: Width for label wrapping (None = default wrapping)
-            
-        Returns:
-            matplotlib Figure object
-        """
         # Get position distribution for ranking
         positions = self.analyzer.get_ranking_positions(ranking_question, filtered, max_rank)
         
@@ -950,25 +860,10 @@ class SurveyPlotter:
         return fig
 
 
+    # Create a stacked bar chart showing responses broken down by professional roles
     def create_role_stacked_chart(self, question: str, title: Optional[str] = None,
                                  horizontal: bool = True, figsize: Tuple[int, int] = (12, 8),
                                  show_percentages: bool = True, label_wrap_width: Optional[int] = None) -> mpl_figure.Figure:
-        """
-        Create a stacked bar chart showing responses broken down by professional roles.
-        Each role is stacked cumulatively to show the percentage distribution.
-        
-        Args:
-            question: Question key to analyze
-            title: Chart title (optional)
-            horizontal: Whether to create horizontal bars
-            figsize: Figure size tuple
-            show_percentages: Whether to show cumulative percentages at end of bars
-            label_wrap_width: Width for wrapping labels
-            save_path: Path to save the figure
-            
-        Returns:
-            matplotlib Figure object
-        """
         # Get all professional roles in the dataset
         role_data = self.analyzer.get_question_counts('professional_role')
         roles = list(role_data.keys())
