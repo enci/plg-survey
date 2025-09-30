@@ -17,6 +17,17 @@ def wrap_text(text, width=30):
     wrapped_lines = textwrap.wrap(text, width=width, break_long_words=False)
     return '\n'.join(wrapped_lines)
 
+# Wrap labels based on width setting: None=no wrapping, 0=wrap at slashes, >0=wrap at width
+def wrap_label_smart(label, width):
+    if width is None:
+        return label
+    elif width == 0:
+        # Special case: wrap at slashes only
+        return label.replace('/', '/\n')
+    else:
+        # Normal width-based wrapping
+        return textwrap.fill(label, width=width, break_long_words=False)
+
 # Wrap a list of labels for better display on axes.
 def wrap_labels(labels, width=25):
     return [wrap_text(label, width) for label in labels]
@@ -60,7 +71,7 @@ plt.rcParams.update({
     'font.size': 20,
     'axes.titlesize': 18,
     'axes.labelsize': 20,
-    'xtick.labelsize': 16,
+    'xtick.labelsize': 20,
     'ytick.labelsize': 20,
     'legend.fontsize': 18,
     'figure.titlesize': 20,
@@ -68,8 +79,7 @@ plt.rcParams.update({
     'grid.alpha': 0.3,
     'axes.axisbelow': True,
     'axes.titlelocation': 'center',
-    'axes.titlesize': 0,
-    #'font.weight': 'bold'  # Make heatmap labels bold
+    'axes.titlesize': 0
 })
 
 # Create plot for professional role question.
@@ -79,7 +89,7 @@ def plot_professional_role(analyzer, plotter, output_dir):
     question_text = question_info.get('question', question_key)
     
     # Local wrapping settings for this chart
-    label_wrap_width = None  # No label wrapping
+    label_wrap_width = 0
     
     print(f"Creating plot for: {question_text}")
 
@@ -90,12 +100,11 @@ def plot_professional_role(analyzer, plotter, output_dir):
     fig = plotter.create_bar_chart(
         question_key,
         title=question_text,
-        horizontal=True,
+        horizontal=False,
         figsize=chart_size,
         show_percentages=True,
         label_wrap_width=label_wrap_width
     )
-
     
     pdf_path = os.path.join(output_dir, f"q1_{question_key}.pdf")
     fig.savefig(pdf_path, format='pdf', bbox_inches='tight', dpi=300)
@@ -126,7 +135,7 @@ def plot_years_experience(analyzer, plotter, output_dir):
         figsize=chart_size,
         show_percentages=True,
         label_wrap_width=label_wrap_width,
-        colormap='Blues'
+        colormap='tab20b'
     )
     
     pdf_path = os.path.join(output_dir, f"q2_{question_key}.pdf")
@@ -180,10 +189,7 @@ def plot_procedural_tools_experience(analyzer, plotter, output_dir):
     question_key = 'procedural_tools_experience'
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
-    
-    # Local wrapping settings for this chart
-    label_wrap_width = 30   # Wrap tool names for matrix chart
-    
+        
     print(f"Creating plot for: {question_text}")
     
     # Calculate dynamic chart size based on number of response options
@@ -197,7 +203,8 @@ def plot_procedural_tools_experience(analyzer, plotter, output_dir):
         figsize=chart_size,
         colormap='bwr',
         horizontal=True,
-        label_wrap_width=label_wrap_width
+        label_wrap_width=30,
+        show_percentages=True
     )
     
     pdf_path = os.path.join(output_dir, f"q4_{question_key}.pdf")
@@ -645,7 +652,8 @@ def plot_genre_interest(analyzer, plotter, output_dir):
         figsize=chart_size,
         colormap='RdYlGn',  # Green for interested, red for not interested
         horizontal=True,
-        label_wrap_width=label_wrap_width
+        label_wrap_width=label_wrap_width,
+        show_percentages=True
     )
     
     pdf_path = os.path.join(output_dir, f"q14_{question_key}.pdf")
@@ -876,10 +884,6 @@ def main():
     pdf_path = plot_procedural_tools_experience(analyzer, plotter, output_dir)
     created_files.append(pdf_path)
 
-    # Question 4 Comparison: Artist vs Designer/Programmer roles
-    pdf_path = plot_procedural_tools_experience_comparison(analyzer, plotter, output_dir)
-    created_files.append(pdf_path)
-
     # Question 5: Role stacked chart
     pdf_path = plot_current_pcg_usage(analyzer, plotter, output_dir)
     created_files.append(pdf_path)    
@@ -888,16 +892,8 @@ def main():
     pdf_path = plot_level_generation_frequency(analyzer, plotter, output_dir)
     created_files.append(pdf_path)
 
-    # Question 6 Comparison: Level generation frequency across professional roles
-    pdf_path = plot_level_generation_frequency_comparison(analyzer, plotter, output_dir)
-    created_files.append(pdf_path)
-
     # Question 7: Role stacked chart
     pdf_path = plot_primary_concerns(analyzer, plotter, output_dir)
-    created_files.append(pdf_path)
-
-    # Question 7 Comparison: Primary concerns across professional roles
-    pdf_path = plot_primary_concerns_comparison(analyzer, plotter, output_dir)
     created_files.append(pdf_path)
 
     # Question 8: Role stacked chart

@@ -20,15 +20,26 @@ from dataclasses import dataclass
 from enum import Enum
 from collections import Counter
 
+# Helper function for smart label wrapping
+def wrap_label_smart(label, width):
+    """Wrap labels based on width setting: None=no wrapping, 0=wrap at slashes, >0=wrap at width"""
+    if width is None:
+        return label
+    elif width == 0:
+        # Special case: wrap at slashes only
+        return label.replace('/', '/\n')
+    else:
+        # Normal width-based wrapping
+        return textwrap.fill(label, width=width, break_long_words=False)
+
+# Enum for filter logic operations
 class FilterLogic(Enum):
-    """Enum for filter logic operations"""
     AND = "AND"
     OR = "OR"
 
-
+# Represents a single filter condition
 @dataclass
 class Filter:
-    """Represents a single filter condition"""
     question: str
     value: Union[str, List[str]]
     negate: bool = False
@@ -37,13 +48,9 @@ class Filter:
         negation = "NOT " if self.negate else ""
         return f"{negation}{self.question} = {self.value}"
 
-
-class SurveyAnalyzer:
-    """
-    A comprehensive survey analysis tool that supports flexible filtering
-    and data extraction from survey responses.
-    """
-    
+# A comprehensive survey analysis tool that supports flexible filtering
+# and data extraction from survey responses.
+class SurveyAnalyzer:    
     # Initialize the SurveyAnalyzer with schema and data files.
     def __init__(self, schema_path: str, data_path: str):
         self.schema_path = schema_path
@@ -441,11 +448,8 @@ class SurveyPlotter:
         
         labels, values = zip(*sorted_items) if sorted_items else ([], [])
         
-        # Wrap long labels for better display only if label_wrap_width is specified
-        if label_wrap_width:
-            wrapped_labels = [textwrap.fill(label, width=label_wrap_width, break_long_words=False) for label in labels]
-        else:
-            wrapped_labels = labels
+        # Wrap long labels for better display based on label_wrap_width setting
+        wrapped_labels = [wrap_label_smart(label, label_wrap_width) for label in labels]
         
         # Convert to percentages if requested
         if show_percentages:
@@ -462,8 +466,11 @@ class SurveyPlotter:
         fig, ax = plt.subplots(figsize=figsize)
         
         # Generate colors using colormap if specified, otherwise golden ratio system
-        colors  = self.role_colors
-        
+        if colormap:
+            colors = get_colors_from_colormap(colormap)
+        else:
+            colors = self.role_colors
+
         if horizontal:
             bars = ax.barh(range(len(labels)), display_values, color=colors)
             ax.set_yticks(range(len(labels)))
@@ -480,7 +487,7 @@ class SurveyPlotter:
                 width = bar.get_width()
                 label_text = value_format(display_values[i])
                 ax.text(width + max_value * 0.01, bar.get_y() + bar.get_height()/2, 
-                    label_text, ha='left', va='center')
+                    label_text, ha='left', va='center', fontsize=20)
         else:
             bars = ax.bar(range(len(labels)), display_values, color=colors)
             ax.set_xticks(range(len(labels)))
@@ -496,7 +503,7 @@ class SurveyPlotter:
                 height = bar.get_height()
                 label_text = value_format(display_values[i])
                 ax.text(bar.get_x() + bar.get_width()/2., height + max_value * 0.01,
-                    label_text, ha='center', va='bottom', fontweight='bold')
+                    label_text, ha='center', va='bottom', fontsize=20)
         
         # Set title
         if title is None:
@@ -586,13 +593,8 @@ class SurveyPlotter:
         # Add any remaining options (e.g., "Other") that weren't in the schema
         all_options.extend(sorted(all_options_set))
         
-        # Apply label wrapping if specified
-        if label_wrap_width:
-            import textwrap
-            wrapped_options = [textwrap.fill(option, width=label_wrap_width, break_long_words=False) 
-                              for option in all_options]
-        else:
-            wrapped_options = all_options
+        # Apply label wrapping based on label_wrap_width setting
+        wrapped_options = [wrap_label_smart(option, label_wrap_width) for option in all_options]
         
         # Prepare data for plotting
         x = np.arange(len(all_options))
@@ -617,7 +619,7 @@ class SurveyPlotter:
                     else:
                         label_text = str(int(height))
                     ax.text(bar.get_x() + bar.get_width()/2., height + max(values) * 0.02,
-                           label_text, ha='center', va='bottom', fontweight='bold')
+                           label_text, ha='center', va='bottom')
         
         # Find the maximum value across all datasets for proper y-axis scaling
         all_values = []
@@ -651,44 +653,12 @@ class SurveyPlotter:
         return fig
     
     # Create a stacked bar chart showing question responses broken down by another variable
-    def create_stacked_bar_chart(self, question: str, stack_by: str, 
-                                title: Optional[str] = None, filtered: bool = True,
-                                figsize: tuple = (12, 8)) -> mpl_figure.Figure:
-        self.analyzer._ensure_loaded()
-        assert self.analyzer.df is not None and self.analyzer.filtered_data is not None
-        
-        data = self.analyzer.filtered_data if filtered else self.analyzer.df
-        
-        if question not in data.columns or stack_by not in data.columns:
-            raise ValueError(f"Questions '{question}' or '{stack_by}' not found in data")
-        
-        # Create crosstab
-        ct = pd.crosstab(data[question], data[stack_by])
-        
-        fig, ax = plt.subplots(figsize=figsize)
-        ct.plot(kind='bar', stacked=True, ax=ax)
-        
-        if title is None:
-            q_info = self.analyzer.get_question_info(question)
-            s_info = self.analyzer.get_question_info(stack_by)
-            title = f"{q_info.get('question', question)}\nby {s_info.get('question', stack_by)}"
-        
-        ax.set_title(title or f"{question} by {stack_by}")
-        ax.set_xlabel(question.replace('_', ' ').title())
-        ax.set_ylabel('Count')
-        plt.xticks(rotation=45, ha='right')
-        plt.legend(title=stack_by.replace('_', ' ').title(), bbox_to_anchor=(1.05, 1), loc='upper left')
-        plt.tight_layout(pad=2.0)
-        
-        return fig
-    
-    
-    
     # Create a stacked bar chart for matrix-type questions (like Likert scales)
     def create_matrix_stacked_bar_chart(self, matrix_question: str, title: Optional[str] = None,
                                        filtered: bool = True, figsize: tuple = (14, 10),
                                        colormap: Optional[str] = None,
-                                       horizontal: bool = True, label_wrap_width: Optional[int] = None) -> mpl_figure.Figure:
+                                       horizontal: bool = True, label_wrap_width: Optional[int] = None,
+                                       show_percentages: bool = False) -> mpl_figure.Figure:
         self.analyzer._ensure_loaded()
         assert self.analyzer.df is not None and self.analyzer.filtered_data is not None
         
@@ -726,15 +696,25 @@ class SurveyPlotter:
                 items_set.remove(item)
         # Add any unexpected items at the end
         items.extend(sorted(items_set))
-        if label_wrap_width:
-            wrapped_items = [textwrap.fill(item, width=label_wrap_width, break_long_words=False) for item in items]
-        else:
-            wrapped_items = [textwrap.fill(item, width=25, break_long_words=False) for item in items]
+        # Wrap item labels based on label_wrap_width setting (default to 25 if None)
+        effective_width = label_wrap_width if label_wrap_width is not None else 25
+        wrapped_items = [wrap_label_smart(item, effective_width) for item in items]
         
         # Prepare data for stacked bar chart
         data = {}
-        for rating in all_ratings:
-            data[rating] = [matrix_counts[item].get(rating, 0) for item in items]
+        if show_percentages:
+            # Calculate total responses per item for percentage calculation
+            totals_per_item = [sum(matrix_counts[item].values()) for item in items]
+            for rating in all_ratings:
+                data[rating] = []
+                for i, item in enumerate(items):
+                    count = matrix_counts[item].get(rating, 0)
+                    total = totals_per_item[i] if totals_per_item[i] > 0 else 1  # Avoid division by zero
+                    percentage = (count / total) * 100
+                    data[rating].append(percentage)
+        else:
+            for rating in all_ratings:
+                data[rating] = [matrix_counts[item].get(rating, 0) for item in items]
         
         # Create the plot
         fig, ax = plt.subplots(figsize=figsize)
@@ -761,13 +741,19 @@ class SurveyPlotter:
         
         # Customize the plot
         if horizontal:
-            ax.set_xlabel('Number of Responses')
+            if show_percentages:
+                ax.set_xlabel('Percentage of Responses')
+            else:
+                ax.set_xlabel('Number of Responses')
             ax.set_ylabel('Tools/Features')
             # Rotate item labels if they're long
             plt.setp(ax.get_yticklabels(), rotation=0)
         else:
             ax.set_xlabel('Tools/Features')
-            ax.set_ylabel('Number of Responses')
+            if show_percentages:
+                ax.set_ylabel('Percentage of Responses')
+            else:
+                ax.set_ylabel('Number of Responses')
             # Rotate item labels if they're long
             plt.setp(ax.get_xticklabels(), rotation=45, ha='right')
         
@@ -804,11 +790,9 @@ class SurveyPlotter:
         sorted_items = sorted(total_mentions.items(), key=lambda x: x[1], reverse=True)
         items = [item for item, _ in sorted_items]
         
-        # Wrap long labels for better display if specified
-        if label_wrap_width:
-            wrapped_items = [textwrap.fill(item, width=label_wrap_width, break_long_words=False) for item in items]
-        else:
-            wrapped_items = [textwrap.fill(item, width=30, break_long_words=False) for item in items]
+        # Wrap long labels for better display based on label_wrap_width setting (default to 30 if None)
+        effective_width = label_wrap_width if label_wrap_width is not None else 30
+        wrapped_items = [wrap_label_smart(item, effective_width) for item in items]
         
         # Prepare data for stacked bar chart
         rank_data = {}
@@ -899,11 +883,8 @@ class SurveyPlotter:
         role_colors = self.role_colors
         # [self.role_colors.get(role, '#CCCCCC') for role in roles]
         
-        # Wrap labels if specified
-        if label_wrap_width:
-            wrapped_main_categories = [textwrap.fill(cat, width=label_wrap_width, break_long_words=False) for cat in main_categories]
-        else:
-            wrapped_main_categories = main_categories
+        # Wrap labels based on label_wrap_width setting
+        wrapped_main_categories = [wrap_label_smart(cat, label_wrap_width) for cat in main_categories]
         
         # Create figure
         fig, ax = plt.subplots(figsize=figsize)
@@ -925,7 +906,7 @@ class SurveyPlotter:
                 for j, cumulative_percentage in enumerate(left):
                     if cumulative_percentage > 0:
                         ax.text(cumulative_percentage + 0.5, j, f'{cumulative_percentage:.1f}%', 
-                               ha='left', va='center', fontsize=20, fontweight='bold')
+                               ha='left', va='center', fontsize=20)
                 
                 # Extend x-axis to accommodate percentage text within chart area
                 if max_percentage > 0:
@@ -952,7 +933,7 @@ class SurveyPlotter:
                 for j, cumulative_percentage in enumerate(bottom):
                     if cumulative_percentage > 0:
                         ax.text(j, cumulative_percentage + 0.5, f'{cumulative_percentage:.1f}%', 
-                               ha='center', va='bottom', fontsize=10, fontweight='bold')
+                               ha='center', va='bottom', fontsize=10)
                 
                 # Extend y-axis to accommodate percentage text within chart area
                 if max_percentage > 0:
