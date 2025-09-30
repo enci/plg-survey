@@ -232,19 +232,24 @@ class SurveyAnalyzer:
     def get_question_values(self, question: str, filtered: bool = True) -> List[Any]:
         self._ensure_loaded()
         assert self.schema is not None and self.df is not None and self.filtered_data is not None
-        
+
         if question not in self.schema['questions']:
             raise ValueError(f"Question '{question}' not found in schema")
-        
-        data = self.filtered_data if filtered else self.df
-        
+
+        # Always apply filters if filtered=True to ensure up-to-date filtered_data
+        if filtered:
+            self.apply_filters()
+            data = self.filtered_data
+        else:
+            data = self.df
+
         if question not in data.columns:
             print(f"Warning: Question '{question}' not found in response data")
             return []
-        
+
         # Handle missing values
         values = data[question].dropna().tolist()
-        
+
         # Flatten if this is a multiple choice question with arrays
         question_type = self.get_question_type(question)
         if question_type == 'multiple_choice':
@@ -255,7 +260,7 @@ class SurveyAnalyzer:
                 else:
                     flattened_values.append(value)
             values = flattened_values
-        
+
         return values
     
     # Get count distribution for a specific question
@@ -390,7 +395,10 @@ class SurveyAnalyzer:
 
 def get_colors_from_colormap(colormap_name):    
     cmap = plt.get_cmap(colormap_name)
-    return [cmap(i / cmap.N) for i in range(cmap.N)]
+    if(cmap.N < 20):
+       return [cmap(i / cmap.N) for i in range(cmap.N)]
+    else:
+       return [cmap(0) for i in range(20)]
 
 def get_nice_colors():
     # High saturation, print-friendly colors
@@ -409,13 +417,31 @@ def get_nice_colors():
         (140/255, 200/255, 130/255, 1.0),  # Vibrant mint
     ]
     return colors
-    
 
-class SurveyPlotter:
-    """
-    A plotting utility class that works with SurveyAnalyzer to create visualizations.
-    """
+font_size = 23
+
+# Configure matplotlib for consistent styling across all plots
+plt.rcParams.update({
+    'font.family': 'serif',
+    'font.serif': ['Times New Roman', 'DejaVu Serif', 'Bitstream Vera Serif', 'serif'],
+    'font.size': font_size,
+    'axes.titlesize': 18,
+    'axes.labelsize': font_size,
+    'xtick.labelsize': font_size,
+    'ytick.labelsize': font_size,
+    'legend.fontsize': 18,
+    'figure.titlesize': 20,
+    'axes.grid': True,
+    'grid.alpha': 0.5,
+    'axes.axisbelow': True,
+    'axes.titlelocation': 'center',
+    'axes.titlesize': 0
+})
+
     
+# A plotting utility class that works with SurveyAnalyzer to create visualizations.
+class SurveyPlotter:
+        
     # Initialize the plotter with a SurveyAnalyzer instance
     def __init__(self, analyzer: SurveyAnalyzer):
         self.analyzer = analyzer
@@ -429,7 +455,7 @@ class SurveyPlotter:
                         title: Optional[str] = None, 
                         filtered: bool = True,
                         horizontal: bool = True,
-                        figsize: tuple = (10, 6),
+                        figsize: tuple = (12, 8),
                         colormap: Optional[str] = None,
                         show_percentages: bool = False,
                         sort: bool = False,
@@ -455,12 +481,10 @@ class SurveyPlotter:
         if show_percentages:
             total = sum(values)
             percentages = [(v / total) * 100 for v in values]
-            display_values = percentages
-            y_label = 'Percentage of Total Responses'
+            display_values = percentages            
             value_format = lambda x: f'{x:.1f}%'
         else:
             display_values = values
-            y_label = 'Count'
             value_format = lambda x: str(int(x))
         
         fig, ax = plt.subplots(figsize=figsize)
@@ -475,7 +499,6 @@ class SurveyPlotter:
             bars = ax.barh(range(len(labels)), display_values, color=colors)
             ax.set_yticks(range(len(labels)))
             ax.set_yticklabels(wrapped_labels)
-            ax.set_xlabel(y_label)
             ax.invert_yaxis()  # Top item at top
             
             # Extend x-axis to make room for labels
@@ -487,12 +510,11 @@ class SurveyPlotter:
                 width = bar.get_width()
                 label_text = value_format(display_values[i])
                 ax.text(width + max_value * 0.01, bar.get_y() + bar.get_height()/2, 
-                    label_text, ha='left', va='center', fontsize=20)
+                    label_text, ha='left', va='center', fontsize=font_size)
         else:
             bars = ax.bar(range(len(labels)), display_values, color=colors)
             ax.set_xticks(range(len(labels)))
             ax.set_xticklabels(wrapped_labels, rotation=45, ha='right')
-            ax.set_ylabel(y_label)
             
             # Extend y-axis to make room for labels
             max_value = max(display_values) if display_values else 0
@@ -503,7 +525,7 @@ class SurveyPlotter:
                 height = bar.get_height()
                 label_text = value_format(display_values[i])
                 ax.text(bar.get_x() + bar.get_width()/2., height + max_value * 0.01,
-                    label_text, ha='center', va='bottom', fontsize=20)
+                    label_text, ha='center', va='bottom', fontsize=font_size)
         
         # Set title
         if title is None:
@@ -516,14 +538,14 @@ class SurveyPlotter:
         ax.set_title(title or question)
         
         # Use tight_layout with padding to prevent label cutoff
-        plt.tight_layout(pad=2.0)
+        # plt.tight_layout(pad=0.0)
         
         return fig
     
     # Create a comparison chart for the same question across different filter conditions
     def create_comparison_chart(self, question: str, filter_configs: List[Dict], 
                                labels: List[str], title: Optional[str] = None,
-                               figsize: tuple = (14, 8),
+                               figsize: tuple = (12, 8),
                                show_percentages: bool = False, label_wrap_width: Optional[int] = None) -> mpl_figure.Figure:
         if len(filter_configs) != len(labels):
             raise ValueError("filter_configs and labels must have the same length")
@@ -648,8 +670,6 @@ class SurveyPlotter:
         # Use tight_layout with padding to prevent label cutoff (consistent with other methods)
         plt.tight_layout(pad=3.0)
         
-        # ...existing code...
-        
         return fig
     
     # Create a stacked bar chart showing question responses broken down by another variable
@@ -768,8 +788,6 @@ class SurveyPlotter:
         ax.set_title(title or matrix_question)
         plt.tight_layout()
         
-        # ...existing code...
-        
         return fig
     
     
@@ -839,15 +857,17 @@ class SurveyPlotter:
         ax.set_title(title or "")
         plt.tight_layout()
         
-        # ...existing code...
-        
         return fig
 
 
     # Create a stacked bar chart showing responses broken down by professional roles
-    def create_role_stacked_chart(self, question: str, title: Optional[str] = None,
-                                 horizontal: bool = True, figsize: Tuple[int, int] = (12, 8),
-                                 show_percentages: bool = True, label_wrap_width: Optional[int] = None) -> mpl_figure.Figure:
+    def create_role_stacked_chart(self,                                
+                                question: str,
+                                title: Optional[str] = None,
+                                horizontal: bool = True,
+                                figsize: Tuple[int, int] = (12, 8),
+                                show_percentages: bool = True,
+                                label_wrap_width: Optional[int] = None) -> mpl_figure.Figure:
         # Get all professional roles in the dataset
         role_data = self.analyzer.get_question_counts('professional_role')
         roles = list(role_data.keys())
@@ -906,13 +926,12 @@ class SurveyPlotter:
                 for j, cumulative_percentage in enumerate(left):
                     if cumulative_percentage > 0:
                         ax.text(cumulative_percentage + 0.5, j, f'{cumulative_percentage:.1f}%', 
-                               ha='left', va='center', fontsize=20)
+                               ha='left', va='center', fontsize=font_size)
                 
                 # Extend x-axis to accommodate percentage text within chart area
                 if max_percentage > 0:
                     ax.set_xlim(0, max_percentage + 12)  # Add extra space for text
             
-            ax.set_xlabel('Percentage of Total Responses')
             # Remove y-axis label as requested
             ax.invert_yaxis()  # Top category at top
             
@@ -952,9 +971,7 @@ class SurveyPlotter:
         
         ax.set_title(title or "")
         plt.tight_layout()
-        
-        # ...existing code...
-        
+                
         return fig
 
 if __name__ == "__main__":

@@ -63,27 +63,9 @@ def get_question_options_count(analyzer, question_key):
     except Exception as e:
         print(f"Warning: Could not get options count for {question_key}: {e}")
         return 5  # Default fallback if there's any error
-
-# Configure matplotlib for consistent styling across all plots
-plt.rcParams.update({
-    'font.family': 'serif',
-    'font.serif': ['Times New Roman', 'DejaVu Serif', 'Bitstream Vera Serif', 'serif'],
-    'font.size': 20,
-    'axes.titlesize': 18,
-    'axes.labelsize': 20,
-    'xtick.labelsize': 20,
-    'ytick.labelsize': 20,
-    'legend.fontsize': 18,
-    'figure.titlesize': 20,
-    'axes.grid': True,
-    'grid.alpha': 0.3,
-    'axes.axisbelow': True,
-    'axes.titlelocation': 'center',
-    'axes.titlesize': 0
-})
-
+    
 # Create plot for professional role question.
-def plot_professional_role(analyzer, plotter, output_dir):
+def plot_professional_role(analyzer :SurveyAnalyzer, plotter :SurveyPlotter, output_dir :str):
     question_key = 'professional_role'
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
@@ -284,6 +266,41 @@ def plot_current_pcg_usage(analyzer, plotter, output_dir):
     )
     
     pdf_path = os.path.join(output_dir, f"q5_{question_key}.pdf")
+    fig.savefig(pdf_path, format='pdf', bbox_inches='tight', dpi=300)
+    plt.close(fig)
+    
+    print(f"  Saved as: {pdf_path}")
+    return pdf_path
+
+
+# Create plot for current PCG usage question.
+def plot_current_pcg_usage_artist(analyzer, plotter, output_dir):
+    question_key = 'current_pcg_usage'
+    question_info = analyzer.get_question_info(question_key)
+    question_text = question_info.get('question', question_key)
+    analyzer.clear_filters()
+
+    # Local wrapping settings for this chart
+    label_wrap_width = 30   # Wrap category labels
+    
+    print(f"Creating plot for: {question_text}")
+
+    # Calculate dynamic chart size based on number of response options
+    num_options = get_question_options_count(analyzer, question_key)
+    chart_size = calculate_role_stacked_chart_size(num_options)
+    
+    analyzer.add_filter('professional_role', ['Technical Artist', 'Environment Artist'])
+    fig = plotter.create_bar_chart(
+        question_key,
+        title=question_text,
+        horizontal=True,
+        figsize=chart_size,
+        show_percentages=True,
+        filtered=True,
+        colormap='RdYlBu',
+        label_wrap_width=label_wrap_width)
+    
+    pdf_path = os.path.join(output_dir, f"q5_{question_key}_artist.pdf")
     fig.savefig(pdf_path, format='pdf', bbox_inches='tight', dpi=300)
     plt.close(fig)
     
@@ -867,6 +884,7 @@ def main():
             
     created_files = []
     
+    """
     # Create plots using individual functions with local wrapping settings
     # Questions 1
     pdf_path = plot_professional_role(analyzer, plotter, output_dir)
@@ -883,11 +901,17 @@ def main():
     # Question 4: Matrix chart with wrapping for better readability
     pdf_path = plot_procedural_tools_experience(analyzer, plotter, output_dir)
     created_files.append(pdf_path)
+    """ 
 
     # Question 5: Role stacked chart
     pdf_path = plot_current_pcg_usage(analyzer, plotter, output_dir)
-    created_files.append(pdf_path)    
+    created_files.append(pdf_path)
 
+    # Question 5: Role stacked chart
+    pdf_path = plot_current_pcg_usage_artist(analyzer, plotter, output_dir)
+    created_files.append(pdf_path)
+
+    """
     # Question 6: Role stacked chart
     pdf_path = plot_level_generation_frequency(analyzer, plotter, output_dir)
     created_files.append(pdf_path)
@@ -947,6 +971,7 @@ def main():
     # Questions 20
     pdf_path = plot_desired_solutions(analyzer, plotter, output_dir)
     created_files.append(pdf_path)
+    """
     
     # Summary
     print("=== Summary ===")
