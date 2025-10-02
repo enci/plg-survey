@@ -167,7 +167,7 @@ def plot_game_engines(analyzer, plotter, output_dir):
     return pdf_path
 
 # Create plot for procedural tools experience question.
-def plot_procedural_tools_experience(analyzer, plotter, output_dir):
+def plot_procedural_tools_experience(analyzer : SurveyAnalyzer, plotter : SurveyPlotter, output_dir):
     question_key = 'procedural_tools_experience'
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
@@ -177,13 +177,17 @@ def plot_procedural_tools_experience(analyzer, plotter, output_dir):
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
     chart_size = calculate_chart_size(num_options)
+    # Make the chart taller for matrix data
+    chart_size = (chart_size[0], chart_size[1] + 1.5)
+
+    
     
     # Use stacked bar chart for better readability of matrix data
     fig = plotter.create_matrix_stacked_bar_chart(
         question_key,
         title=question_text,
         figsize=chart_size,
-        colormap='bwr',
+        colormap='plasma',
         horizontal=True,
         label_wrap_width=30,
         show_percentages=True
@@ -661,13 +665,14 @@ def plot_genre_interest(analyzer, plotter, output_dir):
      # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
     chart_size = calculate_chart_size(num_options)
+    chart_size = (chart_size[0], chart_size[1] + 1.5)  # Make the chart taller for matrix data
 
     # Use matrix stacked bar chart for this matrix question
     fig = plotter.create_matrix_stacked_bar_chart(
         question_key,
         title=wrapped_title,
         figsize=chart_size,
-        colormap='RdYlGn',  # Green for interested, red for not interested
+        colormap='plasma',
         horizontal=True,
         label_wrap_width=label_wrap_width,
         show_percentages=True
@@ -884,7 +889,6 @@ def main():
             
     created_files = []
     
-    """
     # Create plots using individual functions with local wrapping settings
     # Questions 1
     pdf_path = plot_professional_role(analyzer, plotter, output_dir)
@@ -901,7 +905,6 @@ def main():
     # Question 4: Matrix chart with wrapping for better readability
     pdf_path = plot_procedural_tools_experience(analyzer, plotter, output_dir)
     created_files.append(pdf_path)
-    """ 
 
     # Question 5: Role stacked chart
     pdf_path = plot_current_pcg_usage(analyzer, plotter, output_dir)
@@ -911,7 +914,6 @@ def main():
     pdf_path = plot_current_pcg_usage_artist(analyzer, plotter, output_dir)
     created_files.append(pdf_path)
 
-    """
     # Question 6: Role stacked chart
     pdf_path = plot_level_generation_frequency(analyzer, plotter, output_dir)
     created_files.append(pdf_path)
@@ -971,7 +973,6 @@ def main():
     # Questions 20
     pdf_path = plot_desired_solutions(analyzer, plotter, output_dir)
     created_files.append(pdf_path)
-    """
     
     # Summary
     print("=== Summary ===")

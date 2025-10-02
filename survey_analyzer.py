@@ -393,12 +393,17 @@ class SurveyAnalyzer:
         return self.filtered_data.copy()
 
 
-def get_colors_from_colormap(colormap_name):    
-    cmap = plt.get_cmap(colormap_name)
-    if(cmap.N < 20):
-       return [cmap(i / cmap.N) for i in range(cmap.N)]
+def get_colors(colormap_name, num_colors=20):
+    # Check for simple color names
+    if colormap_name in plt.colormaps():
+        cmap = plt.get_cmap(colormap_name)
+        if(cmap.N < num_colors):
+           return [cmap(i / cmap.N) for i in range(cmap.N)]
+        else:
+           return [cmap(i / num_colors) for i in range(num_colors)]
     else:
-       return [cmap(0) for i in range(20)]
+        # Fallback to nice colors if colormap not found
+        return get_nice_colors()[:num_colors]                
 
 def get_nice_colors():
     # High saturation, print-friendly colors
@@ -430,7 +435,7 @@ plt.rcParams.update({
     'xtick.labelsize': font_size,
     'ytick.labelsize': font_size,
     'legend.fontsize': 18,
-    'figure.titlesize': 20,
+    'figure.titlesize': 0,
     'axes.grid': True,
     'grid.alpha': 0.5,
     'axes.axisbelow': True,
@@ -446,7 +451,7 @@ class SurveyPlotter:
     def __init__(self, analyzer: SurveyAnalyzer):
         self.analyzer = analyzer
 
-        # self.colors = get_colors_from_colormap("tab10")
+        # self.colors = get_colors("tab10")
         self.role_colors = get_nice_colors()
     
     # Create a bar chart for a question's response distribution
@@ -491,7 +496,7 @@ class SurveyPlotter:
         
         # Generate colors using colormap if specified, otherwise golden ratio system
         if colormap:
-            colors = get_colors_from_colormap(colormap)
+            colors = get_colors(colormap)
         else:
             colors = self.role_colors
 
@@ -527,15 +532,7 @@ class SurveyPlotter:
                 ax.text(bar.get_x() + bar.get_width()/2., height + max_value * 0.01,
                     label_text, ha='center', va='bottom', fontsize=font_size)
         
-        # Set title
-        if title is None:
-            question_info = self.analyzer.get_question_info(question)
-            title = question_info.get('question', question)
-        
-        if filtered and len(self.analyzer.filters) > 0 and self.analyzer.filtered_data is not None:
-            title = f"{title}\n(Filtered: {len(self.analyzer.filtered_data)} responses)"
-        
-        ax.set_title(title or question)
+        # Title removed for cleaner paper presentation
         
         # Use tight_layout with padding to prevent label cutoff
         # plt.tight_layout(pad=0.0)
@@ -658,26 +655,21 @@ class SurveyPlotter:
         ax.set_xticklabels(wrapped_options, rotation=45, ha='right')
         ax.legend()
         
-        if title is None:
-            question_info = self.analyzer.get_question_info(question)
-            base_title = question_info.get('question', question)
-            title = f"{base_title}\nComparison"
-        
-        # Ensure title is not None
-        final_title = title if title is not None else "Comparison Chart"
-        ax.set_title(final_title)
+        # Title removed for cleaner paper presentation
         
         # Use tight_layout with padding to prevent label cutoff (consistent with other methods)
         plt.tight_layout(pad=3.0)
         
         return fig
     
-    # Create a stacked bar chart showing question responses broken down by another variable
     # Create a stacked bar chart for matrix-type questions (like Likert scales)
-    def create_matrix_stacked_bar_chart(self, matrix_question: str, title: Optional[str] = None,
-                                       filtered: bool = True, figsize: tuple = (14, 10),
+    def create_matrix_stacked_bar_chart(self, matrix_question: str,
+                                        title: Optional[str] = None,
+                                       filtered: bool = True,
+                                       figsize: tuple = (14, 10),
                                        colormap: Optional[str] = None,
-                                       horizontal: bool = True, label_wrap_width: Optional[int] = None,
+                                       horizontal: bool = True,
+                                       label_wrap_width: Optional[int] = None,
                                        show_percentages: bool = False) -> mpl_figure.Figure:
         self.analyzer._ensure_loaded()
         assert self.analyzer.df is not None and self.analyzer.filtered_data is not None
@@ -739,8 +731,10 @@ class SurveyPlotter:
         # Create the plot
         fig, ax = plt.subplots(figsize=figsize)
         
-        # Generate colors using colormap if specified, otherwise golden ratio system
-        colors = self.role_colors
+        if(colormap):
+            colors = get_colors(colormap, len(all_ratings))
+        else:
+            colors = self.role_colors
         
         if horizontal:
             # Create horizontal stacked bars
@@ -759,34 +753,19 @@ class SurveyPlotter:
                                   label=rating, color=colors[i]))
                 bottom += data[rating]
         
-        # Customize the plot
+        # Customize the plot (remove axis labels as requested)
         if horizontal:
-            if show_percentages:
-                ax.set_xlabel('Percentage of Responses')
-            else:
-                ax.set_xlabel('Number of Responses')
-            ax.set_ylabel('Tools/Features')
             # Rotate item labels if they're long
             plt.setp(ax.get_yticklabels(), rotation=0)
         else:
-            ax.set_xlabel('Tools/Features')
-            if show_percentages:
-                ax.set_ylabel('Percentage of Responses')
-            else:
-                ax.set_ylabel('Number of Responses')
             # Rotate item labels if they're long
             plt.setp(ax.get_xticklabels(), rotation=45, ha='right')
         
-        # Add legend
-        ax.legend(title='Experience Level', bbox_to_anchor=(1.05, 1), loc='upper left')
+        # Adjust layout to make room for legend first
+        plt.subplots_adjust(bottom=0.25)
         
-        # Set title
-        if title is None:
-            question_info = self.analyzer.get_question_info(matrix_question)
-            title = question_info.get('question', matrix_question)
-        
-        ax.set_title(title or matrix_question)
-        plt.tight_layout()
+        # Add horizontal legend at bottom without title
+        ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), ncol=len(all_ratings), frameon=False)
         
         return fig
     
@@ -849,12 +828,7 @@ class SurveyPlotter:
         # Add legend positioned in bottom right (empty space in horizontal charts)
         ax.legend(title='Ranking Position', bbox_to_anchor=(1.0, 0.0), loc='lower right')
         
-        # Set title
-        if title is None:
-            question_info = self.analyzer.get_question_info(ranking_question)
-            title = question_info.get('question', ranking_question)
-        
-        ax.set_title(title or "")
+        # Title removed for cleaner paper presentation
         plt.tight_layout()
         
         return fig
@@ -867,7 +841,10 @@ class SurveyPlotter:
                                 horizontal: bool = True,
                                 figsize: Tuple[int, int] = (12, 8),
                                 show_percentages: bool = True,
-                                label_wrap_width: Optional[int] = None) -> mpl_figure.Figure:
+                                label_wrap_width: Optional[int] = None,
+                                legend_loc: str = 'lower right',
+                                legend_fontsize: int = 14,
+                                legend_ncol: int = 1) -> mpl_figure.Figure:
         # Get all professional roles in the dataset
         role_data = self.analyzer.get_question_counts('professional_role')
         roles = list(role_data.keys())
@@ -903,6 +880,22 @@ class SurveyPlotter:
         role_colors = self.role_colors
         # [self.role_colors.get(role, '#CCCCCC') for role in roles]
         
+        # Create shortened role names for legend
+        def shorten_role(role):
+            """Create shortened versions of role names for legend"""
+            role_shortcuts = {
+                'Level Designer': 'LD',
+                'Game Designer': 'GD',
+                'Technical Artist': 'TA',
+                'Environment Artist': 'EA',
+                'Programmer/Technical Designer': 'PTD',
+                'Academic/Researcher': 'AR',
+                'Other': 'Oth'
+            }
+            return role_shortcuts.get(role, role[:3])  # Default to first 3 chars if not found
+        
+        shortened_roles = [shorten_role(role) for role in roles]
+        
         # Wrap labels based on label_wrap_width setting
         wrapped_main_categories = [wrap_label_smart(cat, label_wrap_width) for cat in main_categories]
         
@@ -917,7 +910,7 @@ class SurveyPlotter:
             for i, role in enumerate(roles):
                 values = stack_data[role]
                 bars.append(ax.barh(wrapped_main_categories, values, left=left, 
-                                   label=role, color=role_colors[i]))
+                                   label=shortened_roles[i], color=role_colors[i]))
                 left += values
             
             # Show cumulative percentages at the end of bars if requested
@@ -943,7 +936,7 @@ class SurveyPlotter:
             for i, role in enumerate(roles):
                 values = stack_data[role]
                 bars.append(ax.bar(wrapped_main_categories, values, bottom=bottom,
-                                  label=role, color=role_colors[i]))
+                                  label=shortened_roles[i], color=role_colors[i]))
                 bottom += values
             
             # Show cumulative percentages at the end of bars if requested
@@ -962,14 +955,10 @@ class SurveyPlotter:
             # Remove x-axis label as requested when horizontal=False
             plt.xticks(rotation=45, ha='right')
         
-        # Remove legend as requested - colors are consistent with role mapping
+        # Add legend with shortened role names inside the chart area
+        ax.legend(loc=legend_loc, fontsize=legend_fontsize, ncol=legend_ncol)
         
-        # Set title
-        if title is None:
-            question_info = self.analyzer.get_question_info(question)
-            title = f"{question_info.get('question', question)}\nBreakdown by Professional Role"
-        
-        ax.set_title(title or "")
+        # Title removed for cleaner paper presentation
         plt.tight_layout()
                 
         return fig
