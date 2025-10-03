@@ -82,8 +82,9 @@ def plot_professional_role(analyzer :SurveyAnalyzer, plotter :SurveyPlotter, out
     fig = plotter.create_bar_chart(
         question_key,
         title=question_text,
-        horizontal=False,
+        horizontal=True,
         figsize=chart_size,
+        color='red',  # Use red for professional role chart
         show_percentages=True,
         label_wrap_width=label_wrap_width
     )
@@ -115,6 +116,7 @@ def plot_years_experience(analyzer, plotter, output_dir):
         title=question_text,
         horizontal=True,
         figsize=chart_size,
+        color='blue',  # Use blue for years of experience chart
         show_percentages=True,
         label_wrap_width=label_wrap_width,
         colormap='tab20b'
@@ -187,7 +189,7 @@ def plot_procedural_tools_experience(analyzer : SurveyAnalyzer, plotter : Survey
         question_key,
         title=question_text,
         figsize=chart_size,
-        colormap='plasma',
+        color='purple',  # Use purple for procedural tools experience chart
         horizontal=True,
         label_wrap_width=30,
         show_percentages=True
@@ -299,9 +301,9 @@ def plot_current_pcg_usage_artist(analyzer, plotter, output_dir):
         title=question_text,
         horizontal=True,
         figsize=chart_size,
+        color='green',  # Use green for artist PCG usage chart
         show_percentages=True,
         filtered=True,
-        colormap='RdYlBu',
         label_wrap_width=label_wrap_width)
     
     pdf_path = os.path.join(output_dir, f"q5_{question_key}_artist.pdf")
@@ -546,7 +548,7 @@ def plot_node_tool_features(analyzer, plotter, output_dir):
         title=wrapped_title,
         horizontal=True,
         figsize=chart_size,
-        colormap='Set3',
+        color='cyan',  # Use cyan for node tool features chart
         max_rank=3,  # Top 3 ranking as specified in the question
         label_wrap_width=label_wrap_width
     )
@@ -672,7 +674,7 @@ def plot_genre_interest(analyzer, plotter, output_dir):
         question_key,
         title=wrapped_title,
         figsize=chart_size,
-        colormap='plasma',
+        color='orange',  # Use orange for genre interest chart
         horizontal=True,
         label_wrap_width=label_wrap_width,
         show_percentages=True
@@ -876,6 +878,10 @@ def main():
     
     print("=== Survey Plot Generator ===\n")
     
+    # Specify which questions to plot (1-20). Use None or empty list to plot all.
+    questions_to_plot = [1]     
+    # questions_to_plot = list(range(1, 21))  # Plot all questions by default
+    
     # Create output directory
     output_dir = "plots"
     os.makedirs(output_dir, exist_ok=True)
@@ -889,90 +895,36 @@ def main():
             
     created_files = []
     
-    # Create plots using individual functions with local wrapping settings
-    # Questions 1
-    pdf_path = plot_professional_role(analyzer, plotter, output_dir)
-    created_files.append(pdf_path)
-
-    # Question 2
-    pdf_path = plot_years_experience(analyzer, plotter, output_dir)
-    created_files.append(pdf_path)
-
-    # Question 3
-    pdf_path = plot_game_engines(analyzer, plotter, output_dir)
-    created_files.append(pdf_path)
-
-    # Question 4: Matrix chart with wrapping for better readability
-    pdf_path = plot_procedural_tools_experience(analyzer, plotter, output_dir)
-    created_files.append(pdf_path)
-
-    # Question 5: Role stacked chart
-    pdf_path = plot_current_pcg_usage(analyzer, plotter, output_dir)
-    created_files.append(pdf_path)
-
-    # Question 5: Role stacked chart
-    pdf_path = plot_current_pcg_usage_artist(analyzer, plotter, output_dir)
-    created_files.append(pdf_path)
-
-    # Question 6: Role stacked chart
-    pdf_path = plot_level_generation_frequency(analyzer, plotter, output_dir)
-    created_files.append(pdf_path)
-
-    # Question 7: Role stacked chart
-    pdf_path = plot_primary_concerns(analyzer, plotter, output_dir)
-    created_files.append(pdf_path)
-
-    # Question 8: Role stacked chart
-    pdf_path = plot_tool_view(analyzer, plotter, output_dir)
-    created_files.append(pdf_path)
-
-    # Question 9: Role stacked chart
-    pdf_path = plot_critical_factors(analyzer, plotter, output_dir)
-    created_files.append(pdf_path)
-
-    # Questions 10: Ranking question with position distribution
-    pdf_path = plot_node_tool_features(analyzer, plotter, output_dir)
-    created_files.append(pdf_path)
-
-    # Question 11: Role stacked chart
-    pdf_path = plot_realtime_feedback_importance(analyzer, plotter, output_dir)
-    created_files.append(pdf_path)
-
-    # Question 12: Role stacked chart
-    pdf_path = plot_preferred_approach(analyzer, plotter, output_dir)
-    created_files.append(pdf_path)
-
-    # Question 13: Role stacked chart
-    pdf_path = plot_integration_preference(analyzer, plotter, output_dir)
-    created_files.append(pdf_path)
-
-    # Questions 14
-    pdf_path = plot_genre_interest(analyzer, plotter, output_dir)
-    created_files.append(pdf_path)
-
-    # Questions 15
-    pdf_path = plot_level_representation(analyzer, plotter, output_dir)
-    created_files.append(pdf_path)
-
-    # Questions 16
-    pdf_path = plot_most_useful_approach(analyzer, plotter, output_dir)
-    created_files.append(pdf_path)
-
-    # Questions 17
-    pdf_path = plot_ai_role_preference(analyzer, plotter, output_dir)
-    created_files.append(pdf_path)
-
-    # Questions 18
-    pdf_path = plot_ai_importance_factors(analyzer, plotter, output_dir)
-    created_files.append(pdf_path)
-
-    # Questions 19
-    pdf_path = plot_ai_concerns(analyzer, plotter, output_dir)
-    created_files.append(pdf_path)
-
-    # Questions 20
-    pdf_path = plot_desired_solutions(analyzer, plotter, output_dir)
-    created_files.append(pdf_path)
+    # Define plot functions for each question
+    plot_functions = {
+        1: [plot_professional_role],
+        2: [plot_years_experience],
+        3: [plot_game_engines],
+        4: [plot_procedural_tools_experience],
+        5: [plot_current_pcg_usage, plot_current_pcg_usage_artist],
+        6: [plot_level_generation_frequency],
+        7: [plot_primary_concerns],
+        8: [plot_tool_view],
+        9: [plot_critical_factors],
+        10: [plot_node_tool_features],
+        11: [plot_realtime_feedback_importance],
+        12: [plot_preferred_approach],
+        13: [plot_integration_preference],
+        14: [plot_genre_interest],
+        15: [plot_level_representation],
+        16: [plot_most_useful_approach],
+        17: [plot_ai_role_preference],
+        18: [plot_ai_importance_factors],
+        19: [plot_ai_concerns],
+        20: [plot_desired_solutions]
+    }
+    
+    # Generate plots for selected questions
+    for question in sorted(set(questions_to_plot)):  # Use set to remove duplicates
+        if question in plot_functions:
+            for plot_func in plot_functions[question]:
+                pdf_path = plot_func(analyzer, plotter, output_dir)
+                created_files.append(pdf_path)
     
     # Summary
     print("=== Summary ===")

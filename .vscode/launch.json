@@ -2,6 +2,14 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Python: survey_plot.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/survey_plot.py",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
         "name": "Launch Edge with Live Server",
             "request": "launch",
             "type": "msedge",

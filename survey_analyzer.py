@@ -437,7 +437,7 @@ plt.rcParams.update({
     'legend.fontsize': 18,
     'figure.titlesize': 0,
     'axes.grid': True,
-    'grid.alpha': 0.5,
+    'grid.alpha': 0.4,
     'axes.axisbelow': True,
     'axes.titlelocation': 'center',
     'axes.titlesize': 0
@@ -462,6 +462,7 @@ class SurveyPlotter:
                         horizontal: bool = True,
                         figsize: tuple = (12, 8),
                         colormap: Optional[str] = None,
+                        color: Optional[str] = None,
                         show_percentages: bool = False,
                         sort: bool = False,
                         label_wrap_width: Optional[int] = None) -> mpl_figure.Figure:
@@ -495,7 +496,9 @@ class SurveyPlotter:
         fig, ax = plt.subplots(figsize=figsize)
         
         # Generate colors using colormap if specified, otherwise golden ratio system
-        if colormap:
+        if color:
+            colors = [color] * len(labels)  # Use the same color for all bars
+        elif colormap:
             colors = get_colors(colormap)
         else:
             colors = self.role_colors
@@ -668,6 +671,7 @@ class SurveyPlotter:
                                        filtered: bool = True,
                                        figsize: tuple = (14, 10),
                                        colormap: Optional[str] = None,
+                                       color: Optional[str] = None,
                                        horizontal: bool = True,
                                        label_wrap_width: Optional[int] = None,
                                        show_percentages: bool = False) -> mpl_figure.Figure:
@@ -731,7 +735,9 @@ class SurveyPlotter:
         # Create the plot
         fig, ax = plt.subplots(figsize=figsize)
         
-        if(colormap):
+        if color:
+            colors = [color] * len(all_ratings)  # Use the same color for all ratings
+        elif(colormap):
             colors = get_colors(colormap, len(all_ratings))
         else:
             colors = self.role_colors
@@ -774,6 +780,7 @@ class SurveyPlotter:
     def create_ranking_position_chart(self, ranking_question: str, title: Optional[str] = None,
                                      filtered: bool = True, figsize: tuple = (14, 8),
                                      colormap: Optional[str] = None,
+                                     color: Optional[str] = None,
                                      horizontal: bool = True, max_rank: int = 3,
                                      label_wrap_width: Optional[int] = None) -> mpl_figure.Figure:
         # Get position distribution for ranking
@@ -800,7 +807,12 @@ class SurveyPlotter:
         fig, ax = plt.subplots(figsize=figsize)
         
         # Generate colors using colormap if specified, otherwise golden ratio system
-        colors = self.role_colors
+        if color:
+            colors = [color] * max_rank  # Use the same color for all ranks
+        elif colormap:
+            colors = get_colors(colormap, max_rank)
+        else:
+            colors = self.role_colors
         
         if horizontal:
             # Create horizontal stacked bars
