@@ -45,6 +45,11 @@ const SurveyApp = {
         filteredData: null,
         nextId: 1
     },
+    currentAnalysis: {
+        filteredData: null,
+        chartCounts: null,
+        questionKey: null
+    },
     
     // Initialize the application
     init() {
@@ -75,9 +80,14 @@ const SurveyApp = {
             filterLogic.addEventListener('change', () => this.applyAllFilters());
         }
 
-        const scaleSelect = document.getElementById('scaleSelect');
-        if (scaleSelect) {
-            scaleSelect.addEventListener('change', () => this.redrawCurrentChart());
+        const downloadFilteredDataBtn = document.getElementById('downloadFilteredDataBtn');
+        if (downloadFilteredDataBtn) {
+            downloadFilteredDataBtn.addEventListener('click', () => this.downloadFilteredDataAsJSON());
+        }
+
+        const downloadChartCountsBtn = document.getElementById('downloadChartCountsBtn');
+        if (downloadChartCountsBtn) {
+            downloadChartCountsBtn.addEventListener('click', () => this.downloadChartCountsAsJSON());
         }
     },
     
@@ -415,20 +425,6 @@ const SurveyApp = {
         return this.filters.filteredData || this.data.responses || [];
     },
 
-    // Get selected chart scale
-    getChartScale() {
-        const scaleSelect = document.getElementById('scaleSelect');
-        return scaleSelect ? parseInt(scaleSelect.value) : 1;
-    },
-
-    // Redraw current chart with new scale
-    redrawCurrentChart() {
-        const currentQuestion = document.getElementById('questionSelect')?.value;
-        if (currentQuestion) {
-            this.analyzeQuestion(currentQuestion);
-        }
-    },
-
     // Populate the question dropdown with analyzable questions
     populateQuestionDropdown() {
         const questionSelect = document.getElementById('questionSelect');
@@ -683,6 +679,10 @@ const SurveyApp = {
         this.clearChart();
         this.clearOtherAnswers();
 
+        // Store current analysis data
+        this.currentAnalysis.questionKey = questionKey;
+        this.currentAnalysis.filteredData = this.getCurrentData();
+
         // Dynamically set chart height for bar/stacked charts only, static for pie
         const _schema = this.data.schema;
         const _question = _schema.questions[questionKey];
@@ -815,7 +815,7 @@ const SurveyApp = {
                 indexAxis: 'y', // horizontal stacked bars
                 responsive: true,
                 maintainAspectRatio: false,
-                devicePixelRatio: this.getChartScale(),
+                devicePixelRatio: 1,
                 plugins: {
                     title: {
                         display: false,
@@ -852,8 +852,17 @@ const SurveyApp = {
                 }
             }
         });
-        this.showDownloadButton();
+        
+        // Store chart counts for download
+        this.currentAnalysis.chartCounts = {
+            rankCounts: rankCounts,
+            options: options,
+            maxSelections: maxSelections,
+            totalResponses: currentData.length
+        };
+        
         this.clearOtherAnswers();
+        this.showDownloadButtons();
     },
 
     // Analyze single choice questions (pie chart)
@@ -884,8 +893,16 @@ const SurveyApp = {
             counts['Other'] = otherAnswers.length;
         }
         
+        // Store chart counts for download
+        this.currentAnalysis.chartCounts = {
+            counts: counts,
+            otherAnswers: otherAnswers,
+            totalResponses: currentData.length
+        };
+        
         this.createPieChart(question.question, counts, currentData.length);
         this.showOtherAnswers(otherAnswers);
+        this.showDownloadButtons();
     },
 
         // Analyze multiple choice questions (bar chart)
@@ -928,8 +945,16 @@ const SurveyApp = {
             counts['Other'] = otherAnswers.length;
         }
         
+        // Store chart counts for download
+        this.currentAnalysis.chartCounts = {
+            counts: counts,
+            otherAnswers: otherAnswers,
+            totalResponses: currentData.length
+        };
+        
         this.createBarChart(question.question, counts, currentData.length);
         this.showOtherAnswers(otherAnswers);
+        this.showDownloadButtons();
     },
 
     // Analyze matrix questions (stacked bar chart)
@@ -968,8 +993,17 @@ const SurveyApp = {
             }
         });
         
+        // Store chart counts for download
+        this.currentAnalysis.chartCounts = {
+            matrixData: matrixData,
+            scale: scale,
+            items: items,
+            totalResponses: currentData.length
+        };
+        
         this.createStackedBarChart(question.question, matrixData, scale, currentData.length);
         this.clearOtherAnswers(); // Matrix questions don't typically have "other" answers
+        this.showDownloadButtons();
     },
 
     // Analyze open text questions (text list)
@@ -985,9 +1019,16 @@ const SurveyApp = {
             }
         });
         
+        // Store chart counts for download (text responses)
+        this.currentAnalysis.chartCounts = {
+            responses: responses,
+            totalResponses: currentData.length
+        };
+        
         // Clear any existing chart and show text responses
         this.clearChart();
         this.showTextResponses(question.question, responses, currentData.length);
+        this.showDownloadButtons();
     },
 
 
@@ -1034,7 +1075,7 @@ const SurveyApp = {
                 cutout: '60%', // Creates the hole in the middle
                 responsive: true,
                 maintainAspectRatio: false,
-                devicePixelRatio: this.getChartScale(),
+                devicePixelRatio: 1,
                 plugins: {
                     title: {
                         display: false,
@@ -1092,7 +1133,6 @@ const SurveyApp = {
             }
         });
         
-        this.showDownloadButton();
         console.log(`Created pie chart for: ${title}`);
     },
 
@@ -1170,7 +1210,7 @@ const SurveyApp = {
                 indexAxis: 'y', // horizontal bars
                 responsive: true,
                 maintainAspectRatio: false,
-                devicePixelRatio: this.getChartScale(),
+                devicePixelRatio: 1,
                 plugins: {
                     title: {
                         display: false,
@@ -1218,7 +1258,6 @@ const SurveyApp = {
                 }
             }
         });
-        this.showDownloadButton();
         console.log(`Created bar chart for: ${title}`);
     },
 
@@ -1260,7 +1299,7 @@ const SurveyApp = {
                 indexAxis: 'y', // horizontal stacked bars
                 responsive: true,
                 maintainAspectRatio: false,
-                devicePixelRatio: this.getChartScale(),
+                devicePixelRatio: 1,
                 scales: {
                     x: {
                         stacked: true,
@@ -1315,7 +1354,6 @@ const SurveyApp = {
                 }
             }
         });
-        this.showDownloadButton();
         console.log(`Created stacked bar chart for: ${title}`);
     },
 
@@ -1398,45 +1436,6 @@ const SurveyApp = {
         otherContainer.classList.remove('hidden');
     },
 
-    // Show download button for charts
-    showDownloadButton() {
-        const downloadBtn = document.getElementById('downloadPngBtn');
-        if (downloadBtn) {
-            downloadBtn.style.display = 'inline-block';
-            downloadBtn.onclick = () => this.downloadChartAsPNG();
-        }
-    },
-
-    // Download chart as PNG
-    downloadChartAsPNG() {
-        if (!this.charts.current) return;
-        
-        const canvas = document.getElementById('analysisChart');
-        if (!canvas) return;
-        
-        const scale = this.getChartScale();
-        
-        try {
-            const link = document.createElement('a');
-            link.href = canvas.toDataURL('image/png', 1.0);
-            link.download = `chart_${scale}x.png`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        } catch (error) {
-            console.error('Error downloading PNG:', error);
-            alert('Error downloading chart as PNG.');
-        }
-    },
-
-    // Hide download button
-    hideDownloadButton() {
-        const downloadBtn = document.getElementById('downloadPngBtn');
-        if (downloadBtn) {
-            downloadBtn.style.display = 'none';
-        }
-    },
-
     // Clear other answers display
     clearOtherAnswers() {
         const otherContainer = document.getElementById('otherAnswers');
@@ -1458,7 +1457,93 @@ const SurveyApp = {
             chartContainer.innerHTML = '<canvas id="analysisChart"></canvas>';
         }
         
-        this.hideDownloadButton();
+        this.hideDownloadButtons();
+    },
+
+    // Show download buttons for current analysis
+    showDownloadButtons() {
+        const downloadFilteredDataBtn = document.getElementById('downloadFilteredDataBtn');
+        const downloadChartCountsBtn = document.getElementById('downloadChartCountsBtn');
+        
+        if (downloadFilteredDataBtn) {
+            downloadFilteredDataBtn.style.display = 'inline-block';
+        }
+        if (downloadChartCountsBtn) {
+            downloadChartCountsBtn.style.display = 'inline-block';
+        }
+    },
+
+    // Hide download buttons
+    hideDownloadButtons() {
+        const downloadFilteredDataBtn = document.getElementById('downloadFilteredDataBtn');
+        const downloadChartCountsBtn = document.getElementById('downloadChartCountsBtn');
+        
+        if (downloadFilteredDataBtn) {
+            downloadFilteredDataBtn.style.display = 'none';
+        }
+        if (downloadChartCountsBtn) {
+            downloadChartCountsBtn.style.display = 'none';
+        }
+    },
+
+    // Download filtered data as JSON
+    downloadFilteredDataAsJSON() {
+        if (!this.currentAnalysis.filteredData) {
+            alert('No filtered data available. Please select a question to analyze first.');
+            return;
+        }
+
+        const dataToDownload = {
+            question: this.currentAnalysis.questionKey,
+            totalResponses: this.currentAnalysis.filteredData.length,
+            filteredData: this.currentAnalysis.filteredData,
+            metadata: {
+                downloadDate: new Date().toISOString(),
+                filtersApplied: this.filters.advanced.length > 0 || 
+                               this.filters.demographics.professional_role.size > 0 || 
+                               this.filters.demographics.years_experience.size > 0
+            }
+        };
+
+        const dataStr = JSON.stringify(dataToDownload, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(dataBlob);
+        link.download = `filtered_survey_data_${this.currentAnalysis.questionKey || 'unknown'}.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+    },
+
+    // Download chart counts as JSON
+    downloadChartCountsAsJSON() {
+        if (!this.currentAnalysis.chartCounts) {
+            alert('No chart data available. Please select a question to analyze first.');
+            return;
+        }
+
+        const dataToDownload = {
+            question: this.currentAnalysis.questionKey,
+            chartCounts: this.currentAnalysis.chartCounts,
+            totalResponses: this.currentAnalysis.filteredData ? this.currentAnalysis.filteredData.length : 0,
+            metadata: {
+                downloadDate: new Date().toISOString(),
+                questionType: this.data.schema?.questions?.[this.currentAnalysis.questionKey]?.type || 'unknown'
+            }
+        };
+
+        const dataStr = JSON.stringify(dataToDownload, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(dataBlob);
+        link.download = `chart_counts_${this.currentAnalysis.questionKey || 'unknown'}.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
     }
 };
 
