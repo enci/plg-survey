@@ -854,7 +854,7 @@ class SurveyPlotter:
                                 show_percentages: bool = True,
                                 label_wrap_width: Optional[int] = None,
                                 legend_loc: str = 'lower right',
-                                legend_fontsize: int = 14,
+                                legend_fontsize: int = 22,
                                 legend_ncol: int = 1) -> mpl_figure.Figure:
         # Get all professional roles in the dataset
         role_data = self.analyzer.get_question_counts('professional_role')
@@ -901,7 +901,7 @@ class SurveyPlotter:
                 'Environment Artist': 'EA',
                 'Programmer/Technical Designer': 'PTD',
                 'Academic/Researcher': 'AR',
-                'Other': 'Oth'
+                'Other': 'O'
             }
             return role_shortcuts.get(role, role[:3])  # Default to first 3 chars if not found
         

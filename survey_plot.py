@@ -34,15 +34,10 @@ def wrap_label_smart(label: str, width: Optional[int]) -> str:
 def wrap_labels(labels: List[str], width: int = 25) -> List[str]:
     return [wrap_text(label, width) for label in labels]
 
-def calculate_chart_size(num_options: int, base_height: float = 0.0, height_per_option: float = 1.08) -> Tuple[int, int]:    
-    width = 12  # Fixed width as requested
-    height = int(base_height + (num_options * height_per_option))
-    return (width, height)
-
-# Calculate chart size specifically for role stacked charts to ensure consistent bar heights.
-def calculate_role_stacked_chart_size(num_options: int) -> Tuple[int, int]:
+# Calculate chart size to ensure consistent bar heights. 
+def calculate_chart_size(num_options: int) -> Tuple[int, int]:
     width = 12
-    consistent_bar_height = 0.7  # Consistent height per bar
+    consistent_bar_height = 0.9  # Consistent height per bar
     base_padding = 1.0  # Space for legend and padding
     height = int(base_padding + (num_options * consistent_bar_height))    
     return (width, height)
@@ -151,7 +146,7 @@ def plot_game_engines(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_d
     
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
-    chart_size = calculate_role_stacked_chart_size(num_options)  # Use consistent sizing for role stacked charts
+    chart_size = calculate_chart_size(num_options)
     
     # Create role stacked chart showing cumulative professional role breakdown
     fig = plotter.create_role_stacked_chart(
@@ -160,7 +155,8 @@ def plot_game_engines(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_d
         horizontal=True,
         figsize=chart_size,
         show_percentages=True,
-        label_wrap_width=label_wrap_width
+        label_wrap_width=label_wrap_width,
+        legend_fontsize=18
     )
     
     pdf_path = os.path.join(output_dir, f"q3_{question_key}.pdf")
@@ -229,7 +225,7 @@ def plot_procedural_tools_experience_comparison(analyzer: SurveyAnalyzer, plotte
     
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
-    chart_size = calculate_chart_size(num_options, base_height=4, height_per_option=0.6)  # Comparison charts need more height
+    chart_size = calculate_chart_size(num_options)  # Comparison charts need more height
     
     fig = plotter.create_comparison_chart(
         question_key,
@@ -262,7 +258,7 @@ def plot_current_pcg_usage(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, out
 
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
-    chart_size = calculate_role_stacked_chart_size(num_options)
+    chart_size = calculate_chart_size(num_options)
     
     fig = plotter.create_role_stacked_chart(
         question_key,
@@ -270,7 +266,8 @@ def plot_current_pcg_usage(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, out
         horizontal=True,
         figsize=chart_size,
         show_percentages=True,
-        label_wrap_width=label_wrap_width
+        label_wrap_width=label_wrap_width,
+        legend_fontsize=18
     )
     
     pdf_path = os.path.join(output_dir, f"q5_{question_key}.pdf")
@@ -295,7 +292,7 @@ def plot_current_pcg_usage_artist(analyzer: SurveyAnalyzer, plotter: SurveyPlott
 
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
-    chart_size = calculate_role_stacked_chart_size(num_options)
+    chart_size = calculate_chart_size(num_options)
     
     analyzer.add_filter('professional_role', ['Technical Artist', 'Environment Artist'])
     fig = plotter.create_bar_chart(
@@ -325,14 +322,15 @@ def plot_level_generation_frequency(analyzer: SurveyAnalyzer, plotter: SurveyPlo
 
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
-    chart_size = calculate_role_stacked_chart_size(num_options)
+    chart_size = calculate_chart_size(num_options)
     
     fig = plotter.create_role_stacked_chart(
         question_key,
         title=question_text,
         horizontal=True,
         figsize=chart_size,
-        show_percentages=True
+        show_percentages=True,
+        legend_fontsize=18
     )
     
     pdf_path = os.path.join(output_dir, f"q6_{question_key}.pdf")
@@ -356,7 +354,7 @@ def plot_level_generation_frequency_comparison(analyzer: SurveyAnalyzer, plotter
 
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
-    chart_size = calculate_role_stacked_chart_size(num_options)
+    chart_size = calculate_chart_size(num_options)
     
     # Create filter configurations for comparison
     filter_configs = [
@@ -399,7 +397,7 @@ def plot_primary_concerns(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, outp
 
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
-    chart_size = calculate_role_stacked_chart_size(num_options)
+    chart_size = calculate_chart_size(num_options)
     
     analyzer.clear_filters()
     fig = plotter.create_role_stacked_chart(
@@ -408,7 +406,8 @@ def plot_primary_concerns(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, outp
         horizontal=True,
         figsize=chart_size,
         show_percentages=True,
-        label_wrap_width=label_wrap_width
+        label_wrap_width=label_wrap_width,
+        legend_fontsize=18
     )
     
     pdf_path = os.path.join(output_dir, f"q7_{question_key}.pdf")
@@ -428,7 +427,7 @@ def plot_primary_concerns_comparison(analyzer: SurveyAnalyzer, plotter: SurveyPl
 
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
-    chart_size = calculate_role_stacked_chart_size(num_options)
+    chart_size = calculate_chart_size(num_options)
     
     # Define role groups for comparison - design roles vs artist roles
     design_roles = ['Level Designer', 'Game Designer', 'Programmer/Technical Designer']
@@ -475,7 +474,7 @@ def plot_tool_view(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_dir:
 
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
-    chart_size = calculate_role_stacked_chart_size(num_options)
+    chart_size = calculate_chart_size(num_options)
 
     analyzer.clear_filters()    
     fig = plotter.create_role_stacked_chart(
@@ -484,7 +483,8 @@ def plot_tool_view(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_dir:
         horizontal=True,
         figsize=chart_size,
         show_percentages=True,
-        label_wrap_width=label_wrap_width
+        label_wrap_width=label_wrap_width,
+        legend_fontsize=18
     )
     
     pdf_path = os.path.join(output_dir, f"q8_{question_key}.pdf")
@@ -507,7 +507,7 @@ def plot_critical_factors(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, outp
 
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
-    chart_size = calculate_role_stacked_chart_size(num_options)
+    chart_size = calculate_chart_size(num_options)
     
     fig = plotter.create_role_stacked_chart(
         question_key,
@@ -515,7 +515,8 @@ def plot_critical_factors(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, outp
         horizontal=True,
         figsize=chart_size,
         show_percentages=True,
-        label_wrap_width=label_wrap_width
+        label_wrap_width=label_wrap_width,
+        legend_fontsize=18
     )
     
     pdf_path = os.path.join(output_dir, f"q9_{question_key}.pdf")
@@ -572,14 +573,15 @@ def plot_realtime_feedback_importance(analyzer: SurveyAnalyzer, plotter: SurveyP
 
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
-    chart_size = calculate_role_stacked_chart_size(num_options)
+    chart_size = calculate_chart_size(num_options)
     
     fig = plotter.create_role_stacked_chart(
         question_key,
         title=question_text,
         horizontal=True,
         figsize=chart_size,
-        show_percentages=True
+        show_percentages=True,
+        legend_fontsize=18
     )
     
     pdf_path = os.path.join(output_dir, f"q11_{question_key}.pdf")
@@ -602,7 +604,7 @@ def plot_preferred_approach(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, ou
 
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
-    chart_size = calculate_role_stacked_chart_size(num_options)
+    chart_size = calculate_chart_size(num_options)
     
     fig = plotter.create_role_stacked_chart(
         question_key,
@@ -610,7 +612,8 @@ def plot_preferred_approach(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, ou
         horizontal=True,
         figsize=chart_size,
         show_percentages=True,
-        label_wrap_width=label_wrap_width
+        label_wrap_width=label_wrap_width,
+        legend_fontsize=18
     )
     
     pdf_path = os.path.join(output_dir, f"q12_{question_key}.pdf")
@@ -633,7 +636,7 @@ def plot_integration_preference(analyzer: SurveyAnalyzer, plotter: SurveyPlotter
     
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
-    chart_size = calculate_role_stacked_chart_size(num_options)
+    chart_size = calculate_chart_size(num_options)
 
     fig = plotter.create_role_stacked_chart(
         question_key,
@@ -641,7 +644,8 @@ def plot_integration_preference(analyzer: SurveyAnalyzer, plotter: SurveyPlotter
         horizontal=True,
         figsize=chart_size,
         show_percentages=True,
-        label_wrap_width=label_wrap_width
+        label_wrap_width=label_wrap_width,
+        legend_fontsize=18
     )
     
     pdf_path = os.path.join(output_dir, f"q13_{question_key}.pdf")
@@ -702,7 +706,7 @@ def plot_level_representation(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, 
 
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
-    chart_size = calculate_role_stacked_chart_size(num_options)
+    chart_size = calculate_chart_size(num_options)
 
     fig = plotter.create_role_stacked_chart(
         question_key,
@@ -710,7 +714,8 @@ def plot_level_representation(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, 
         horizontal=True,
         figsize=chart_size,
         show_percentages=True,
-        label_wrap_width=label_wrap_width
+        label_wrap_width=label_wrap_width,
+        legend_fontsize=18
     )
     
     pdf_path = os.path.join(output_dir, f"q15_{question_key}.pdf")
@@ -733,7 +738,7 @@ def plot_most_useful_approach(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, 
 
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
-    chart_size = calculate_role_stacked_chart_size(num_options)
+    chart_size = calculate_chart_size(num_options)
 
     fig = plotter.create_role_stacked_chart(
         question_key,
@@ -741,7 +746,8 @@ def plot_most_useful_approach(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, 
         horizontal=True,
         figsize=chart_size,
         show_percentages=True,
-        label_wrap_width=label_wrap_width
+        label_wrap_width=label_wrap_width,
+        legend_fontsize=18
     )
     
     pdf_path = os.path.join(output_dir, f"q16_{question_key}.pdf")
@@ -764,7 +770,7 @@ def plot_ai_role_preference(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, ou
     
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
-    chart_size = calculate_role_stacked_chart_size(num_options)
+    chart_size = calculate_chart_size(num_options)
 
     fig = plotter.create_role_stacked_chart(
         question_key,
@@ -772,7 +778,8 @@ def plot_ai_role_preference(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, ou
         horizontal=True,
         figsize=chart_size,
         show_percentages=True,
-        label_wrap_width=label_wrap_width
+        label_wrap_width=label_wrap_width,
+        legend_fontsize=18
     )
     
     pdf_path = os.path.join(output_dir, f"q17_{question_key}.pdf")
@@ -795,7 +802,7 @@ def plot_ai_importance_factors(analyzer: SurveyAnalyzer, plotter: SurveyPlotter,
 
      # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
-    chart_size = calculate_role_stacked_chart_size(num_options)
+    chart_size = calculate_chart_size(num_options)
 
     fig = plotter.create_role_stacked_chart(
         question_key,
@@ -803,7 +810,8 @@ def plot_ai_importance_factors(analyzer: SurveyAnalyzer, plotter: SurveyPlotter,
         horizontal=True,
         figsize=chart_size,
         show_percentages=True,
-        label_wrap_width=label_wrap_width
+        label_wrap_width=label_wrap_width,
+        legend_fontsize=18
     )
     
     pdf_path = os.path.join(output_dir, f"q18_{question_key}.pdf")
@@ -826,7 +834,7 @@ def plot_ai_concerns(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_di
 
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
-    chart_size = calculate_role_stacked_chart_size(num_options)  # Use consistent sizing for role stacked charts
+    chart_size = calculate_chart_size(num_options)  # Use consistent sizing for role stacked charts
 
     fig = plotter.create_role_stacked_chart(
         question_key,
@@ -834,7 +842,8 @@ def plot_ai_concerns(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_di
         horizontal=True,
         figsize=chart_size,
         show_percentages=True,
-        label_wrap_width=label_wrap_width
+        label_wrap_width=label_wrap_width,
+        legend_fontsize=18
     )
     
     pdf_path = os.path.join(output_dir, f"q19_{question_key}.pdf")
@@ -857,7 +866,7 @@ def plot_desired_solutions(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, out
 
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
-    chart_size = calculate_role_stacked_chart_size(num_options)
+    chart_size = calculate_chart_size(num_options)
     
     fig = plotter.create_role_stacked_chart(
         question_key,
@@ -865,7 +874,8 @@ def plot_desired_solutions(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, out
         horizontal=True,
         figsize=chart_size,
         show_percentages=True,
-        label_wrap_width=label_wrap_width
+        label_wrap_width=label_wrap_width,
+        legend_fontsize=18
     )
     
     pdf_path = os.path.join(output_dir, f"q20_{question_key}.pdf")
