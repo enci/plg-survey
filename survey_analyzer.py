@@ -423,7 +423,7 @@ def get_nice_colors():
     ]
     return colors
 
-font_size = 23
+font_size = 26
 
 # Configure matplotlib for consistent styling across all plots
 plt.rcParams.update({
@@ -434,7 +434,7 @@ plt.rcParams.update({
     'axes.labelsize': font_size,
     'xtick.labelsize': font_size,
     'ytick.labelsize': font_size,
-    'legend.fontsize': 18,
+    'legend.fontsize': font_size,
     'figure.titlesize': 0,
     'axes.grid': True,
     'grid.alpha': 0.4,
@@ -535,10 +535,9 @@ class SurveyPlotter:
                 ax.text(bar.get_x() + bar.get_width()/2., height + max_value * 0.01,
                     label_text, ha='center', va='bottom', fontsize=font_size)
         
-        # Title removed for cleaner paper presentation
         
         # Use tight_layout with padding to prevent label cutoff
-        # plt.tight_layout(pad=0.0)
+        plt.tight_layout()
         
         return fig
     

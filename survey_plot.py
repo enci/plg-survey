@@ -78,13 +78,13 @@ def plot_professional_role(analyzer :SurveyAnalyzer, plotter :SurveyPlotter, out
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
     chart_size = calculate_chart_size(num_options)
+    # chart_size = (chart_size[0], chart_size[1] + 0.5)
 
     fig = plotter.create_bar_chart(
         question_key,
         title=question_text,
         horizontal=True,
         figsize=chart_size,
-        color='red',  # Use red for professional role chart
         show_percentages=True,
         label_wrap_width=label_wrap_width
     )
@@ -116,7 +116,7 @@ def plot_years_experience(analyzer, plotter, output_dir):
         title=question_text,
         horizontal=True,
         figsize=chart_size,
-        color='blue',  # Use blue for years of experience chart
+        color='cornflowerblue',
         show_percentages=True,
         label_wrap_width=label_wrap_width,
         colormap='tab20b'
@@ -879,7 +879,7 @@ def main():
     print("=== Survey Plot Generator ===\n")
     
     # Specify which questions to plot (1-20). Use None or empty list to plot all.
-    questions_to_plot = [1]     
+    questions_to_plot = [1, 2, 3]
     # questions_to_plot = list(range(1, 21))  # Plot all questions by default
     
     # Create output directory
