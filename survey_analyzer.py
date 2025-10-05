@@ -21,7 +21,7 @@ from enum import Enum
 from collections import Counter
 
 # Helper function for smart label wrapping
-def wrap_label_smart(label, width):
+def wrap_label_smart(label: str, width: Optional[int]) -> str:
     """Wrap labels based on width setting: None=no wrapping, 0=wrap at slashes, >0=wrap at width"""
     if width is None:
         return label
@@ -44,7 +44,7 @@ class Filter:
     value: Union[str, List[str]]
     negate: bool = False
     
-    def __str__(self):
+    def __str__(self) -> str:
         negation = "NOT " if self.negate else ""
         return f"{negation}{self.question} = {self.value}"
 
@@ -65,7 +65,7 @@ class SurveyAnalyzer:
         self._load_data()
     
     # Load schema and survey response data from JSON files. Non-standard answers are stored as 'Other'.
-    def _load_data(self):
+    def _load_data(self) -> None:
         try:
             with open(self.schema_path, 'r', encoding='utf-8') as f:
                 self.schema = json.load(f)
@@ -108,7 +108,7 @@ class SurveyAnalyzer:
             raise ValueError(f"Invalid JSON format: {e}")
     
     # Ensure data is loaded, raise error if not
-    def _ensure_loaded(self):
+    def _ensure_loaded(self) -> None:
         if self.schema is None or self.responses is None or self.df is None:
             raise RuntimeError("Data not loaded. Check file paths and try again.")
     
@@ -139,7 +139,7 @@ class SurveyAnalyzer:
         return question_info.get('type', 'unknown')
     
     # Add a filter condition
-    def add_filter(self, question: str, value: Union[str, List[str]], negate: bool = False):
+    def add_filter(self, question: str, value: Union[str, List[str]], negate: bool = False) -> None:
         self._ensure_loaded()
         assert self.schema is not None  # for type checker
         
@@ -151,7 +151,7 @@ class SurveyAnalyzer:
         print(f"Added filter: {filter_obj}")
     
     # Remove a filter by index
-    def remove_filter(self, index: int):
+    def remove_filter(self, index: int) -> None:
         if 0 <= index < len(self.filters):
             removed_filter = self.filters.pop(index)
             print(f"Removed filter: {removed_filter}")
@@ -159,7 +159,7 @@ class SurveyAnalyzer:
             raise IndexError(f"Filter index {index} out of range")
     
     # Remove all filters
-    def clear_filters(self):
+    def clear_filters(self) -> None:
         self._ensure_loaded()
         assert self.df is not None  # for type checker
         
@@ -168,7 +168,7 @@ class SurveyAnalyzer:
         print("All filters cleared")
     
     # Set the logic for combining multiple filters
-    def set_filter_logic(self, logic: Union[FilterLogic, str]):
+    def set_filter_logic(self, logic: Union[FilterLogic, str]) -> None:
         if isinstance(logic, str):
             logic = FilterLogic(logic.upper())
         
@@ -393,7 +393,7 @@ class SurveyAnalyzer:
         return self.filtered_data.copy()
 
 
-def get_colors(colormap_name, num_colors=20):
+def get_colors(colormap_name: str, num_colors: int = 20) -> List[Tuple[float, float, float, float]]:
     # Check for simple color names
     if colormap_name in plt.colormaps():
         cmap = plt.get_cmap(colormap_name)
@@ -405,7 +405,7 @@ def get_colors(colormap_name, num_colors=20):
         # Fallback to nice colors if colormap not found
         return get_nice_colors()[:num_colors]                
 
-def get_nice_colors():
+def get_nice_colors() -> List[Tuple[float, float, float, float]]:
     # High saturation, print-friendly colors
     colors = [
         (155/255, 75/255, 160/255, 1.0),   # Rich purple
