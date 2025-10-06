@@ -326,10 +326,6 @@ def plot_level_generation_frequency_comparison(analyzer: SurveyAnalyzer, plotter
     # Define role groups for comparison - design roles vs artist roles
     design_roles = ['Level Designer', 'Game Designer']
     artist_roles = ['Technical Artist', 'Environment Artist']
-
-    # Calculate dynamic chart size based on number of response options
-    num_options = get_question_options_count(analyzer, question_key)
-    chart_size = calculate_chart_size(num_options)
     
     # Create filter configurations for comparison
     filter_configs = [
@@ -344,12 +340,13 @@ def plot_level_generation_frequency_comparison(analyzer: SurveyAnalyzer, plotter
     
     fig = plotter.create_comparison_chart(
         question_key,
-        filter_configs,
+        filter_configs,        
         labels,
         title=title,
-        figsize=chart_size,
+        figsize=(12, 10),
         show_percentages=True,
-        label_wrap_width=18
+        label_wrap_width=18,
+        colors=['#9E2DB5', '#50A326']
     )
     
     pdf_path = os.path.join(output_dir, f"q6_comparison_{question_key}.pdf")
@@ -850,7 +847,7 @@ def main() -> None:
     print("=== Survey Plot Generator ===\n")
     
     # Specify which questions to plot (1-20). Use None or empty list to plot all.
-    questions_to_plot = [20]
+    questions_to_plot = [6]
     # questions_to_plot = list(range(1, 21))  # Plot all questions by default
     
     # Create output directory
@@ -873,7 +870,7 @@ def main() -> None:
         3: [plot_game_engines],
         4: [plot_procedural_tools_experience],
         5: [plot_current_pcg_usage],
-        6: [plot_level_generation_frequency],
+        6: [plot_level_generation_frequency, plot_level_generation_frequency_comparison],
         7: [plot_primary_concerns],
         8: [plot_tool_view],
         9: [plot_critical_factors],

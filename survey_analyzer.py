@@ -557,10 +557,13 @@ class SurveyPlotter:
         return fig
     
     # Create a comparison chart for the same question across different filter conditions
-    def create_comparison_chart(self, question: str, filter_configs: List[Dict], 
-                               labels: List[str], title: Optional[str] = None,
-                               figsize: tuple = (12, 8),
-                               show_percentages: bool = False, label_wrap_width: Optional[int] = None) -> mpl_figure.Figure:
+    def create_comparison_chart(self, question: str,
+                                filter_configs: List[Dict], 
+                                labels: List[str], title: Optional[str] = None,
+                                figsize: tuple = (12, 8),
+                                show_percentages: bool = False,
+                                label_wrap_width: Optional[int] = None,
+                                colors: Optional[List] = None) -> mpl_figure.Figure:
         if len(filter_configs) != len(labels):
             raise ValueError("filter_configs and labels must have the same length")
         
@@ -633,49 +636,48 @@ class SurveyPlotter:
         wrapped_options = [wrap_label_smart(option, label_wrap_width) for option in all_options]
         
         # Prepare data for plotting
-        x = np.arange(len(all_options))
-        width = 0.8 / len(data_sets)  # Adjust width based on number of datasets
+        y = np.arange(len(all_options))
+        height = 0.8 / len(data_sets)  # Adjust height based on number of datasets
         
         fig, ax = plt.subplots(figsize=figsize)
         
-        # Generate colors using golden ratio color system for optimal visual separation
-        colors = self.role_colors
+        # Use provided colors or default to golden ratio color system for optimal visual separation
+        colors = colors or self.role_colors
         
         for i, (label, values_dict) in enumerate(data_sets):
             values = [values_dict.get(option, 0) for option in all_options]
-            offset = width * (i - len(data_sets)/2 + 0.5)
-            bars = ax.bar(x + offset, values, width, label=label, color=colors[i])
+            offset = height * (i - len(data_sets)/2 + 0.5)
+            bars = ax.barh(y + offset, values, height, label=label, color=colors[i])
             
             # Add value labels on bars with consistent styling
             for bar in bars:
-                height = bar.get_height()
-                if height > 0:
+                width_val = bar.get_width()
+                if width_val >= 0:
                     if show_percentages:
-                        label_text = f'{height:.1f}%'
+                        label_text = f'{width_val:.1f}%'
                     else:
-                        label_text = str(int(height))
-                    ax.text(bar.get_x() + bar.get_width()/2., height + max(values) * 0.02,
-                           label_text, ha='center', va='bottom')
+                        label_text = str(int(width_val))
+                    ax.text(width_val + max(values) * 0.01, bar.get_y() + bar.get_height()/2.,
+                           label_text, ha='left', va='center')
         
-        # Find the maximum value across all datasets for proper y-axis scaling
+        # Find the maximum value across all datasets for proper axis scaling
         all_values = []
         for _, values_dict in data_sets:
             all_values.extend(values_dict.values())
         max_value = max(all_values) if all_values else 0
         
-        # Set y-axis limits with extra space for percentage labels (20% padding)
-        ax.set_ylim(0, max_value * 1.2)
+        # Set x-axis limits with extra space for percentage labels (20% padding)
+        ax.set_xlim(0, max_value * 1.2)
+        ax.set_yticks(y)
+        ax.set_yticklabels(wrapped_options)
+        ax.invert_yaxis()  # Top option at top
         
-        ax.set_xlabel('Options')
-        ax.set_ylabel('Percentage' if show_percentages else 'Count')
-        ax.set_xticks(x)
-        ax.set_xticklabels(wrapped_options, rotation=45, ha='right')
         ax.legend()
         
         # Title removed for cleaner paper presentation
         
         # Use tight_layout with padding to prevent label cutoff (consistent with other methods)
-        plt.tight_layout(pad=3.0)
+        # plt.tight_layout(pad=3.0)
         
         return fig
     
