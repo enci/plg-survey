@@ -63,10 +63,10 @@
         "Custom code-based PCG solutions"
       ],
       "scale": [
-        "No Experience",
-        "Limited Experience",
-        "Moderate Experience",
-        "Extensive Experience"
+        "None",
+        "Limited",
+        "Moderate",
+        "Extensive"
       ]
     },
     "current_pcg_usage": {
@@ -199,10 +199,10 @@
         "Roguelikes / Roguelites"
       ],
       "scale": [
-        "Not Interested",
-        "Somewhat Interested",
+        "Not",
+        "Somewhat",
         "Interested",
-        "Very Interested"
+        "Very"
       ]
     },
     "level_representation": {

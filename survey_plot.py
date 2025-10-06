@@ -39,12 +39,21 @@ def calculate_chart_size(num_options: int) -> Tuple[int, int]:
     width = 12
     consistent_bar_height = 0.9  # Consistent height per bar
     base_padding = 1.0  # Space for legend and padding
-    height = int(base_padding + (num_options * consistent_bar_height))    
+    height = base_padding + (num_options * consistent_bar_height)
     return (width, height)
 
 # Get the number of unique response options for a question.
 def get_question_options_count(analyzer: SurveyAnalyzer, question_key: str) -> int:
     try:
+        # Get question info to check type
+        question_info = analyzer.get_question_info(question_key)
+        question_type = question_info.get('type', 'single_choice')
+        
+        # For matrix questions, return the number of items (rows)
+        if question_type == 'matrix':
+            items = question_info.get('items', [])
+            return len(items)
+        
         # First try to get predefined options from schema
         options = analyzer.get_question_options(question_key)
 
@@ -168,16 +177,14 @@ def plot_game_engines(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_d
 def plot_procedural_tools_experience(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_dir: str) -> str:
     question_key = 'procedural_tools_experience'
     question_info = analyzer.get_question_info(question_key)
-    question_text = question_info.get('question', question_key)
-        
+    question_text = question_info.get('question', question_key)        
     print(f"Creating plot for: {question_text}")
     
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
     chart_size = calculate_chart_size(num_options)
     # Make the chart taller for matrix data
-    chart_size = (chart_size[0], chart_size[1] + 1.5)
-
+    chart_size = (chart_size[0], chart_size[1] * 1.2)
     
     
     # Use stacked bar chart for better readability of matrix data
@@ -185,9 +192,8 @@ def plot_procedural_tools_experience(analyzer: SurveyAnalyzer, plotter: SurveyPl
         question_key,
         title=question_text,
         figsize=chart_size,
-        color='purple',  # Use purple for procedural tools experience chart
-        horizontal=True,
-        label_wrap_width=30,
+        colormap='plasma', 
+        label_wrap_width=25,
         show_percentages=True
     )
     
@@ -655,15 +661,13 @@ def plot_genre_interest(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output
      # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
     chart_size = calculate_chart_size(num_options)
-    chart_size = (chart_size[0], chart_size[1] + 1.5)  # Make the chart taller for matrix data
 
     # Use matrix stacked bar chart for this matrix question
     fig = plotter.create_matrix_stacked_bar_chart(
         question_key,
         title=wrapped_title,
         figsize=chart_size,
-        color='orange',  # Use orange for genre interest chart
-        horizontal=True,
+        colormap='plasma',
         label_wrap_width=label_wrap_width,
         show_percentages=True
     )
@@ -861,7 +865,7 @@ def main() -> None:
     print("=== Survey Plot Generator ===\n")
     
     # Specify which questions to plot (1-20). Use None or empty list to plot all.
-    questions_to_plot = [1, 2, 3]
+    questions_to_plot = [5]
     # questions_to_plot = list(range(1, 21))  # Plot all questions by default
     
     # Create output directory

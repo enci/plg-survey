@@ -668,10 +668,9 @@ class SurveyPlotter:
     def create_matrix_stacked_bar_chart(self, matrix_question: str,
                                         title: Optional[str] = None,
                                        filtered: bool = True,
-                                       figsize: tuple = (14, 10),
+                                       figsize: tuple = (12, 10),
                                        colormap: Optional[str] = None,
                                        color: Optional[str] = None,
-                                       horizontal: bool = True,
                                        label_wrap_width: Optional[int] = None,
                                        show_percentages: bool = False) -> mpl_figure.Figure:
         self.analyzer._ensure_loaded()
@@ -741,36 +740,23 @@ class SurveyPlotter:
         else:
             colors = self.role_colors
         
-        if horizontal:
-            # Create horizontal stacked bars
-            bottom = np.zeros(len(items))
-            bars = []
-            for i, rating in enumerate(all_ratings):
-                bars.append(ax.barh(wrapped_items, data[rating], left=bottom, 
-                                   label=rating, color=colors[i]))
-                bottom += data[rating]
-        else:
-            # Create vertical stacked bars
-            bottom = np.zeros(len(items))
-            bars = []
-            for i, rating in enumerate(all_ratings):
-                bars.append(ax.bar(wrapped_items, data[rating], bottom=bottom, 
-                                  label=rating, color=colors[i]))
-                bottom += data[rating]
+        # Create horizontal stacked bars
+        bottom = np.zeros(len(items))
+        bars = []
+        for i, rating in enumerate(all_ratings):
+            bars.append(ax.barh(wrapped_items, data[rating], left=bottom, 
+                               label=rating, color=colors[i], height=0.78))
+            bottom += data[rating]
         
         # Customize the plot (remove axis labels as requested)
-        if horizontal:
-            # Rotate item labels if they're long
-            plt.setp(ax.get_yticklabels(), rotation=0)
-        else:
-            # Rotate item labels if they're long
-            plt.setp(ax.get_xticklabels(), rotation=45, ha='right')
+        # Rotate item labels if they're long
+        plt.setp(ax.get_yticklabels())
         
-        # Adjust layout to make room for legend first
-        plt.subplots_adjust(bottom=0.25)
+        # Adjust layout to make room for legend at bottom
+        # plt.subplots_adjust(bottom=0.2)
         
-        # Add horizontal legend at bottom without title
-        ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), ncol=len(all_ratings), frameon=False)
+        # Add legend at bottom left
+        ax.legend(loc='upper left', bbox_to_anchor=(-0.44, -0.05), ncol=len(all_ratings), frameon=True)
         
         return fig
     
