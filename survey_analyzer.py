@@ -21,8 +21,12 @@ from enum import Enum
 from collections import Counter
 
 # Helper function for smart label wrapping
-def wrap_label_smart(label: str, width: Optional[int]) -> str:
+def wrap_label_smart(label: str, width: Optional[int], max_length: int = 78) -> str:
     """Wrap labels based on width setting: None=no wrapping, 0=wrap at slashes, >0=wrap at width"""
+    # First, truncate if label is too long
+    if len(label) > max_length:
+        label = label[:max_length-3] + "..."
+    
     if width is None:
         return label
     elif width == 0:
@@ -30,7 +34,18 @@ def wrap_label_smart(label: str, width: Optional[int]) -> str:
         return label.replace('/', '/\n')
     else:
         # Normal width-based wrapping
-        return textwrap.fill(label, width=width, break_long_words=False)
+        wrapped = textwrap.fill(label, width=width, break_long_words=False)
+        # Check if we have 3 or more lines, if so keep only first two and add "..." to second
+        lines = wrapped.split('\n')
+        if len(lines) >= 3:
+            # Keep first line and truncate second line, adding "..." 
+            second_line = lines[1]
+            if len(second_line) >= width - 3:
+                truncated_second = second_line[:width-3] + "..."
+            else:
+                truncated_second = second_line + "..."
+            wrapped = '\n'.join([lines[0], truncated_second])
+        return wrapped
 
 # Enum for filter logic operations
 class FilterLogic(Enum):
@@ -767,7 +782,11 @@ class SurveyPlotter:
                                      colormap: Optional[str] = None,
                                      color: Optional[str] = None,
                                      horizontal: bool = True, max_rank: int = 3,
-                                     label_wrap_width: Optional[int] = None) -> mpl_figure.Figure:
+                                     label_wrap_width: Optional[int] = None,
+                                     label_fontsize_offset: int = 0,
+                                     legend_fontsize: int = 22,
+                                     legend_ncol: int = 1,
+                                     xlabel_fontsize: int = 20) -> mpl_figure.Figure:
         # Get position distribution for ranking
         positions = self.analyzer.get_ranking_positions(ranking_question, filtered, max_rank)
         
@@ -796,8 +815,10 @@ class SurveyPlotter:
             colors = [color] * max_rank  # Use the same color for all ranks
         elif colormap:
             colors = get_colors(colormap, max_rank)
+            colors = colors[::-1]  # Always reverse the color order
         else:
             colors = self.role_colors
+            colors = colors[::-1]  # Always reverse the color order
         
         if horizontal:
             # Create horizontal stacked bars
@@ -807,8 +828,7 @@ class SurveyPlotter:
                 bars.append(ax.barh(wrapped_items, values, left=bottom, 
                                    label=rank_name, color=colors[i]))
                 bottom += values
-            ax.set_xlabel('Number of Times Ranked')
-            ax.set_ylabel('Features')
+            ax.set_xlabel('Number of Times Ranked', fontsize=xlabel_fontsize)
             ax.invert_yaxis()  # Top item at top
         else:
             # Create vertical stacked bars
@@ -818,12 +838,18 @@ class SurveyPlotter:
                 bars.append(ax.bar(wrapped_items, values, bottom=bottom, 
                                   label=rank_name, color=colors[i]))
                 bottom += values
-            ax.set_xlabel('Features')
-            ax.set_ylabel('Number of Times Ranked')
+            ax.set_xlabel('Features', fontsize=xlabel_fontsize)
+            ax.set_ylabel('Number of Times Ranked', fontsize=xlabel_fontsize)
             plt.xticks(rotation=45, ha='right')
         
+        # Adjust label font size if offset is specified
+        if label_fontsize_offset != 0:
+            for label in ax.get_yticklabels():
+                label.set_fontsize(font_size + label_fontsize_offset)
+        
         # Add legend positioned in bottom right (empty space in horizontal charts)
-        ax.legend(title='Ranking Position', bbox_to_anchor=(1.0, 0.0), loc='lower right')
+        ax.legend(bbox_to_anchor=(1.0, 0.0), loc='lower right',
+                fontsize=legend_fontsize, ncol=legend_ncol)
         
         # Title removed for cleaner paper presentation
         plt.tight_layout()
@@ -838,9 +864,11 @@ class SurveyPlotter:
                                 figsize: Tuple[int, int] = (12, 8),
                                 show_percentages: bool = True,
                                 label_wrap_width: Optional[int] = None,
+                                label_fontsize_offset: int = 0,
                                 legend_loc: str = 'lower right',
                                 legend_fontsize: int = 22,
-                                legend_ncol: int = 1) -> mpl_figure.Figure:
+                                legend_ncol: int = 1,
+                                xlim_padding: int = 18) -> mpl_figure.Figure:
         # Get all professional roles in the dataset
         role_data = self.analyzer.get_question_counts('professional_role')
         roles = list(role_data.keys())
@@ -918,10 +946,15 @@ class SurveyPlotter:
             
             # Extend x-axis to accommodate percentage text within chart area
             if max_percentage > 0:
-                ax.set_xlim(0, max_percentage + 18)  # Add extra space for text
+                ax.set_xlim(0, max_percentage + xlim_padding)  # Add extra space for text
         
         # Remove y-axis label as requested
         ax.invert_yaxis()  # Top category at top
+        
+        # Adjust label font size if offset is specified
+        if label_fontsize_offset != 0:
+            for label in ax.get_yticklabels():
+                label.set_fontsize(font_size + label_fontsize_offset)
         
         # Add legend with shortened role names inside the chart area
         ax.legend(loc=legend_loc, fontsize=legend_fontsize, ncol=legend_ncol)

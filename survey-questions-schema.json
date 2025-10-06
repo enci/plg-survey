@@ -217,7 +217,7 @@
         "Hierarchical/nested structures",
         "Node-based graphs (mission/flow graphs)",
         "Navigation mesh",
-        "Constraint-based representations (is this a known term)",
+        "Constraint-based representations",
         "Voxel-based"
       ],
       "has_other": true

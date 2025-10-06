@@ -2,37 +2,12 @@
 Survey Plot Generator
 """
 
-from survey_analyzer import SurveyAnalyzer, SurveyPlotter
+from survey_analyzer import SurveyAnalyzer, SurveyPlotter, wrap_label_smart
 import matplotlib.pyplot as plt
 import matplotlib.backends.backend_pdf as pdf_backend
 import matplotlib.figure as mpl_figure
 import os
-import textwrap
 from typing import List, Tuple, Optional, Union
-
-# Wrap text to specified width, breaking on word boundaries.
-def wrap_text(text: str, width: int = 30) -> str:
-    if len(text) <= width:
-        return text
-    
-    # Use textwrap to break on word boundaries
-    wrapped_lines = textwrap.wrap(text, width=width, break_long_words=False)
-    return '\n'.join(wrapped_lines)
-
-# Wrap labels based on width setting: None=no wrapping, 0=wrap at slashes, >0=wrap at width
-def wrap_label_smart(label: str, width: Optional[int]) -> str:
-    if width is None:
-        return label
-    elif width == 0:
-        # Special case: wrap at slashes only
-        return label.replace('/', '/\n')
-    else:
-        # Normal width-based wrapping
-        return textwrap.fill(label, width=width, break_long_words=False)
-
-# Wrap a list of labels for better display on axes.
-def wrap_labels(labels: List[str], width: int = 25) -> List[str]:
-    return [wrap_text(label, width) for label in labels]
 
 # Calculate chart size to ensure consistent bar heights. 
 def calculate_chart_size(num_options: int) -> Tuple[int, int]:
@@ -142,14 +117,7 @@ def plot_game_engines(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_d
     question_text = question_info.get('question', question_key)
 
     # Local wrapping settings for this chart
-    title_wrap_width = None  # No title wrapping
     label_wrap_width = 25   # Wrap long engine names
-    
-    # Wrap the title text for better display if specified
-    if title_wrap_width:
-        wrapped_title = wrap_text(question_text, width=title_wrap_width)
-    else:
-        wrapped_title = question_text
     
     print(f"Creating plot for: {question_text}")
     
@@ -160,7 +128,7 @@ def plot_game_engines(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_d
     # Create role stacked chart showing cumulative professional role breakdown
     fig = plotter.create_role_stacked_chart(
         question_key,
-        title=wrapped_title,
+        title=question_text,
         figsize=chart_size,
         show_percentages=True,
         label_wrap_width=label_wrap_width
@@ -269,6 +237,7 @@ def plot_current_pcg_usage(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, out
         title=question_text,
         figsize=chart_size,
         show_percentages=True,
+        label_fontsize_offset=-3,
         label_wrap_width=label_wrap_width
     )
     
@@ -321,6 +290,7 @@ def plot_level_generation_frequency(analyzer: SurveyAnalyzer, plotter: SurveyPlo
     question_text = question_info.get('question', question_key)
     
     print(f"Creating plot for: {question_text}")
+    analyzer.clear_filters()    
 
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
@@ -330,7 +300,12 @@ def plot_level_generation_frequency(analyzer: SurveyAnalyzer, plotter: SurveyPlo
         question_key,
         title=question_text,
         figsize=chart_size,
-        show_percentages=True
+        show_percentages=True,
+        label_wrap_width=18,
+        legend_loc = 'upper right',
+        legend_fontsize=19,
+        legend_ncol=2,
+        label_fontsize_offset=-2
     )
     
     pdf_path = os.path.join(output_dir, f"q6_{question_key}.pdf")
@@ -405,7 +380,10 @@ def plot_primary_concerns(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, outp
         title=question_text,
         figsize=chart_size,
         show_percentages=True,
-        label_wrap_width=label_wrap_width
+        label_wrap_width=label_wrap_width,
+        label_fontsize_offset=-3,
+        legend_ncol=2,
+        legend_fontsize=18
     )
     
     pdf_path = os.path.join(output_dir, f"q7_{question_key}.pdf")
@@ -480,7 +458,10 @@ def plot_tool_view(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_dir:
         title=question_text,
         figsize=chart_size,
         show_percentages=True,
-        label_wrap_width=label_wrap_width
+        label_wrap_width=label_wrap_width,
+        label_fontsize_offset=-3,
+        legend_fontsize=19,
+        legend_loc='upper right'
     )
     
     pdf_path = os.path.join(output_dir, f"q8_{question_key}.pdf")
@@ -510,7 +491,10 @@ def plot_critical_factors(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, outp
         title=question_text,
         figsize=chart_size,
         show_percentages=True,
-        label_wrap_width=label_wrap_width
+        label_wrap_width=label_wrap_width,
+        label_fontsize_offset=-3,
+        legend_ncol=2,
+        legend_fontsize=19
     )
     
     pdf_path = os.path.join(output_dir, f"q9_{question_key}.pdf")
@@ -524,30 +508,26 @@ def plot_critical_factors(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, outp
 def plot_node_tool_features(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_dir: str) -> str:
     question_key = 'node_tool_features'
     question_info = analyzer.get_question_info(question_key)
-    question_text = question_info.get('question', question_key)
-    
-    # Local wrapping settings for this chart
-    title_wrap_width = 60   # Wrap long title
-    label_wrap_width = 30   # Wrap long labels for features
-    
-    # Wrap the title text for better display
-    wrapped_title = wrap_text(question_text, width=title_wrap_width)
-    
+    question_text = question_info.get('question', question_key)    
+        
     print(f"Creating plot for: {question_text}")
 
     # Calculate dynamic chart size based on number of response options
-    num_options = get_question_options_count(analyzer, question_key)
+    num_options = 8  # Fixed number of options for this question
     chart_size = calculate_chart_size(num_options)
     
     # Use position distribution visualization to show ranking patterns
     fig = plotter.create_ranking_position_chart(
         question_key,
-        title=wrapped_title,
+        title=question_text,
         horizontal=True,
         figsize=chart_size,
-        color='cyan',  # Use cyan for node tool features chart
+        colormap='plasma',
         max_rank=3,  # Top 3 ranking as specified in the question
-        label_wrap_width=label_wrap_width
+        label_wrap_width=30,
+        label_fontsize_offset=-5,
+        legend_fontsize=19,
+        xlabel_fontsize=18
     )
     
     pdf_path = os.path.join(output_dir, f"q10_{question_key}.pdf")
@@ -573,7 +553,9 @@ def plot_realtime_feedback_importance(analyzer: SurveyAnalyzer, plotter: SurveyP
         question_key,
         title=question_text,
         figsize=chart_size,
-        show_percentages=True
+        show_percentages=True,
+        legend_fontsize=17,
+        legend_ncol=4
     )
     
     pdf_path = os.path.join(output_dir, f"q11_{question_key}.pdf")
@@ -587,10 +569,7 @@ def plot_realtime_feedback_importance(analyzer: SurveyAnalyzer, plotter: SurveyP
 def plot_preferred_approach(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_dir: str) -> str:
     question_key = 'preferred_approach'
     question_info = analyzer.get_question_info(question_key)
-    question_text = question_info.get('question', question_key)
-    
-    # Local wrapping settings for this chart
-    label_wrap_width = 40   # Wrap long labels for approaches
+    question_text = question_info.get('question', question_key)    
     
     print(f"Creating plot for: {question_text}")
 
@@ -603,7 +582,9 @@ def plot_preferred_approach(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, ou
         title=question_text,
         figsize=chart_size,
         show_percentages=True,
-        label_wrap_width=label_wrap_width
+        label_wrap_width=45,
+        label_fontsize_offset=-5,
+        legend_fontsize=19,
     )
     
     pdf_path = os.path.join(output_dir, f"q12_{question_key}.pdf")
@@ -619,9 +600,6 @@ def plot_integration_preference(analyzer: SurveyAnalyzer, plotter: SurveyPlotter
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
     
-    # Local wrapping settings for this chart
-    label_wrap_width = 35   # Wrap labels for integration options
-    
     print(f"Creating plot for: {question_text}")
     
     # Calculate dynamic chart size based on number of response options
@@ -633,7 +611,11 @@ def plot_integration_preference(analyzer: SurveyAnalyzer, plotter: SurveyPlotter
         title=question_text,
         figsize=chart_size,
         show_percentages=True,
-        label_wrap_width=label_wrap_width
+        label_wrap_width=35,
+        label_fontsize_offset=-2,
+        legend_ncol=2,
+        legend_fontsize=19
+
     )
     
     pdf_path = os.path.join(output_dir, f"q13_{question_key}.pdf")
@@ -650,12 +632,8 @@ def plot_genre_interest(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output
     question_text = question_info.get('question', question_key)
     
     # Local wrapping settings for this chart
-    title_wrap_width = 60   # Wrap long title
     label_wrap_width = 20   # Wrap genre labels
-    
-    # Wrap the title text for better display
-    wrapped_title = wrap_text(question_text, width=title_wrap_width)
-    
+        
     print(f"Creating plot for: {question_text}")
 
      # Calculate dynamic chart size based on number of response options
@@ -665,7 +643,7 @@ def plot_genre_interest(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output
     # Use matrix stacked bar chart for this matrix question
     fig = plotter.create_matrix_stacked_bar_chart(
         question_key,
-        title=wrapped_title,
+        title=question_text,
         figsize=chart_size,
         colormap='plasma',
         label_wrap_width=label_wrap_width,
@@ -684,10 +662,7 @@ def plot_level_representation(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, 
     question_key = 'level_representation'
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
-    
-    # Local wrapping settings for this chart
-    label_wrap_width = 35   # Wrap representation method labels
-    
+        
     print(f"Creating plot for: {question_text}")
 
     # Calculate dynamic chart size based on number of response options
@@ -699,7 +674,8 @@ def plot_level_representation(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, 
         title=question_text,
         figsize=chart_size,
         show_percentages=True,
-        label_wrap_width=label_wrap_width
+        label_wrap_width=30,
+        xlim_padding=15
     )
     
     pdf_path = os.path.join(output_dir, f"q15_{question_key}.pdf")
@@ -714,10 +690,7 @@ def plot_most_useful_approach(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, 
     question_key = 'most_useful_approach'
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
-    
-    # Local wrapping settings for this chart
-    label_wrap_width = 40   # Wrap approach labels
-    
+        
     print(f"Creating plot for: {question_text}")
 
     # Calculate dynamic chart size based on number of response options
@@ -729,7 +702,11 @@ def plot_most_useful_approach(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, 
         title=question_text,
         figsize=chart_size,
         show_percentages=True,
-        label_wrap_width=label_wrap_width
+        label_wrap_width=35,
+        label_fontsize_offset=-4,
+        xlim_padding=25,    
+        legend_loc='upper right',
+        legend_fontsize=15
     )
     
     pdf_path = os.path.join(output_dir, f"q16_{question_key}.pdf")
@@ -744,10 +721,7 @@ def plot_ai_role_preference(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, ou
     question_key = 'ai_role_preference'
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
-    
-    # Local wrapping settings for this chart
-    label_wrap_width = 42   # Wrap AI role labels
-    
+        
     print(f"Creating plot for: {question_text}")
     
     # Calculate dynamic chart size based on number of response options
@@ -759,7 +733,11 @@ def plot_ai_role_preference(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, ou
         title=question_text,
         figsize=chart_size,
         show_percentages=True,
-        label_wrap_width=label_wrap_width
+        label_wrap_width=35,
+        label_fontsize_offset=-3,
+        legend_fontsize=17,
+        legend_ncol=2,
+        xlim_padding=25
     )
     
     pdf_path = os.path.join(output_dir, f"q17_{question_key}.pdf")
@@ -789,8 +767,11 @@ def plot_ai_importance_factors(analyzer: SurveyAnalyzer, plotter: SurveyPlotter,
         title=question_text,
         figsize=chart_size,
         show_percentages=True,
-        label_wrap_width=label_wrap_width
-    )
+        label_wrap_width=label_wrap_width,
+        label_fontsize_offset=-3,
+        legend_fontsize=19,
+        xlim_padding=20
+        )
     
     pdf_path = os.path.join(output_dir, f"q18_{question_key}.pdf")
     fig.savefig(pdf_path, format='pdf', bbox_inches='tight', dpi=300)
@@ -819,7 +800,11 @@ def plot_ai_concerns(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_di
         title=question_text,
         figsize=chart_size,
         show_percentages=True,
-        label_wrap_width=label_wrap_width
+        label_wrap_width=label_wrap_width,
+        label_fontsize_offset=-4,
+        legend_fontsize=14,
+        legend_ncol=3,
+        xlim_padding=22
     )
     
     pdf_path = os.path.join(output_dir, f"q19_{question_key}.pdf")
@@ -835,9 +820,6 @@ def plot_desired_solutions(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, out
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
     
-    # Local wrapping settings for this chart
-    label_wrap_width = 35   # Wrap solution labels
-    
     print(f"Creating plot for: {question_text}")
 
     # Calculate dynamic chart size based on number of response options
@@ -849,7 +831,10 @@ def plot_desired_solutions(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, out
         title=question_text,
         figsize=chart_size,
         show_percentages=True,
-        label_wrap_width=label_wrap_width
+        label_wrap_width=30,
+        label_fontsize_offset=-3,
+        legend_fontsize=19,
+        xlim_padding=25
     )
     
     pdf_path = os.path.join(output_dir, f"q20_{question_key}.pdf")
@@ -865,7 +850,7 @@ def main() -> None:
     print("=== Survey Plot Generator ===\n")
     
     # Specify which questions to plot (1-20). Use None or empty list to plot all.
-    questions_to_plot = [5]
+    questions_to_plot = [20]
     # questions_to_plot = list(range(1, 21))  # Plot all questions by default
     
     # Create output directory
@@ -887,7 +872,7 @@ def main() -> None:
         2: [plot_years_experience],
         3: [plot_game_engines],
         4: [plot_procedural_tools_experience],
-        5: [plot_current_pcg_usage, plot_current_pcg_usage_artist],
+        5: [plot_current_pcg_usage],
         6: [plot_level_generation_frequency],
         7: [plot_primary_concerns],
         8: [plot_tool_view],

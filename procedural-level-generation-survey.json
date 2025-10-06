@@ -746,7 +746,7 @@
             "Node-based graphs (mission/flow graphs)",
             "Scene graph/hierarchical structure",
             "Rectangular grid/tile-based",
-            "Constraint-based representations (is this a known term)"
+            "Constraint-based representations"
         ],
         "most_useful_approach": "Space-driven generation (spatial layout determines gameplay possibilities)",
         "ai_role_preference": [
@@ -2138,7 +2138,7 @@
             "Rectangular grid/tile-based",
             "Free-form geometry",
             "Node-based graphs (mission/flow graphs)",
-            "Constraint-based representations (is this a known term)"
+            "Constraint-based representations"
         ],
         "most_useful_approach": "Context-dependent (different approaches for different game sections)",
         "ai_role_preference": [
@@ -2598,7 +2598,7 @@
         },
         "level_representation": [
             "Scene graph/hierarchical structure",
-            "Constraint-based representations (is this a known term)"
+            "Constraint-based representations"
         ],
         "most_useful_approach": "Context-dependent (different approaches for different game sections)",
         "ai_role_preference": [
@@ -6930,7 +6930,7 @@
             "Rectangular grid/tile-based",
             "Hexagonal grid/tile-based",
             "Voxel-based",
-            "Constraint-based representations (is this a known term)"
+            "Constraint-based representations"
         ],
         "most_useful_approach": "Context-dependent (different approaches for different game sections)",
         "ai_role_preference": [
@@ -7237,7 +7237,7 @@
         "level_representation": [
             "Rectangular grid/tile-based",
             "Voxel-based",
-            "Constraint-based representations (is this a known term)",
+            "Constraint-based representations",
             "Drawn zones (mix of free-form and constraints)"
         ],
         "most_useful_approach": "Space-driven generation (spatial layout determines gameplay possibilities)",
@@ -7997,7 +7997,7 @@
             "Node-based graphs (mission/flow graphs)",
             "Scene graph/hierarchical structure",
             "Rectangular grid/tile-based",
-            "Constraint-based representations (is this a known term)",
+            "Constraint-based representations",
             "Navigation mesh",
             "Free-form geometry",
             "Voxel-based"
@@ -8594,7 +8594,7 @@
             "Free-form geometry",
             "Node-based graphs (mission/flow graphs)",
             "Navigation mesh",
-            "Constraint-based representations (is this a known term)",
+            "Constraint-based representations",
             "Voxel-based"
         ],
         "most_useful_approach": "Balanced approach (iterative refinement between mission and space)",
