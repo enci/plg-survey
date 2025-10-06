@@ -432,7 +432,7 @@ plt.rcParams.update({
     'font.size': font_size,
     'axes.titlesize': 18,
     'axes.labelsize': font_size,
-    'xtick.labelsize': font_size,
+    'xtick.labelsize': font_size - 5,
     'ytick.labelsize': font_size,
     'legend.fontsize': font_size,
     'figure.titlesize': 0,
@@ -849,7 +849,6 @@ class SurveyPlotter:
     def create_role_stacked_chart(self,                                
                                 question: str,
                                 title: Optional[str] = None,
-                                horizontal: bool = True,
                                 figsize: Tuple[int, int] = (12, 8),
                                 show_percentages: bool = True,
                                 label_wrap_width: Optional[int] = None,
@@ -913,58 +912,30 @@ class SurveyPlotter:
         # Create figure
         fig, ax = plt.subplots(figsize=figsize)
         
-        if horizontal:
-            # Create horizontal stacked bars
-            left = np.zeros(len(main_categories))
-            bars = []
+        # Create horizontal stacked bars
+        left = np.zeros(len(main_categories))
+        bars = []
+        
+        for i, role in enumerate(roles):
+            values = stack_data[role]
+            bars.append(ax.barh(wrapped_main_categories, values, left=left, 
+                               label=shortened_roles[i], color=role_colors[i]))
+            left += values
+        
+        # Show cumulative percentages at the end of bars if requested
+        if show_percentages:
+            max_percentage = max(left) if len(left) > 0 else 0
+            for j, cumulative_percentage in enumerate(left):
+                if cumulative_percentage > 0:
+                    ax.text(cumulative_percentage + 0.5, j, f'{cumulative_percentage:.1f}%', 
+                           ha='left', va='center', fontsize=font_size)
             
-            for i, role in enumerate(roles):
-                values = stack_data[role]
-                bars.append(ax.barh(wrapped_main_categories, values, left=left, 
-                                   label=shortened_roles[i], color=role_colors[i]))
-                left += values
-            
-            # Show cumulative percentages at the end of bars if requested
-            if show_percentages:
-                max_percentage = max(left) if len(left) > 0 else 0
-                for j, cumulative_percentage in enumerate(left):
-                    if cumulative_percentage > 0:
-                        ax.text(cumulative_percentage + 0.5, j, f'{cumulative_percentage:.1f}%', 
-                               ha='left', va='center', fontsize=font_size)
-                
-                # Extend x-axis to accommodate percentage text within chart area
-                if max_percentage > 0:
-                    ax.set_xlim(0, max_percentage + 12)  # Add extra space for text
-            
-            # Remove y-axis label as requested
-            ax.invert_yaxis()  # Top category at top
-            
-        else:
-            # Create vertical stacked bars
-            bottom = np.zeros(len(main_categories))
-            bars = []
-            
-            for i, role in enumerate(roles):
-                values = stack_data[role]
-                bars.append(ax.bar(wrapped_main_categories, values, bottom=bottom,
-                                  label=shortened_roles[i], color=role_colors[i]))
-                bottom += values
-            
-            # Show cumulative percentages at the end of bars if requested
-            if show_percentages:
-                max_percentage = max(bottom) if len(bottom) > 0 else 0
-                for j, cumulative_percentage in enumerate(bottom):
-                    if cumulative_percentage > 0:
-                        ax.text(j, cumulative_percentage + 0.5, f'{cumulative_percentage:.1f}%', 
-                               ha='center', va='bottom', fontsize=10)
-                
-                # Extend y-axis to accommodate percentage text within chart area
-                if max_percentage > 0:
-                    ax.set_ylim(0, max_percentage + 8)  # Add extra space for text
-            
-            ax.set_ylabel('Percentage of Total Responses')
-            # Remove x-axis label as requested when horizontal=False
-            plt.xticks(rotation=45, ha='right')
+            # Extend x-axis to accommodate percentage text within chart area
+            if max_percentage > 0:
+                ax.set_xlim(0, max_percentage + 18)  # Add extra space for text
+        
+        # Remove y-axis label as requested
+        ax.invert_yaxis()  # Top category at top
         
         # Add legend with shortened role names inside the chart area
         ax.legend(loc=legend_loc, fontsize=legend_fontsize, ncol=legend_ncol)

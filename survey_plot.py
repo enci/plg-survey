@@ -152,11 +152,9 @@ def plot_game_engines(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_d
     fig = plotter.create_role_stacked_chart(
         question_key,
         title=wrapped_title,
-        horizontal=True,
         figsize=chart_size,
         show_percentages=True,
-        label_wrap_width=label_wrap_width,
-        legend_fontsize=18
+        label_wrap_width=label_wrap_width
     )
     
     pdf_path = os.path.join(output_dir, f"q3_{question_key}.pdf")
@@ -263,11 +261,9 @@ def plot_current_pcg_usage(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, out
     fig = plotter.create_role_stacked_chart(
         question_key,
         title=question_text,
-        horizontal=True,
         figsize=chart_size,
         show_percentages=True,
-        label_wrap_width=label_wrap_width,
-        legend_fontsize=18
+        label_wrap_width=label_wrap_width
     )
     
     pdf_path = os.path.join(output_dir, f"q5_{question_key}.pdf")
@@ -327,10 +323,8 @@ def plot_level_generation_frequency(analyzer: SurveyAnalyzer, plotter: SurveyPlo
     fig = plotter.create_role_stacked_chart(
         question_key,
         title=question_text,
-        horizontal=True,
         figsize=chart_size,
-        show_percentages=True,
-        legend_fontsize=18
+        show_percentages=True
     )
     
     pdf_path = os.path.join(output_dir, f"q6_{question_key}.pdf")
@@ -403,11 +397,9 @@ def plot_primary_concerns(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, outp
     fig = plotter.create_role_stacked_chart(
         question_key,
         title=question_text,
-        horizontal=True,
         figsize=chart_size,
         show_percentages=True,
-        label_wrap_width=label_wrap_width,
-        legend_fontsize=18
+        label_wrap_width=label_wrap_width
     )
     
     pdf_path = os.path.join(output_dir, f"q7_{question_key}.pdf")
@@ -480,11 +472,9 @@ def plot_tool_view(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_dir:
     fig = plotter.create_role_stacked_chart(
         question_key,
         title=question_text,
-        horizontal=True,
         figsize=chart_size,
         show_percentages=True,
-        label_wrap_width=label_wrap_width,
-        legend_fontsize=18
+        label_wrap_width=label_wrap_width
     )
     
     pdf_path = os.path.join(output_dir, f"q8_{question_key}.pdf")
@@ -512,11 +502,9 @@ def plot_critical_factors(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, outp
     fig = plotter.create_role_stacked_chart(
         question_key,
         title=question_text,
-        horizontal=True,
         figsize=chart_size,
         show_percentages=True,
-        label_wrap_width=label_wrap_width,
-        legend_fontsize=18
+        label_wrap_width=label_wrap_width
     )
     
     pdf_path = os.path.join(output_dir, f"q9_{question_key}.pdf")
@@ -578,10 +566,8 @@ def plot_realtime_feedback_importance(analyzer: SurveyAnalyzer, plotter: SurveyP
     fig = plotter.create_role_stacked_chart(
         question_key,
         title=question_text,
-        horizontal=True,
         figsize=chart_size,
-        show_percentages=True,
-        legend_fontsize=18
+        show_percentages=True
     )
     
     pdf_path = os.path.join(output_dir, f"q11_{question_key}.pdf")
@@ -609,11 +595,9 @@ def plot_preferred_approach(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, ou
     fig = plotter.create_role_stacked_chart(
         question_key,
         title=question_text,
-        horizontal=True,
         figsize=chart_size,
         show_percentages=True,
-        label_wrap_width=label_wrap_width,
-        legend_fontsize=18
+        label_wrap_width=label_wrap_width
     )
     
     pdf_path = os.path.join(output_dir, f"q12_{question_key}.pdf")
@@ -641,11 +625,9 @@ def plot_integration_preference(analyzer: SurveyAnalyzer, plotter: SurveyPlotter
     fig = plotter.create_role_stacked_chart(
         question_key,
         title=question_text,
-        horizontal=True,
         figsize=chart_size,
         show_percentages=True,
-        label_wrap_width=label_wrap_width,
-        legend_fontsize=18
+        label_wrap_width=label_wrap_width
     )
     
     pdf_path = os.path.join(output_dir, f"q13_{question_key}.pdf")
@@ -711,11 +693,9 @@ def plot_level_representation(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, 
     fig = plotter.create_role_stacked_chart(
         question_key,
         title=question_text,
-        horizontal=True,
         figsize=chart_size,
         show_percentages=True,
-        label_wrap_width=label_wrap_width,
-        legend_fontsize=18
+        label_wrap_width=label_wrap_width
     )
     
     pdf_path = os.path.join(output_dir, f"q15_{question_key}.pdf")
@@ -743,11 +723,9 @@ def plot_most_useful_approach(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, 
     fig = plotter.create_role_stacked_chart(
         question_key,
         title=question_text,
-        horizontal=True,
         figsize=chart_size,
         show_percentages=True,
-        label_wrap_width=label_wrap_width,
-        legend_fontsize=18
+        label_wrap_width=label_wrap_width
     )
     
     pdf_path = os.path.join(output_dir, f"q16_{question_key}.pdf")
@@ -775,11 +753,9 @@ def plot_ai_role_preference(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, ou
     fig = plotter.create_role_stacked_chart(
         question_key,
         title=question_text,
-        horizontal=True,
         figsize=chart_size,
         show_percentages=True,
-        label_wrap_width=label_wrap_width,
-        legend_fontsize=18
+        label_wrap_width=label_wrap_width
     )
     
     pdf_path = os.path.join(output_dir, f"q17_{question_key}.pdf")
@@ -807,11 +783,9 @@ def plot_ai_importance_factors(analyzer: SurveyAnalyzer, plotter: SurveyPlotter,
     fig = plotter.create_role_stacked_chart(
         question_key,
         title=question_text,
-        horizontal=True,
         figsize=chart_size,
         show_percentages=True,
-        label_wrap_width=label_wrap_width,
-        legend_fontsize=18
+        label_wrap_width=label_wrap_width
     )
     
     pdf_path = os.path.join(output_dir, f"q18_{question_key}.pdf")
@@ -839,11 +813,9 @@ def plot_ai_concerns(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_di
     fig = plotter.create_role_stacked_chart(
         question_key,
         title=question_text,
-        horizontal=True,
         figsize=chart_size,
         show_percentages=True,
-        label_wrap_width=label_wrap_width,
-        legend_fontsize=18
+        label_wrap_width=label_wrap_width
     )
     
     pdf_path = os.path.join(output_dir, f"q19_{question_key}.pdf")
@@ -871,11 +843,9 @@ def plot_desired_solutions(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, out
     fig = plotter.create_role_stacked_chart(
         question_key,
         title=question_text,
-        horizontal=True,
         figsize=chart_size,
         show_percentages=True,
-        label_wrap_width=label_wrap_width,
-        legend_fontsize=18
+        label_wrap_width=label_wrap_width
     )
     
     pdf_path = os.path.join(output_dir, f"q20_{question_key}.pdf")
