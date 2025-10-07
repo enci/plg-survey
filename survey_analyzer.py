@@ -67,17 +67,85 @@ class Filter:
 # and data extraction from survey responses.
 class SurveyAnalyzer:    
     # Initialize the SurveyAnalyzer with schema and data files.
-    def __init__(self, schema_path: str, data_path: str):
+    def __init__(self, schema_path: str, data_path: str, mapping_path: Optional[str] = None):
         self.schema_path = schema_path
         self.data_path = data_path
+        self.mapping_path = mapping_path
         self.schema: Optional[Dict[str, Any]] = None
         self.responses: Optional[List[Dict[str, Any]]] = None
         self.df: Optional[pd.DataFrame] = None
         self.filtered_data: Optional[pd.DataFrame] = None
         self.filters: List[Filter] = []
         self.filter_logic = FilterLogic.AND
+        self.option_mappings: Dict[str, str] = {}  # Flattened mapping from full text to short text
         
         self._load_data()
+    
+    # Load and flatten the option mappings from the mapping file
+    def _load_option_mappings(self) -> None:
+        if not self.mapping_path:
+            return
+        
+        try:
+            with open(self.mapping_path, 'r', encoding='utf-8') as f:
+                mapping_data = json.load(f)
+            
+            # Flatten all mappings into a single dictionary
+            question_mappings = mapping_data.get('question_mappings', {})
+            
+            for question_key, mapping_info in question_mappings.items():
+                if isinstance(mapping_info, dict):
+                    if 'items' in mapping_info:
+                        # Handle nested item mappings (e.g., for matrix questions)
+                        for item_full, item_short in mapping_info['items'].items():
+                            self.option_mappings[item_full] = item_short
+                    else:
+                        # Handle direct option mappings
+                        for full_text, short_text in mapping_info.items():
+                            if isinstance(short_text, str):  # Direct mapping
+                                self.option_mappings[full_text] = short_text
+            
+            print(f"Loaded {len(self.option_mappings)} option mappings from {self.mapping_path}")
+            
+        except FileNotFoundError:
+            print(f"Warning: Mapping file not found: {self.mapping_path}")
+        except json.JSONDecodeError as e:
+            print(f"Warning: Invalid JSON format in mapping file: {e}")
+        except Exception as e:
+            print(f"Warning: Error loading mapping file: {e}")
+    
+    # Apply option mappings to response data, replacing long options with short versions
+    def _apply_option_mappings(self, responses: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        if not self.option_mappings:
+            return responses
+        
+        mapped_responses = []
+        
+        for response in responses:
+            mapped_response = response.copy()
+            
+            for question_key, value in mapped_response.items():
+                if isinstance(value, str):
+                    # Single choice - replace if mapping exists
+                    mapped_response[question_key] = self.option_mappings.get(value, value)
+                    
+                elif isinstance(value, list):
+                    # Multiple choice - replace each item if mapping exists
+                    mapped_response[question_key] = [
+                        self.option_mappings.get(item, item) for item in value
+                    ]
+                    
+                elif isinstance(value, dict):
+                    # Matrix questions - replace keys if mapping exists
+                    mapped_dict = {}
+                    for item_key, item_value in value.items():
+                        mapped_key = self.option_mappings.get(item_key, item_key)
+                        mapped_dict[mapped_key] = item_value
+                    mapped_response[question_key] = mapped_dict
+            
+            mapped_responses.append(mapped_response)
+        
+        return mapped_responses
     
     # Load schema and survey response data from JSON files. Non-standard answers are stored as 'Other'.
     def _load_data(self) -> None:
@@ -87,6 +155,9 @@ class SurveyAnalyzer:
 
             with open(self.data_path, 'r', encoding='utf-8') as f:
                 raw_responses = json.load(f)
+
+            # Load option mappings first
+            self._load_option_mappings()
 
             # Clean responses: replace non-standard answers with 'Other'
             cleaned_responses = []
@@ -109,7 +180,10 @@ class SurveyAnalyzer:
             else:
                 cleaned_responses = raw_responses
 
-            self.responses = cleaned_responses
+            # Apply option mappings to replace long text with short versions
+            mapped_responses = self._apply_option_mappings(cleaned_responses)
+
+            self.responses = mapped_responses
             self.df = pd.DataFrame(self.responses)
             self.filtered_data = self.df.copy()
 
@@ -954,9 +1028,9 @@ class SurveyPlotter:
         ax.invert_yaxis()  # Top category at top
         
         # Adjust label font size if offset is specified
-        if label_fontsize_offset != 0:
-            for label in ax.get_yticklabels():
-                label.set_fontsize(font_size + label_fontsize_offset)
+        #if label_fontsize_offset != 0:
+        #    for label in ax.get_yticklabels():
+        #        label.set_fontsize(font_size + label_fontsize_offset)
         
         # Add legend with shortened role names inside the chart area
         ax.legend(loc=legend_loc, fontsize=legend_fontsize, ncol=legend_ncol)

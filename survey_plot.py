@@ -847,8 +847,8 @@ def main() -> None:
     print("=== Survey Plot Generator ===\n")
     
     # Specify which questions to plot (1-20). Use None or empty list to plot all.
-    questions_to_plot = [6]
-    # questions_to_plot = list(range(1, 21))  # Plot all questions by default
+    # questions_to_plot = [6]
+    questions_to_plot = list(range(1, 21))  # Plot all questions by default
     
     # Create output directory
     output_dir = "plots"
@@ -857,7 +857,8 @@ def main() -> None:
     # Initialize analyzer and plotter
     analyzer = SurveyAnalyzer(
         'survey-questions-schema.json',
-        'procedural-level-generation-survey.json'
+        'procedural-level-generation-survey.json',
+        'survey-options-mapping.json'  # Load option mappings for shortened text
     )
     plotter = SurveyPlotter(analyzer)
             
