@@ -71,7 +71,7 @@ def plot_professional_role(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, out
     )
     
     pdf_path = os.path.join(output_dir, f"q1_{question_key}.pdf")
-    fig.savefig(pdf_path, format='pdf', bbox_inches='tight', dpi=300)
+    fig.savefig(pdf_path)
     plt.close(fig)
     
     print(f"  Saved as: {pdf_path}")
@@ -104,7 +104,7 @@ def plot_years_experience(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, outp
     )
     
     pdf_path = os.path.join(output_dir, f"q2_{question_key}.pdf")
-    fig.savefig(pdf_path, format='pdf', bbox_inches='tight', dpi=300)
+    fig.savefig(pdf_path)
     plt.close(fig)
     
     print(f"  Saved as: {pdf_path}")
@@ -137,7 +137,7 @@ def plot_game_engines(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_d
     )
     
     pdf_path = os.path.join(output_dir, f"q3_{question_key}.pdf")
-    fig.savefig(pdf_path, format='pdf', bbox_inches='tight', dpi=300)
+    fig.savefig(pdf_path)
     plt.close(fig)
     
     print(f"  Saved as: {pdf_path}")
@@ -168,7 +168,7 @@ def plot_procedural_tools_experience(analyzer: SurveyAnalyzer, plotter: SurveyPl
     )
     
     pdf_path = os.path.join(output_dir, f"q4_{question_key}.pdf")
-    fig.savefig(pdf_path, format='pdf', bbox_inches='tight', dpi=300)
+    fig.savefig(pdf_path)
     plt.close(fig)
     
     print(f"  Saved as: {pdf_path}")
@@ -212,7 +212,7 @@ def plot_procedural_tools_experience_comparison(analyzer: SurveyAnalyzer, plotte
     )
     
     pdf_path = os.path.join(output_dir, f"q4_comparison_{question_key}.pdf")
-    fig.savefig(pdf_path, format='pdf', bbox_inches='tight', dpi=300)
+    fig.savefig(pdf_path)
     plt.close(fig)
     
     print(f"  Saved as: {pdf_path}")
@@ -245,7 +245,7 @@ def plot_current_pcg_usage(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, out
     )
     
     pdf_path = os.path.join(output_dir, f"q5_{question_key}.pdf")
-    fig.savefig(pdf_path, format='pdf', bbox_inches='tight', dpi=300)
+    fig.savefig(pdf_path)
     plt.close(fig)
     
     print(f"  Saved as: {pdf_path}")
@@ -280,7 +280,7 @@ def plot_current_pcg_usage_artist(analyzer: SurveyAnalyzer, plotter: SurveyPlott
         label_wrap_width=label_wrap_width)
     
     pdf_path = os.path.join(output_dir, f"q5_{question_key}_artist.pdf")
-    fig.savefig(pdf_path, format='pdf', bbox_inches='tight', dpi=300)
+    fig.savefig(pdf_path)
     plt.close(fig)
     
     print(f"  Saved as: {pdf_path}")
@@ -313,7 +313,7 @@ def plot_level_generation_frequency(analyzer: SurveyAnalyzer, plotter: SurveyPlo
     )
     
     pdf_path = os.path.join(output_dir, f"q6_{question_key}.pdf")
-    fig.savefig(pdf_path, format='pdf', bbox_inches='tight', dpi=300)
+    fig.savefig(pdf_path)
     plt.close(fig)
 
     print(f"  Saved as: {pdf_path}")
@@ -354,7 +354,7 @@ def plot_level_generation_frequency_comparison(analyzer: SurveyAnalyzer, plotter
     )
     
     pdf_path = os.path.join(output_dir, f"q6_comparison_{question_key}.pdf")
-    fig.savefig(pdf_path, format='pdf', bbox_inches='tight', dpi=300)
+    fig.savefig(pdf_path)
     plt.close(fig)
     
     print(f"  Saved as: {pdf_path}")
@@ -389,7 +389,7 @@ def plot_primary_concerns(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, outp
     )
     
     pdf_path = os.path.join(output_dir, f"q7_{question_key}.pdf")
-    fig.savefig(pdf_path, format='pdf', bbox_inches='tight', dpi=300)
+    fig.savefig(pdf_path)
     plt.close(fig)
     
     print(f"  Saved as: {pdf_path}")
@@ -433,7 +433,7 @@ def plot_primary_concerns_comparison(analyzer: SurveyAnalyzer, plotter: SurveyPl
     )
     
     pdf_path = os.path.join(output_dir, f"q7_comparison_{question_key}.pdf")
-    fig.savefig(pdf_path, format='pdf', bbox_inches='tight', dpi=300)
+    fig.savefig(pdf_path)
     plt.close(fig)
     
     print(f"  Saved as: {pdf_path}")
@@ -467,7 +467,7 @@ def plot_tool_view(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_dir:
     )
     
     pdf_path = os.path.join(output_dir, f"q8_{question_key}.pdf")
-    fig.savefig(pdf_path, format='pdf', bbox_inches='tight', dpi=300)
+    fig.savefig(pdf_path)
     plt.close(fig)
     
     print(f"  Saved as: {pdf_path}")
@@ -499,7 +499,7 @@ def plot_critical_factors(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, outp
     )
     
     pdf_path = os.path.join(output_dir, f"q9_{question_key}.pdf")
-    fig.savefig(pdf_path, format='pdf', bbox_inches='tight', dpi=300)
+    fig.savefig(pdf_path)
     plt.close(fig)
     
     print(f"  Saved as: {pdf_path}")
@@ -532,7 +532,7 @@ def plot_node_tool_features(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, ou
     )
     
     pdf_path = os.path.join(output_dir, f"q10_{question_key}.pdf")
-    fig.savefig(pdf_path, format='pdf', bbox_inches='tight', dpi=300)
+    fig.savefig(pdf_path)
     plt.close(fig)
     
     print(f"  Saved as: {pdf_path}")
@@ -561,7 +561,7 @@ def plot_realtime_feedback_importance(analyzer: SurveyAnalyzer, plotter: SurveyP
     )
     
     pdf_path = os.path.join(output_dir, f"q11_{question_key}.pdf")
-    fig.savefig(pdf_path, format='pdf', bbox_inches='tight', dpi=300)
+    fig.savefig(pdf_path)
     plt.close(fig)
     
     print(f"  Saved as: {pdf_path}")
@@ -591,7 +591,7 @@ def plot_preferred_approach(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, ou
     )
     
     pdf_path = os.path.join(output_dir, f"q12_{question_key}.pdf")
-    fig.savefig(pdf_path, format='pdf', bbox_inches='tight', dpi=300)
+    fig.savefig(pdf_path)
     plt.close(fig)
     
     print(f"  Saved as: {pdf_path}")
@@ -623,7 +623,7 @@ def plot_integration_preference(analyzer: SurveyAnalyzer, plotter: SurveyPlotter
     )
     
     pdf_path = os.path.join(output_dir, f"q13_{question_key}.pdf")
-    fig.savefig(pdf_path, format='pdf', bbox_inches='tight', dpi=300)
+    fig.savefig(pdf_path)
     plt.close(fig)
     
     print(f"  Saved as: {pdf_path}")
@@ -655,7 +655,7 @@ def plot_genre_interest(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output
     )
     
     pdf_path = os.path.join(output_dir, f"q14_{question_key}.pdf")
-    fig.savefig(pdf_path, format='pdf', bbox_inches='tight', dpi=300)
+    fig.savefig(pdf_path)
     plt.close(fig)
     
     print(f"  Saved as: {pdf_path}")
@@ -683,7 +683,7 @@ def plot_level_representation(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, 
     )
     
     pdf_path = os.path.join(output_dir, f"q15_{question_key}.pdf")
-    fig.savefig(pdf_path, format='pdf', bbox_inches='tight', dpi=300)
+    fig.savefig(pdf_path)
     plt.close(fig)
     
     print(f"  Saved as: {pdf_path}")
@@ -712,7 +712,7 @@ def plot_most_useful_approach(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, 
     )
     
     pdf_path = os.path.join(output_dir, f"q16_{question_key}.pdf")
-    fig.savefig(pdf_path, format='pdf', bbox_inches='tight', dpi=300)
+    fig.savefig(pdf_path)
     plt.close(fig)
     
     print(f"  Saved as: {pdf_path}")
@@ -742,7 +742,7 @@ def plot_ai_role_preference(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, ou
     )
     
     pdf_path = os.path.join(output_dir, f"q17_{question_key}.pdf")
-    fig.savefig(pdf_path, format='pdf', bbox_inches='tight', dpi=300)
+    fig.savefig(pdf_path)
     plt.close(fig)
     
     print(f"  Saved as: {pdf_path}")
@@ -773,7 +773,7 @@ def plot_ai_importance_factors(analyzer: SurveyAnalyzer, plotter: SurveyPlotter,
         )
     
     pdf_path = os.path.join(output_dir, f"q18_{question_key}.pdf")
-    fig.savefig(pdf_path, format='pdf', bbox_inches='tight', dpi=300)
+    fig.savefig(pdf_path)
     plt.close(fig)
     
     print(f"  Saved as: {pdf_path}")
@@ -805,7 +805,7 @@ def plot_ai_concerns(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_di
     )
     
     pdf_path = os.path.join(output_dir, f"q19_{question_key}.pdf")
-    fig.savefig(pdf_path, format='pdf', bbox_inches='tight', dpi=300)
+    fig.savefig(pdf_path)
     plt.close(fig)
     
     print(f"  Saved as: {pdf_path}")
@@ -833,7 +833,7 @@ def plot_desired_solutions(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, out
     )
     
     pdf_path = os.path.join(output_dir, f"q20_{question_key}.pdf")
-    fig.savefig(pdf_path, format='pdf', bbox_inches='tight', dpi=300)
+    fig.savefig(pdf_path)
     plt.close(fig)
     
     print(f"  Saved as: {pdf_path}")
@@ -845,8 +845,8 @@ def main() -> None:
     print("=== Survey Plot Generator ===\n")
     
     # Specify which questions to plot (1-20). Use None or empty list to plot all.
-    questions_to_plot = [15, 16, 17, 18 , 19, 20]
-    # questions_to_plot = list(range(1, 21))  # Plot all questions by default
+    # questions_to_plot = [15, 16, 17, 18 , 19, 20]
+    questions_to_plot = list(range(1, 21))  # Plot all questions by default
     
     # Create output directory
     output_dir = "plots"

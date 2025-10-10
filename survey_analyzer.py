@@ -407,10 +407,11 @@ class SurveyAnalyzer:
             if isinstance(value, list):
                 # Calculate weighted scores: rank 1 = max_rank points, rank 2 = max_rank-1 points, etc.
                 for rank, item in enumerate(value[:max_rank], 1):  # Only consider top max_rank items
-                    if item not in ranking_scores:
-                        ranking_scores[item] = 0.0
+                    mapped_item = self._get_mapped_option(item)
+                    if mapped_item not in ranking_scores:
+                        ranking_scores[mapped_item] = 0.0
                     # Higher ranks get more points (rank 1 = max_rank points, rank 2 = max_rank-1 points, etc.)
-                    ranking_scores[item] += max_rank - rank + 1
+                    ranking_scores[mapped_item] += max_rank - rank + 1
         
         return ranking_scores
     
@@ -428,9 +429,10 @@ class SurveyAnalyzer:
         for value in values:
             if isinstance(value, list):
                 for rank, item in enumerate(value[:max_rank], 1):  # Only consider top max_rank items
-                    if item not in position_counts:
-                        position_counts[item] = {i: 0 for i in range(1, max_rank + 1)}
-                    position_counts[item][rank] += 1
+                    mapped_item = self._get_mapped_option(item)
+                    if mapped_item not in position_counts:
+                        position_counts[mapped_item] = {i: 0 for i in range(1, max_rank + 1)}
+                    position_counts[mapped_item][rank] += 1
         
         return position_counts
     
@@ -502,11 +504,19 @@ plt.rcParams.update({
     'ytick.labelsize': font_size,
     'legend.fontsize': font_size,
     'figure.titlesize': 0,
+    'figure.dpi': 100,  # Consistent base DPI for figure creation
     'axes.grid': True,
     'grid.alpha': 0.4,
     'axes.axisbelow': True,
     'axes.titlelocation': 'center',
-    'axes.titlesize': 0
+    'axes.titlesize': 0,
+    'savefig.dpi': 300,  # Consistent high-quality output
+    'savefig.format': 'pdf',
+    'savefig.bbox': 'tight',
+    'savefig.pad_inches': 0.1,
+    'pdf.fonttype': 42,  # Embed fonts as Type 42 (TrueType) for consistency
+    'pdf.use14corefonts': False,  # Don't use limited core fonts
+    'text.usetex': False,  # Disable LaTeX for consistency
 })
 
     
