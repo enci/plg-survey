@@ -4,6 +4,9 @@
     "purpose": "For use in visualizations, tables, and compact displays"
   },
   "question_mappings": {
+    "game_engines": {
+      "Custom in-house engine": "Custom engine"
+    },
     "procedural_tools_experience": {
       "items": {
         "Plugins/Tools that use Wave Function Collapse": "WFC plugins/tools",
@@ -79,7 +82,7 @@
       "Scene graph/hierarchical structure": "Scene graph",
       "Graph-based (nodes and connections)": "Graph-based",
       "Node-based graphs (mission/flow graphs)": "Node-based graphs",
-      "Constraint-based representations (is this a known term)": "Constraint-based"
+      "Constraint-based representations": "Constraint-based"
     },
     "most_useful_approach": {
       "Mission-driven generation (gameplay goals determine level structure)": "Mission-driven",

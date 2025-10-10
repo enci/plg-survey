@@ -10,9 +10,9 @@ import os
 from typing import List, Tuple, Optional, Union
 
 # Calculate chart size to ensure consistent bar heights. 
-def calculate_chart_size(num_options: int) -> Tuple[int, int]:
+def calculate_chart_size(num_options: int) -> Tuple[float, float]:
     width = 12
-    consistent_bar_height = 0.9  # Consistent height per bar
+    consistent_bar_height = 0.8  # Consistent height per bar
     base_padding = 1.0  # Space for legend and padding
     height = base_padding + (num_options * consistent_bar_height)
     return (width, height)
@@ -97,7 +97,7 @@ def plot_years_experience(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, outp
         title=question_text,
         horizontal=True,
         figsize=chart_size,
-        color='cornflowerblue',
+        color='grey',
         show_percentages=True,
         label_wrap_width=label_wrap_width,
         colormap='tab20b'
@@ -131,7 +131,9 @@ def plot_game_engines(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_d
         title=question_text,
         figsize=chart_size,
         show_percentages=True,
-        label_wrap_width=label_wrap_width
+        label_wrap_width=label_wrap_width,
+        xlim_padding=12,
+        legend_ncol=2
     )
     
     pdf_path = os.path.join(output_dir, f"q3_{question_key}.pdf")
@@ -237,8 +239,9 @@ def plot_current_pcg_usage(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, out
         title=question_text,
         figsize=chart_size,
         show_percentages=True,
-        label_fontsize_offset=-3,
-        label_wrap_width=label_wrap_width
+        label_wrap_width=label_wrap_width,
+        legend_fontsize=21,
+        xlim_padding=12,
     )
     
     pdf_path = os.path.join(output_dir, f"q5_{question_key}.pdf")
@@ -305,7 +308,8 @@ def plot_level_generation_frequency(analyzer: SurveyAnalyzer, plotter: SurveyPlo
         legend_loc = 'upper right',
         legend_fontsize=19,
         legend_ncol=2,
-        label_fontsize_offset=-2
+        label_fontsize_offset=-2,
+        xlim_padding=8
     )
     
     pdf_path = os.path.join(output_dir, f"q6_{question_key}.pdf")
@@ -380,7 +384,8 @@ def plot_primary_concerns(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, outp
         label_wrap_width=label_wrap_width,
         label_fontsize_offset=-3,
         legend_ncol=2,
-        legend_fontsize=18
+        legend_fontsize=18,
+        xlim_padding=10
     )
     
     pdf_path = os.path.join(output_dir, f"q7_{question_key}.pdf")
@@ -456,9 +461,9 @@ def plot_tool_view(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_dir:
         figsize=chart_size,
         show_percentages=True,
         label_wrap_width=label_wrap_width,
-        label_fontsize_offset=-3,
-        legend_fontsize=19,
-        legend_loc='upper right'
+        legend_fontsize=21,
+        legend_loc='upper right',
+        xlim_padding=7
     )
     
     pdf_path = os.path.join(output_dir, f"q8_{question_key}.pdf")
@@ -489,9 +494,8 @@ def plot_critical_factors(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, outp
         figsize=chart_size,
         show_percentages=True,
         label_wrap_width=label_wrap_width,
-        label_fontsize_offset=-3,
-        legend_ncol=2,
-        legend_fontsize=19
+        legend_ncol=3,
+        xlim_padding=13
     )
     
     pdf_path = os.path.join(output_dir, f"q9_{question_key}.pdf")
@@ -551,8 +555,9 @@ def plot_realtime_feedback_importance(analyzer: SurveyAnalyzer, plotter: SurveyP
         title=question_text,
         figsize=chart_size,
         show_percentages=True,
-        legend_fontsize=17,
-        legend_ncol=4
+        legend_fontsize=20,
+        legend_ncol=1,
+        xlim_padding=22
     )
     
     pdf_path = os.path.join(output_dir, f"q11_{question_key}.pdf")
@@ -580,8 +585,9 @@ def plot_preferred_approach(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, ou
         figsize=chart_size,
         show_percentages=True,
         label_wrap_width=45,
-        label_fontsize_offset=-5,
-        legend_fontsize=19,
+        legend_fontsize=21,
+        xlim_padding=10,
+        legend_ncol=2
     )
     
     pdf_path = os.path.join(output_dir, f"q12_{question_key}.pdf")
@@ -610,8 +616,9 @@ def plot_integration_preference(analyzer: SurveyAnalyzer, plotter: SurveyPlotter
         show_percentages=True,
         label_wrap_width=35,
         label_fontsize_offset=-2,
-        legend_ncol=2,
-        legend_fontsize=19
+        legend_ncol=3,
+        legend_fontsize=19,
+        xlim_padding=8
 
     )
     
@@ -629,7 +636,7 @@ def plot_genre_interest(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output
     question_text = question_info.get('question', question_key)
     
     # Local wrapping settings for this chart
-    label_wrap_width = 20   # Wrap genre labels
+    label_wrap_width = 40   # Wrap genre labels
         
     print(f"Creating plot for: {question_text}")
 
@@ -671,8 +678,8 @@ def plot_level_representation(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, 
         title=question_text,
         figsize=chart_size,
         show_percentages=True,
-        label_wrap_width=30,
-        xlim_padding=15
+        label_wrap_width=50,
+        xlim_padding=12
     )
     
     pdf_path = os.path.join(output_dir, f"q15_{question_key}.pdf")
@@ -700,10 +707,8 @@ def plot_most_useful_approach(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, 
         figsize=chart_size,
         show_percentages=True,
         label_wrap_width=35,
-        label_fontsize_offset=-4,
-        xlim_padding=25,    
+        xlim_padding=15,
         legend_loc='upper right',
-        legend_fontsize=15
     )
     
     pdf_path = os.path.join(output_dir, f"q16_{question_key}.pdf")
@@ -731,10 +736,9 @@ def plot_ai_role_preference(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, ou
         figsize=chart_size,
         show_percentages=True,
         label_wrap_width=35,
-        label_fontsize_offset=-3,
-        legend_fontsize=17,
-        legend_ncol=2,
-        xlim_padding=25
+        legend_ncol=3,
+        legend_fontsize=18,
+        xlim_padding=10
     )
     
     pdf_path = os.path.join(output_dir, f"q17_{question_key}.pdf")
@@ -765,8 +769,6 @@ def plot_ai_importance_factors(analyzer: SurveyAnalyzer, plotter: SurveyPlotter,
         figsize=chart_size,
         show_percentages=True,
         label_wrap_width=label_wrap_width,
-        label_fontsize_offset=-3,
-        legend_fontsize=19,
         xlim_padding=20
         )
     
@@ -799,9 +801,7 @@ def plot_ai_concerns(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_di
         show_percentages=True,
         label_wrap_width=label_wrap_width,
         label_fontsize_offset=-4,
-        legend_fontsize=14,
-        legend_ncol=3,
-        xlim_padding=22
+        xlim_padding=25
     )
     
     pdf_path = os.path.join(output_dir, f"q19_{question_key}.pdf")
@@ -829,9 +829,7 @@ def plot_desired_solutions(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, out
         figsize=chart_size,
         show_percentages=True,
         label_wrap_width=30,
-        label_fontsize_offset=-3,
-        legend_fontsize=19,
-        xlim_padding=25
+        xlim_padding=18
     )
     
     pdf_path = os.path.join(output_dir, f"q20_{question_key}.pdf")
@@ -847,8 +845,8 @@ def main() -> None:
     print("=== Survey Plot Generator ===\n")
     
     # Specify which questions to plot (1-20). Use None or empty list to plot all.
-    # questions_to_plot = [6]
-    questions_to_plot = list(range(1, 21))  # Plot all questions by default
+    questions_to_plot = [15, 16, 17, 18 , 19, 20]
+    # questions_to_plot = list(range(1, 21))  # Plot all questions by default
     
     # Create output directory
     output_dir = "plots"

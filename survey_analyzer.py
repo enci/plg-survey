@@ -31,7 +31,8 @@ def wrap_label_smart(label: str, width: Optional[int], max_length: int = 78) -> 
         return label
     elif width == 0:
         # Special case: wrap at slashes only
-        return label.replace('/', '/\n')
+        # return label.replace('/', '/\n')
+        return label
     else:
         # Normal width-based wrapping
         wrapped = textwrap.fill(label, width=width, break_long_words=False)
@@ -114,39 +115,6 @@ class SurveyAnalyzer:
         except Exception as e:
             print(f"Warning: Error loading mapping file: {e}")
     
-    # Apply option mappings to response data, replacing long options with short versions
-    def _apply_option_mappings(self, responses: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        if not self.option_mappings:
-            return responses
-        
-        mapped_responses = []
-        
-        for response in responses:
-            mapped_response = response.copy()
-            
-            for question_key, value in mapped_response.items():
-                if isinstance(value, str):
-                    # Single choice - replace if mapping exists
-                    mapped_response[question_key] = self.option_mappings.get(value, value)
-                    
-                elif isinstance(value, list):
-                    # Multiple choice - replace each item if mapping exists
-                    mapped_response[question_key] = [
-                        self.option_mappings.get(item, item) for item in value
-                    ]
-                    
-                elif isinstance(value, dict):
-                    # Matrix questions - replace keys if mapping exists
-                    mapped_dict = {}
-                    for item_key, item_value in value.items():
-                        mapped_key = self.option_mappings.get(item_key, item_key)
-                        mapped_dict[mapped_key] = item_value
-                    mapped_response[question_key] = mapped_dict
-            
-            mapped_responses.append(mapped_response)
-        
-        return mapped_responses
-    
     # Load schema and survey response data from JSON files. Non-standard answers are stored as 'Other'.
     def _load_data(self) -> None:
         try:
@@ -181,9 +149,9 @@ class SurveyAnalyzer:
                 cleaned_responses = raw_responses
 
             # Apply option mappings to replace long text with short versions
-            mapped_responses = self._apply_option_mappings(cleaned_responses)
+            # mapped_responses = self._apply_option_mappings(cleaned_responses)
 
-            self.responses = mapped_responses
+            self.responses = cleaned_responses
             self.df = pd.DataFrame(self.responses)
             self.filtered_data = self.df.copy()
 
@@ -382,18 +350,20 @@ class SurveyAnalyzer:
             value_str = str(value) if not isinstance(value, str) else value
             raw_counts[value_str] = raw_counts.get(value_str, 0) + 1
         
-        # Build ordered counts dictionary preserving schema order
+        # Build ordered, mapped counts dictionary
         counts = {}
         
         # First add schema options in their original order (if they have counts)
         for option in schema_options:
             if option in raw_counts:
-                counts[option] = raw_counts[option]
+                mapped_option = self._get_mapped_option(option)
+                counts[mapped_option] = raw_counts[option]
         
         # Then add any unexpected options (like "Other") at the end
         for value_str, count in raw_counts.items():
-            if value_str not in counts:
-                counts[value_str] = count
+            mapped_value = self._get_mapped_option(value_str)
+            if mapped_value not in counts:
+                counts[mapped_value] = count
         
         return counts
     
@@ -412,10 +382,13 @@ class SurveyAnalyzer:
             if isinstance(value, dict):
                 for item, rating in value.items():
                     if rating is not None:
-                        if item not in matrix_counts:
-                            matrix_counts[item] = {}
-                        rating_str = str(rating)
-                        matrix_counts[item][rating_str] = matrix_counts[item].get(rating_str, 0) + 1
+                        mapped_item = self._get_mapped_option(item)
+                        mapped_rating = self._get_mapped_option(str(rating))
+                        
+                        if mapped_item not in matrix_counts:
+                            matrix_counts[mapped_item] = {}
+                        
+                        matrix_counts[mapped_item][mapped_rating] = matrix_counts[mapped_item].get(mapped_rating, 0) + 1
         
         return matrix_counts
     
@@ -460,6 +433,10 @@ class SurveyAnalyzer:
                     position_counts[item][rank] += 1
         
         return position_counts
+    
+    # Get a mapped version of an option, if a mapping exists
+    def _get_mapped_option(self, option: str) -> str:
+        return self.option_mappings.get(option, option)
     
     # Get a summary of the current state of the analyzer
     def get_summary(self) -> Dict[str, Any]:
@@ -692,26 +669,30 @@ class SurveyPlotter:
         for _, counts in data_sets:
             all_options_set.update(counts.keys())
         
-        # Get the original order from the survey schema
+        # Get the original order from the survey schema and map them
         question_info = self.analyzer.get_question_info(question)
         schema_options = question_info.get('options', [])
-        
+        mapped_schema_options = [self.analyzer._get_mapped_option(o) for o in schema_options]
+
         # Preserve original schema order, then add any unexpected options at the end
         all_options = []
-        for option in schema_options:
-            if option in all_options_set:
+        processed_options = set()
+
+        for option in mapped_schema_options:
+            if option in all_options_set and option not in processed_options:
                 all_options.append(option)
-                all_options_set.remove(option)
+                processed_options.add(option)
         
-        # Add any remaining options (e.g., "Other") that weren't in the schema
-        all_options.extend(sorted(all_options_set))
+        # Add any remaining options that weren't in the schema but are in the data
+        remaining_options = sorted([opt for opt in all_options_set if opt not in processed_options])
+        all_options.extend(remaining_options)
         
         # Apply label wrapping based on label_wrap_width setting
         wrapped_options = [wrap_label_smart(option, label_wrap_width) for option in all_options]
         
         # Prepare data for plotting
         y = np.arange(len(all_options))
-        height = 0.8 / len(data_sets)  # Adjust height based on number of datasets
+        height = 0.8 / len(data_sets) # Adjust height based on number of datasets
         
         fig, ax = plt.subplots(figsize=figsize)
         
@@ -847,7 +828,11 @@ class SurveyPlotter:
         # plt.subplots_adjust(bottom=0.2)
         
         # Add legend at bottom left
-        ax.legend(loc='upper left', bbox_to_anchor=(-0.44, -0.05), ncol=len(all_ratings), frameon=True)
+        ax.legend(loc='upper left',
+                  bbox_to_anchor=(0, -0.05),
+                  ncol=len(all_ratings),
+                  frameon=True,
+                  fontsize=font_size-5)
         
         return fig
     
@@ -937,12 +922,12 @@ class SurveyPlotter:
     def create_role_stacked_chart(self,                                
                                 question: str,
                                 title: Optional[str] = None,
-                                figsize: Tuple[int, int] = (12, 8),
+                                figsize: Tuple[float, float] = (12.0, 8.0),
                                 show_percentages: bool = True,
                                 label_wrap_width: Optional[int] = None,
                                 label_fontsize_offset: int = 0,
                                 legend_loc: str = 'lower right',
-                                legend_fontsize: int = 22,
+                                legend_fontsize: int = 21,
                                 legend_ncol: int = 1,
                                 xlim_padding: int = 18) -> mpl_figure.Figure:
         # Get all professional roles in the dataset
