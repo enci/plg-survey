@@ -308,7 +308,6 @@ def plot_level_generation_frequency(analyzer: SurveyAnalyzer, plotter: SurveyPlo
         legend_loc = 'upper right',
         legend_fontsize=19,
         legend_ncol=2,
-        label_fontsize_offset=-2,
         xlim_padding=8
     )
     
@@ -382,7 +381,6 @@ def plot_primary_concerns(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, outp
         figsize=chart_size,
         show_percentages=True,
         label_wrap_width=label_wrap_width,
-        label_fontsize_offset=-3,
         legend_ncol=2,
         legend_fontsize=18,
         xlim_padding=10
@@ -526,7 +524,6 @@ def plot_node_tool_features(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, ou
         colormap='plasma',
         max_rank=3,  # Top 3 ranking as specified in the question
         label_wrap_width=30,
-        label_fontsize_offset=-5,
         legend_fontsize=19,
         xlabel_fontsize=18
     )
@@ -615,7 +612,6 @@ def plot_integration_preference(analyzer: SurveyAnalyzer, plotter: SurveyPlotter
         figsize=chart_size,
         show_percentages=True,
         label_wrap_width=35,
-        label_fontsize_offset=-2,
         legend_ncol=3,
         legend_fontsize=19,
         xlim_padding=8
@@ -800,7 +796,6 @@ def plot_ai_concerns(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_di
         figsize=chart_size,
         show_percentages=True,
         label_wrap_width=label_wrap_width,
-        label_fontsize_offset=-4,
         xlim_padding=25
     )
     
