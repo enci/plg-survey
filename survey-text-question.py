@@ -435,8 +435,7 @@ def save_edge_legend(
     ax.set_ylim(0, 1)
 
     # Title
-    ax.text(0.5, 0.88, title, ha='center', va='center', fontsize=params['label_font_size'])
-    ax.text(0.5, 0.88, title, ha='center', va='center', fontsize=params['label_font_size'])
+    ax.text(0.5, 0.88, title, ha='center', va='center', fontsize=params['label_font_size'], zorder=10)
 
     # Draw sample lines evenly spaced
     n = len(reps)
@@ -448,11 +447,11 @@ def save_edge_legend(
     for x, w in zip(xs, reps):
         lw = width_for(w)
         color = color_for(w)
-        ax.hlines(y_line, x - line_len/2, x + line_len/2, colors=color, linewidth=lw)
-        ax.text(x, y_text, f"{w}", ha='center', va='center')
+        ax.hlines(y_line, x - line_len/2, x + line_len/2, colors=color, linewidth=lw, zorder=10)
+        ax.text(x, y_text, f"{w}", ha='center', va='center', zorder=10)
 
     plt.tight_layout()
-    plt.savefig(output_path, bbox_inches='tight', pad_inches=0.02)
+    plt.savefig(output_path, bbox_inches='tight', pad_inches=0.0)  # Increased padding to include border
     plt.close(fig)
     return output_path
 
@@ -516,12 +515,11 @@ def merge_pdfs(graph_pdf, legend_pdf, output_pdf='plots/q21_problem_theme_networ
         graph_pg.cropbox.upper_right = (graph_rect.x1, graph_rect.y1)
         
         # Add some padding
-        #padding = 0
-        #spacing = 0
+        spacer = 20
         
         # Calculate new page size
         new_width = max(g_width, l_width)
-        new_height = g_width - top_crop - bottom_crop
+        new_height = g_width - top_crop - bottom_crop + l_height + spacer
         
         # Create new page
         writer = PdfWriter()
@@ -545,10 +543,11 @@ def merge_pdfs(graph_pdf, legend_pdf, output_pdf='plots/q21_problem_theme_networ
         )
                 
         # Merge legend at bottom
-        #new_page.merge_transformed_page(
-        #    legend_pg,
-        #    Transformation().translate(tx=legend_x - legend_rect.x0, ty=legend_y - legend_rect.y0)
-        #)
+        new_page.merge_transformed_page(
+            legend_pg,
+            Transformation().translate(tx=legend_x - legend_rect.x0,
+                                       ty=legend_y - legend_rect.y0)
+        )
         
         writer.add_page(new_page)
         
