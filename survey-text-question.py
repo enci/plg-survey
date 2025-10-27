@@ -237,22 +237,38 @@ def create_network_graph(theme_stats, cooccurrence_matrix, min_cooccurrence=1):
                    count=row['count'],
                    percentage=row['percentage'])
     
+    edge_count_by_weight = {}
     for theme1 in cooccurrence_matrix.index:
         for theme2 in cooccurrence_matrix.columns:
             if theme1 < theme2:
                 weight = cooccurrence_matrix.loc[theme1, theme2]
-                if weight >= 0:
+                if weight >= min_cooccurrence:
                     G.add_edge(theme1, theme2, weight=weight)
-
+                    edge_count_by_weight[weight] = edge_count_by_weight.get(weight, 0) + 1
+    
+    print(f"  Edge distribution: {dict(sorted(edge_count_by_weight.items()))}")
     return G
 
 # ============================================================================
 # Visualization Using NetworkX Built-in Functions
 # ============================================================================
 
-def visualize_network(G, params=VIZ_PARAMS, output_path='plots/q21_problem_theme_network.pdf'):
+def visualize_network(
+    G, 
+    params=VIZ_PARAMS, 
+    output_path='plots/q21_problem_theme_network.pdf',
+    crop='tight',      # 'none' | 'tight' | 'axes'
+    pad_inches=0.01
+):
     """
     NetworkX visualization with consistent styling and proper font control
+    
+    Cropping options (applied at save time):
+    - crop='none':  no additional cropping
+    - crop='tight': Matplotlib tight layout cropping (bbox_inches='tight')
+    - crop='axes':  Crop to the axes' tight bounding box (content-only)
+    
+    pad_inches controls extra border around the cropped box.
     """
     fig, ax = plt.subplots(figsize=params['figsize'], facecolor='white')
 
@@ -277,7 +293,7 @@ def visualize_network(G, params=VIZ_PARAMS, output_path='plots/q21_problem_theme
     nx.draw_networkx_nodes(G, pos, 
                           node_size=node_sizes,
                           node_color=node_colors,
-                          cmap=plt.cm.get_cmap(params['node_cmap']),
+                          cmap=plt.get_cmap(params['node_cmap']),
                           edgecolors='black',
                           linewidths=0,
                           ax=ax)
@@ -287,17 +303,23 @@ def visualize_network(G, params=VIZ_PARAMS, output_path='plots/q21_problem_theme
     edge_widths_sorted = [G[u][v]['weight'] * params['edge_width_scale'] for u, v in edges_sorted]
     edge_colors_sorted = [G[u][v]['weight'] for u, v in edges_sorted]
 
-    # Normalize edge colors to use only darker half of colormap
-    norm = matplotlib.colors.Normalize(vmin=min(edge_colors_sorted), 
-                            vmax=max(edge_colors_sorted))
-    norm_colors = [0.65 + 0.35 * norm(c) for c in edge_colors_sorted]
+    # Store min/max for legend and create truncated colormap (darker half only)
+    edge_vmin = min(edge_colors_sorted)
+    edge_vmax = max(edge_colors_sorted)
+    
+    # Create a colormap using only the darker half of Blues (0.5 to 1.0)
+    import numpy as np
+    from matplotlib.colors import LinearSegmentedColormap
+    blues_dark = plt.cm.Blues(np.linspace(0.5, 1.0, 256))
+    blues_dark_cmap = LinearSegmentedColormap.from_list('blues_dark', blues_dark)
 
     nx.draw_networkx_edges(G, pos,
                         edgelist=edges_sorted,
                         width=edge_widths_sorted,
-                        edge_color=norm_colors,
-                        edge_cmap=plt.cm.Blues,
-                        edge_vmin=0.5, edge_vmax=1.0,  # Use only darker half
+                        edge_color=edge_colors_sorted,  # Just pass raw weights
+                        edge_cmap=blues_dark_cmap,  # Use truncated colormap
+                        edge_vmin=edge_vmin,
+                        edge_vmax=edge_vmax,
                         ax=ax)
 
     # Spread the labels slightly by adding an offset based on the 
@@ -339,13 +361,198 @@ def visualize_network(G, params=VIZ_PARAMS, output_path='plots/q21_problem_theme
     
     plt.tight_layout()
     
-    # Save as PDF (uses matplotlib settings for DPI, format, etc.)
-    plt.savefig(output_path)
+    # Save with optional cropping
+    if crop == 'axes':
+        # Crop to axes content
+        fig.canvas.draw()  # ensure renderer exists
+        bbox = ax.get_tightbbox(fig.canvas.get_renderer()).transformed(
+            fig.dpi_scale_trans.inverted()
+        )
+        plt.savefig(output_path, bbox_inches=bbox, pad_inches=pad_inches)
+    elif crop == 'tight':
+        plt.savefig(output_path, bbox_inches='tight', pad_inches=pad_inches)
+    else:
+        plt.savefig(output_path)
     
     print(f"✓ Network visualization saved to: {output_path}")
     print(f"  Fonts: DejaVu Serif, size={params['label_font_size']}")
     
     plt.close()
+
+def save_edge_legend(
+    G,
+    params=VIZ_PARAMS,
+    output_path='plots/q21_problem_theme_legend.pdf',
+    samples=None,  # None = show all unique weights
+    title='Edge legend: co-occurrence count'
+):
+    """Save a separate legend figure showing sample edge widths and colors.
+
+    - Shows unique positive weights from the graph (or samples if specified)
+    - Uses the EXACT same width and color mapping as the main plot
+    - Saves a compact, wide legend you can place below the figure in LaTeX
+    """
+    import numpy as np
+    
+    # Collect positive weights only
+    weights = [G[u][v]['weight'] for u, v in G.edges() if G[u][v]['weight'] > 0]
+    if not weights:
+        # Nothing to show
+        return None
+
+    weights = sorted(set(weights))
+    
+    # Use all weights by default, or sample if requested
+    if samples is None or len(weights) <= samples:
+        reps = weights
+    else:
+        # Smart sampling: ensure we get min, max, and evenly distributed middle values
+        idxs = np.round(np.linspace(0, len(weights) - 1, samples)).astype(int)
+        idxs = np.unique(idxs)
+        reps = [weights[i] for i in idxs]
+
+    # Use EXACT same normalization as the main graph
+    vmin, vmax = min(weights), max(weights)
+    norm = matplotlib.colors.Normalize(vmin=vmin, vmax=vmax)
+    
+    # Use only darker half of Blues colormap (0.5 to 1.0), matching the graph
+    def color_for(w):
+        t = norm(w)  # Normalize weight to [0, 1]
+        # Map to darker half: 0 -> 0.5, 1 -> 1.0 in Blues colormap
+        blues_value = 0.5 + 0.5 * t
+        return plt.cm.Blues(blues_value)
+
+    def width_for(w):
+        return w * params['edge_width_scale']
+
+    # Build legend figure
+    fig_w, fig_h = params.get('figsize', (8, 8))
+    legend_height = max(1.1, fig_h * 0.16)  # compact strip
+    fig, ax = plt.subplots(figsize=(fig_w, legend_height), facecolor='white')
+
+    ax.axis('off')
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+
+    # Title
+    ax.text(0.5, 0.88, title, ha='center', va='center', fontsize=params['label_font_size'])
+    ax.text(0.5, 0.88, title, ha='center', va='center', fontsize=params['label_font_size'])
+
+    # Draw sample lines evenly spaced
+    n = len(reps)
+    xs = np.linspace(0.12, 0.88, n)
+    y_line = 0.55
+    y_text = 0.10
+    line_len = 0.12
+
+    for x, w in zip(xs, reps):
+        lw = width_for(w)
+        color = color_for(w)
+        ax.hlines(y_line, x - line_len/2, x + line_len/2, colors=color, linewidth=lw)
+        ax.text(x, y_text, f"{w}", ha='center', va='center')
+
+    plt.tight_layout()
+    plt.savefig(output_path, bbox_inches='tight', pad_inches=0.02)
+    plt.close(fig)
+    return output_path
+
+def merge_pdfs(graph_pdf, legend_pdf, output_pdf='plots/q21_problem_theme_network_with_legend.pdf'):
+    """Merge the graph and legend PDFs into a single page with vertical stacking.
+    
+    Uses pure vector PDF operations - no rasterization, preserves quality.
+    Crops both PDFs and combines them on one page with the graph on top
+    and the legend below.
+    
+    Args:
+        graph_pdf: Path to the main graph PDF
+        legend_pdf: Path to the legend PDF
+        output_pdf: Path for the merged output
+    
+    Returns:
+        Path to the merged PDF
+    """
+    try:
+        from pypdf import PdfReader, PdfWriter, Transformation, PageObject
+        from pypdf.generic import RectangleObject
+        import fitz  # PyMuPDF for getting tight crop boxes
+        
+        # Get tight bounding boxes using PyMuPDF
+        graph_doc = fitz.open(graph_pdf)
+        legend_doc = fitz.open(legend_pdf)
+        
+        graph_page = graph_doc[0]
+        legend_page = legend_doc[0]
+        
+        # Get actual content bounds
+        graph_rect = graph_page.bound()
+        legend_rect = legend_page.bound()
+        
+        graph_doc.close()
+        legend_doc.close()
+        
+        # Use pypdf for the actual merging (vector operations)
+        graph_reader = PdfReader(graph_pdf)
+        legend_reader = PdfReader(legend_pdf)
+        
+        graph_pg = graph_reader.pages[0]
+        legend_pg = legend_reader.pages[0]
+        
+        # Use the tight bounds from fitz
+        g_width = graph_rect.width
+        g_height = graph_rect.height
+        l_width = legend_rect.width
+        l_height = legend_rect.height
+        
+        # Add some padding
+        padding = 0
+        spacing = 0
+        
+        # Calculate new page size
+        new_width = max(g_width, l_width) + 2 * padding
+        new_height = g_height + l_height + spacing + 2 * padding
+        
+        # Create new page
+        writer = PdfWriter()
+        
+        # Create a blank page with the combined size
+        new_page = PageObject.create_blank_page(width=new_width, height=new_height)
+        
+        # Calculate positions (centered horizontally)
+        graph_x = (new_width - g_width) / 2
+        graph_y = new_height - padding - g_height  # Top
+        
+        legend_x = (new_width - l_width) / 2  
+        legend_y = padding  # Bottom
+        
+        # Merge graph at top
+        new_page.merge_transformed_page(
+            graph_pg,
+            Transformation().translate(tx=graph_x - graph_rect.x0, ty=graph_y - graph_rect.y0)
+        )
+        
+        # Merge legend at bottom
+        new_page.merge_transformed_page(
+            legend_pg,
+            Transformation().translate(tx=legend_x - legend_rect.x0, ty=legend_y - legend_rect.y0)
+        )
+        
+        writer.add_page(new_page)
+        
+        # Write output
+        with open(output_pdf, 'wb') as f:
+            writer.write(f)
+        
+        return output_pdf
+        
+    except ImportError as e:
+        print(f"⚠ PDF merging requires PyMuPDF (fitz) and pypdf. Install with: pip install PyMuPDF pypdf")
+        print(f"  Error: {e}")
+        return None
+    except Exception as e:
+        print(f"⚠ Could not merge PDFs: {e}")
+        import traceback
+        traceback.print_exc()
+        return None
 
 # ============================================================================
 # Analysis Report
@@ -497,10 +704,20 @@ def main():
     cooccurrence_matrix = calculate_cooccurrence_matrix(coded_data)
     
     print("[4/5] Creating network graph...")
-    G = create_network_graph(theme_stats, cooccurrence_matrix, min_cooccurrence=2)
+    G = create_network_graph(theme_stats, cooccurrence_matrix, min_cooccurrence=1)
     
     print("[5/5] Generating network visualization...")
-    visualize_network(G)
+    visualize_network(G, crop='none')  # Don't crop - let merge handle it
+    # Also emit a separate legend PDF for edge sizes/colors
+    legend_path = save_edge_legend(G)
+    if legend_path:
+        print(f"✓ Edge legend saved to: {legend_path}")
+        
+        # Merge the graph and legend into one PDF (single page, cropped)
+        merged_path = merge_pdfs('plots/q21_problem_theme_network.pdf', legend_path)
+        if merged_path:
+            print(f"✓ Merged graph+legend saved to: {merged_path} (single page, cropped)")
+        print("  Tip: Use individual PDFs separately or the merged version in LaTeX.")
     
     generate_report(coded_data, theme_stats, cooccurrence_matrix, G)
     

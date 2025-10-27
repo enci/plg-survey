@@ -3,3 +3,6 @@ matplotlib
 numpy
 networkx
 jinja2
+pypdf
+PyMuPDF
+Pillow
