@@ -775,7 +775,8 @@ class SurveyPlotter:
                                        colormap: Optional[str] = None,
                                        color: Optional[str] = None,
                                        label_wrap_width: Optional[int] = None,
-                                       show_percentages: bool = False) -> mpl_figure.Figure:
+                                       show_percentages: bool = False,
+                                       legend_xoffset: float = 0.0) -> mpl_figure.Figure:
         self.analyzer._ensure_loaded()
         assert self.analyzer.df is not None and self.analyzer.filtered_data is not None
         
@@ -860,10 +861,10 @@ class SurveyPlotter:
         
         # Add legend at bottom left
         ax.legend(loc='upper left',
-                  bbox_to_anchor=(0, -0.05),
+                  bbox_to_anchor=(legend_xoffset, -0.05),
                   ncol=len(all_ratings),
                   frameon=True,
-                  fontsize=font_size-5)
+                  fontsize=font_size-1)
         
         # Customize spines to make frame thinner
         for spine in ax.spines.values():

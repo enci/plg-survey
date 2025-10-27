@@ -473,7 +473,7 @@ def merge_pdfs(graph_pdf, legend_pdf, output_pdf='plots/q21_problem_theme_networ
     """
     try:
         from pypdf import PdfReader, PdfWriter, Transformation, PageObject
-        from pypdf.generic import RectangleObject
+        #from pypdf.generic import RectangleObject
         import fitz  # PyMuPDF for getting tight crop boxes
         
         # Get tight bounding boxes using PyMuPDF
@@ -502,14 +502,26 @@ def merge_pdfs(graph_pdf, legend_pdf, output_pdf='plots/q21_problem_theme_networ
         g_height = graph_rect.height
         l_width = legend_rect.width
         l_height = legend_rect.height
+
+        top_crop = 40
+        bottom_crop = 40
+        
+        # Apply crop factor to graph height (reduce to remove whitespace from bottom)
+        #graph_height_crop = 1.0  # Adjust this value (0.0-1.0) to crop more or less
+        #g_height = g_height_original * graph_height_crop
+        #crop_amount = g_height_original - g_height  # How much we're removing from bottom
+        
+        # Adjust the graph's crop box to remove content from the bottom
+        graph_pg.cropbox.lower_left = (graph_rect.x0, graph_rect.y0)
+        graph_pg.cropbox.upper_right = (graph_rect.x1, graph_rect.y1)
         
         # Add some padding
-        padding = 0
-        spacing = 0
+        #padding = 0
+        #spacing = 0
         
         # Calculate new page size
-        new_width = max(g_width, l_width) + 2 * padding
-        new_height = g_height + l_height + spacing + 2 * padding
+        new_width = max(g_width, l_width)
+        new_height = g_width - top_crop - bottom_crop
         
         # Create new page
         writer = PdfWriter()
@@ -519,22 +531,24 @@ def merge_pdfs(graph_pdf, legend_pdf, output_pdf='plots/q21_problem_theme_networ
         
         # Calculate positions (centered horizontally)
         graph_x = (new_width - g_width) / 2
-        graph_y = new_height - padding - g_height  # Top
+        graph_y = new_height - g_height  # Top
         
         legend_x = (new_width - l_width) / 2  
-        legend_y = padding  # Bottom
+        legend_y = 0  # Bottom
         
-        # Merge graph at top
+        
+        # Merge graph at top (now with adjusted crop box)
         new_page.merge_transformed_page(
             graph_pg,
-            Transformation().translate(tx=graph_x - graph_rect.x0, ty=graph_y - graph_rect.y0)
+            Transformation().translate(tx=graph_x - graph_rect.x0,
+                                       ty=graph_y - graph_rect.y0 + top_crop)
         )
-        
+                
         # Merge legend at bottom
-        new_page.merge_transformed_page(
-            legend_pg,
-            Transformation().translate(tx=legend_x - legend_rect.x0, ty=legend_y - legend_rect.y0)
-        )
+        #new_page.merge_transformed_page(
+        #    legend_pg,
+        #    Transformation().translate(tx=legend_x - legend_rect.x0, ty=legend_y - legend_rect.y0)
+        #)
         
         writer.add_page(new_page)
         
