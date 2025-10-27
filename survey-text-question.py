@@ -132,6 +132,18 @@ THEMES = {
     ]
 }
 
+OFFSETS = {
+    'Control & \n Flexibility': [ -0.15, 0.1 ],
+    'Time & \n Efficiency': [ -0.0, 0.17 ],
+    'Integration & \n Workflow': [ 0.0, 0.0 ],
+    'Technical \n Barriers': [ 0.0, -0.1 ],
+    'Designer \n Accessibility': [ 0.2, 0.2 ],
+    'Debugging & \n Understanding': [ 0.0, 0.1 ],
+    'Quality & \n Consistency': [ 0.15, 0.11 ],
+    'Content \n Mixing': [ 0.0, 0.0 ],
+    'Documentation & \n Learning': [ 0.1, 0.07 ]
+}
+
 # ============================================================================
 # Data Loading and Processing
 # ============================================================================
@@ -229,9 +241,9 @@ def create_network_graph(theme_stats, cooccurrence_matrix, min_cooccurrence=1):
         for theme2 in cooccurrence_matrix.columns:
             if theme1 < theme2:
                 weight = cooccurrence_matrix.loc[theme1, theme2]
-                if weight >= 1:
+                if weight >= 0:
                     G.add_edge(theme1, theme2, weight=weight)
-    
+
     return G
 
 # ============================================================================
@@ -296,11 +308,14 @@ def visualize_network(G, params=VIZ_PARAMS, output_path='plots/q21_problem_theme
     #    offset = (size ** 0.4) / 5.0  # Adjust divisor to change spacing
     #    label_pos[node] = (x * (1 + offset), y * (1 + offset))
 
-    # use constant offset instead
+    # Use constant offset with manual adjustments from OFFSETS dictionary
     label_pos = {}
     offset = 0.4  # constant offset
     for node, (x, y) in pos.items():
-        label_pos[node] = (x * (1 + offset), y * (1 + offset))
+        # Get manual offset for this node (default to [0, 0] if not defined)
+        manual_offset = OFFSETS.get(node, [0.0, 0.0])
+        label_pos[node] = (x * (1 + offset) + manual_offset[0], 
+                          y * (1 + offset) + manual_offset[1])
 
     # Draw node labels - EXPLICITLY SET FONT PROPERTIES
     nx.draw_networkx_labels(G, label_pos,
@@ -336,18 +351,21 @@ def visualize_network(G, params=VIZ_PARAMS, output_path='plots/q21_problem_theme
 # Analysis Report
 # ============================================================================
 
-def generate_report(coded_data, theme_stats, cooccurrence_matrix, G):
+def generate_report(coded_data, theme_stats, cooccurrence_matrix, G, output_latex='plots/q21_theme_statistics.tex'):
+    """Generate report and save statistics as LaTeX tables"""
+    
     print("\n" + "="*80)
     print("THEMATIC ANALYSIS REPORT")
     print("="*80)
     
     total_responses = len(coded_data)
     coded_responses = len([e for e in coded_data if e['themes']])
+    avg_themes = sum(e['num_themes'] for e in coded_data)/coded_responses
     
     print(f"\n1. RESPONSE STATISTICS")
     print(f"   Total responses: {total_responses}")
     print(f"   Coded responses: {coded_responses} ({coded_responses/total_responses*100:.1f}%)")
-    print(f"   Average themes per response: {sum(e['num_themes'] for e in coded_data)/coded_responses:.1f}")
+    print(f"   Average themes per response: {avg_themes:.1f}")
     
     print(f"\n2. THEME FREQUENCIES")
     print(theme_stats.to_string(index=False))
@@ -355,6 +373,11 @@ def generate_report(coded_data, theme_stats, cooccurrence_matrix, G):
     print(f"\n3. NETWORK STATISTICS")
     print(f"   Nodes: {G.number_of_nodes()}")
     print(f"   Edges: {G.number_of_edges()}")
+    
+    # Collect network statistics
+    edge_weights = []
+    most_central = None
+    central_connections = 0
     
     if G.number_of_edges() > 0:
         edge_weights = [(u, v, G[u][v]['weight']) for u, v in G.edges()]
@@ -367,10 +390,93 @@ def generate_report(coded_data, theme_stats, cooccurrence_matrix, G):
         if G.number_of_nodes() > 0:
             degree_cent = nx.degree_centrality(G)
             most_central = max(degree_cent, key=degree_cent.get)
+            central_connections = G.degree(most_central)
             print(f"\n   Most central theme: {most_central}")
-            print(f"   (Connected to {G.degree(most_central)} other themes)")
+            print(f"   (Connected to {central_connections} other themes)")
     
     print("\n" + "="*80)
+    
+    # ========================================================================
+    # Generate LaTeX output
+    # ========================================================================
+    
+    latex_output = []
+    latex_output.append("% Theme Frequencies Table")
+    latex_output.append("\\begin{table}[htbp]")
+    latex_output.append("\\centering")
+    latex_output.append("\\caption{Theme Frequencies in Open-Ended Responses}")
+    latex_output.append("\\label{tab:theme_frequencies}")
+    
+    # Create theme frequencies table
+    theme_stats_latex = theme_stats.copy()
+    theme_stats_latex['theme'] = theme_stats_latex['theme'].str.replace(' \n ', ' & ')
+    theme_stats_latex['theme'] = theme_stats_latex['theme'].str.replace('&', '\\&')
+    theme_stats_latex['percentage'] = theme_stats_latex['percentage'].apply(lambda x: f"{x:.1f}\\%")
+    
+    latex_table = theme_stats_latex.to_latex(
+        index=False,
+        column_format='lcc',
+        escape=False,
+        header=['Theme', 'Count', 'Percentage']
+    )
+    latex_output.append(latex_table)
+    latex_output.append("\\end{table}")
+    latex_output.append("")
+    
+    # Top co-occurring pairs table
+    if edge_weights:
+        latex_output.append("% Top Co-occurring Theme Pairs")
+        latex_output.append("\\begin{table}[htbp]")
+        latex_output.append("\\centering")
+        latex_output.append("\\caption{Top Co-occurring Theme Pairs}")
+        latex_output.append("\\label{tab:cooccurrence}")
+        latex_output.append("\\begin{tabular}{llc}")
+        latex_output.append("\\toprule")
+        latex_output.append("Theme 1 & Theme 2 & Co-occurrence Count \\\\")
+        latex_output.append("\\midrule")
+        
+        for u, v, w in edge_weights[:10]:  # Top 10 pairs
+            u_clean = u.replace(' \n ', ' ').replace('&', '\\&')
+            v_clean = v.replace(' \n ', ' ').replace('&', '\\&')
+            latex_output.append(f"{u_clean} & {v_clean} & {w} \\\\")
+        
+        latex_output.append("\\bottomrule")
+        latex_output.append("\\end{tabular}")
+        latex_output.append("\\end{table}")
+        latex_output.append("")
+    
+    # Summary statistics table
+    latex_output.append("% Summary Statistics")
+    latex_output.append("\\begin{table}[htbp]")
+    latex_output.append("\\centering")
+    latex_output.append("\\caption{Survey Response Summary Statistics}")
+    latex_output.append("\\label{tab:summary_stats}")
+    latex_output.append("\\begin{tabular}{lr}")
+    latex_output.append("\\toprule")
+    latex_output.append("Statistic & Value \\\\")
+    latex_output.append("\\midrule")
+    latex_output.append(f"Total responses & {total_responses} \\\\")
+    latex_output.append(f"Coded responses & {coded_responses} ({coded_responses/total_responses*100:.1f}\\%) \\\\")
+    latex_output.append(f"Average themes per response & {avg_themes:.1f} \\\\")
+    latex_output.append(f"Number of themes & {G.number_of_nodes()} \\\\")
+    latex_output.append(f"Number of co-occurrence edges & {G.number_of_edges()} \\\\")
+    if most_central:
+        most_central_clean = most_central.replace(' \n ', ' ').replace('&', '\\&')
+        latex_output.append(f"Most central theme & {most_central_clean} \\\\")
+        latex_output.append(f"Connections of most central & {central_connections} \\\\")
+    latex_output.append("\\bottomrule")
+    latex_output.append("\\end{tabular}")
+    latex_output.append("\\end{table}")
+    
+    # Write to file
+    latex_content = '\n'.join(latex_output)
+    with open(output_latex, 'w', encoding='utf-8') as f:
+        f.write(latex_content)
+    
+    print(f"\n✓ LaTeX tables saved to: {output_latex}")
+    print(f"  Include in your LaTeX document with: \\input{{{output_latex}}}")
+    
+    return latex_content
 
 # ============================================================================
 # Main Pipeline
