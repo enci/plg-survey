@@ -188,3 +188,4 @@ cython_debug/
 .cursorindexingignore
 /.vscode/edge-debug-userdatadir
 /plots
+/.claude
