@@ -491,12 +491,16 @@ def get_nice_colors() -> List[Tuple[float, float, float, float]]:
     ]
     return colors
 
-font_size = 26
+font_size = 24
+
+# Note: font_size is kept for backward compatibility, but chart styling is now centralized in SurveyPlotter.chart_style
 
 # Configure matplotlib for consistent styling across all plots
 plt.rcParams.update({
     'font.family': 'serif',
-    'font.serif': ['DejaVu Serif', 'Bitstream Vera Serif', 'serif'],
+    'font.serif': ['DejaVu Serif'],
+    'font.sans-serif': ['DejaVu Sans'],
+    'font.monospace': ['DejaVu Sans Mono'],
     'font.size': font_size,
     'axes.titlesize': 18,
     'axes.labelsize': font_size,
@@ -504,7 +508,7 @@ plt.rcParams.update({
     'ytick.labelsize': font_size,
     'legend.fontsize': font_size,
     'figure.titlesize': 0,
-    'figure.dpi': 100,  # Consistent base DPI for figure creation
+    'figure.dpi': 300,  # Consistent base DPI for figure creation
     'axes.grid': True,
     'grid.alpha': 0.4,
     'axes.axisbelow': True,
@@ -513,12 +517,11 @@ plt.rcParams.update({
     'savefig.dpi': 300,  # Consistent high-quality output
     'savefig.format': 'pdf',
     'savefig.bbox': 'tight',
-    'savefig.pad_inches': 0.1,
+    'savefig.pad_inches': 0.0,
     'pdf.fonttype': 42,  # Embed fonts as Type 42 (TrueType) for consistency
     'pdf.use14corefonts': False,  # Don't use limited core fonts
-    'text.usetex': False,  # Disable LaTeX for consistency
+    'mathtext.fontset': 'stix',  # Use STIX fonts for math text consistency
 })
-
     
 # A plotting utility class that works with SurveyAnalyzer to create visualizations.
 class SurveyPlotter:
@@ -529,6 +532,14 @@ class SurveyPlotter:
 
         # self.colors = get_colors("tab10")
         self.role_colors = get_nice_colors()
+        
+        # Chart styling constants - centralized for easy tweaking
+        self.chart_style = {
+            'spine_linewidth': 1,
+            'spine_color': "#4D4D4D",
+            'font_size': 24,  # Base font size for matplotlib
+            'label_font_size': 10,  # Font size for specific text labels
+        }
     
     # Create a bar chart for a question's response distribution
     def create_bar_chart(self,
@@ -611,6 +622,11 @@ class SurveyPlotter:
                 ax.text(bar.get_x() + bar.get_width()/2., height + max_value * 0.01,
                     label_text, ha='center', va='bottom', fontsize=font_size)
         
+        
+        # Customize spines to make frame thinner
+        for spine in ax.spines.values():
+            spine.set_linewidth(self.chart_style['spine_linewidth'])
+            spine.set_color(self.chart_style['spine_color'])
         
         # Use tight_layout with padding to prevent label cutoff
         plt.tight_layout()
@@ -741,6 +757,11 @@ class SurveyPlotter:
         
         # Title removed for cleaner paper presentation
         
+        # Customize spines to make frame thinner
+        for spine in ax.spines.values():
+            spine.set_linewidth(self.chart_style['spine_linewidth'])
+            spine.set_color(self.chart_style['spine_color'])
+        
         # Use tight_layout with padding to prevent label cutoff (consistent with other methods)
         # plt.tight_layout(pad=3.0)
         
@@ -754,7 +775,8 @@ class SurveyPlotter:
                                        colormap: Optional[str] = None,
                                        color: Optional[str] = None,
                                        label_wrap_width: Optional[int] = None,
-                                       show_percentages: bool = False) -> mpl_figure.Figure:
+                                       show_percentages: bool = False,
+                                       legend_xoffset: float = 0.0) -> mpl_figure.Figure:
         self.analyzer._ensure_loaded()
         assert self.analyzer.df is not None and self.analyzer.filtered_data is not None
         
@@ -839,10 +861,15 @@ class SurveyPlotter:
         
         # Add legend at bottom left
         ax.legend(loc='upper left',
-                  bbox_to_anchor=(0, -0.05),
+                  bbox_to_anchor=(legend_xoffset, -0.05),
                   ncol=len(all_ratings),
                   frameon=True,
-                  fontsize=font_size-5)
+                  fontsize=font_size-1)
+        
+        # Customize spines to make frame thinner
+        for spine in ax.spines.values():
+            spine.set_linewidth(self.chart_style['spine_linewidth'])
+            spine.set_color(self.chart_style['spine_color'])
         
         return fig
     
@@ -854,7 +881,6 @@ class SurveyPlotter:
                                      color: Optional[str] = None,
                                      horizontal: bool = True, max_rank: int = 3,
                                      label_wrap_width: Optional[int] = None,
-                                     label_fontsize_offset: int = 0,
                                      legend_fontsize: int = 22,
                                      legend_ncol: int = 1,
                                      xlabel_fontsize: int = 20) -> mpl_figure.Figure:
@@ -914,15 +940,20 @@ class SurveyPlotter:
             plt.xticks(rotation=45, ha='right')
         
         # Adjust label font size if offset is specified
-        if label_fontsize_offset != 0:
-            for label in ax.get_yticklabels():
-                label.set_fontsize(font_size + label_fontsize_offset)
+        for label in ax.get_yticklabels():
+            label.set_fontsize(font_size)
         
         # Add legend positioned in bottom right (empty space in horizontal charts)
         ax.legend(bbox_to_anchor=(1.0, 0.0), loc='lower right',
                 fontsize=legend_fontsize, ncol=legend_ncol)
         
         # Title removed for cleaner paper presentation
+        
+        # Customize spines to make frame thinner
+        for spine in ax.spines.values():
+            spine.set_linewidth(self.chart_style['spine_linewidth'])
+            spine.set_color(self.chart_style['spine_color'])
+        
         plt.tight_layout()
         
         return fig
@@ -935,7 +966,6 @@ class SurveyPlotter:
                                 figsize: Tuple[float, float] = (12.0, 8.0),
                                 show_percentages: bool = True,
                                 label_wrap_width: Optional[int] = None,
-                                label_fontsize_offset: int = 0,
                                 legend_loc: str = 'lower right',
                                 legend_fontsize: int = 21,
                                 legend_ncol: int = 1,
@@ -1022,15 +1052,16 @@ class SurveyPlotter:
         # Remove y-axis label as requested
         ax.invert_yaxis()  # Top category at top
         
-        # Adjust label font size if offset is specified
-        #if label_fontsize_offset != 0:
-        #    for label in ax.get_yticklabels():
-        #        label.set_fontsize(font_size + label_fontsize_offset)
-        
         # Add legend with shortened role names inside the chart area
         ax.legend(loc=legend_loc, fontsize=legend_fontsize, ncol=legend_ncol)
         
         # Title removed for cleaner paper presentation
+        
+        # Customize spines to make frame thinner
+        for spine in ax.spines.values():
+            spine.set_linewidth(self.chart_style['spine_linewidth'])
+            spine.set_color(self.chart_style['spine_color'])
+        
         plt.tight_layout()
                 
         return fig

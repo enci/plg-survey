@@ -11,7 +11,7 @@ from typing import List, Tuple, Optional, Union
 
 # Calculate chart size to ensure consistent bar heights. 
 def calculate_chart_size(num_options: int) -> Tuple[float, float]:
-    width = 12
+    width = 12.0
     consistent_bar_height = 0.8  # Consistent height per bar
     base_padding = 1.0  # Space for legend and padding
     height = base_padding + (num_options * consistent_bar_height)
@@ -97,7 +97,6 @@ def plot_years_experience(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, outp
         title=question_text,
         horizontal=True,
         figsize=chart_size,
-        color='grey',
         show_percentages=True,
         label_wrap_width=label_wrap_width,
         colormap='tab20b'
@@ -164,7 +163,8 @@ def plot_procedural_tools_experience(analyzer: SurveyAnalyzer, plotter: SurveyPl
         figsize=chart_size,
         colormap='plasma', 
         label_wrap_width=25,
-        show_percentages=True
+        show_percentages=True,
+        legend_xoffset=-0.18
     )
     
     pdf_path = os.path.join(output_dir, f"q4_{question_key}.pdf")
@@ -308,7 +308,6 @@ def plot_level_generation_frequency(analyzer: SurveyAnalyzer, plotter: SurveyPlo
         legend_loc = 'upper right',
         legend_fontsize=19,
         legend_ncol=2,
-        label_fontsize_offset=-2,
         xlim_padding=8
     )
     
@@ -382,7 +381,6 @@ def plot_primary_concerns(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, outp
         figsize=chart_size,
         show_percentages=True,
         label_wrap_width=label_wrap_width,
-        label_fontsize_offset=-3,
         legend_ncol=2,
         legend_fontsize=18,
         xlim_padding=10
@@ -526,7 +524,6 @@ def plot_node_tool_features(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, ou
         colormap='plasma',
         max_rank=3,  # Top 3 ranking as specified in the question
         label_wrap_width=30,
-        label_fontsize_offset=-5,
         legend_fontsize=19,
         xlabel_fontsize=18
     )
@@ -615,7 +612,6 @@ def plot_integration_preference(analyzer: SurveyAnalyzer, plotter: SurveyPlotter
         figsize=chart_size,
         show_percentages=True,
         label_wrap_width=35,
-        label_fontsize_offset=-2,
         legend_ncol=3,
         legend_fontsize=19,
         xlim_padding=8
@@ -642,7 +638,8 @@ def plot_genre_interest(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output
 
      # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
-    chart_size = calculate_chart_size(num_options)
+    chart_size = calculate_chart_size(num_options) # Make the chart taller for matrix data  
+    chart_size = (chart_size[0], chart_size[1] * 1.2)
 
     # Use matrix stacked bar chart for this matrix question
     fig = plotter.create_matrix_stacked_bar_chart(
@@ -651,7 +648,8 @@ def plot_genre_interest(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output
         figsize=chart_size,
         colormap='plasma',
         label_wrap_width=label_wrap_width,
-        show_percentages=True
+        show_percentages=True,
+        legend_xoffset=-0.18
     )
     
     pdf_path = os.path.join(output_dir, f"q14_{question_key}.pdf")
@@ -800,7 +798,6 @@ def plot_ai_concerns(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_di
         figsize=chart_size,
         show_percentages=True,
         label_wrap_width=label_wrap_width,
-        label_fontsize_offset=-4,
         xlim_padding=25
     )
     
@@ -845,8 +842,8 @@ def main() -> None:
     print("=== Survey Plot Generator ===\n")
     
     # Specify which questions to plot (1-20). Use None or empty list to plot all.
-    # questions_to_plot = [15, 16, 17, 18 , 19, 20]
-    questions_to_plot = list(range(1, 21))  # Plot all questions by default
+    questions_to_plot = [14]
+    # questions_to_plot = list(range(1, 21))  # Plot all questions by default
     
     # Create output directory
     output_dir = "plots"
