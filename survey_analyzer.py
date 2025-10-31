@@ -496,7 +496,7 @@ font_size = 26
 # Configure matplotlib for consistent styling across all plots
 plt.rcParams.update({
     'font.family': 'serif',
-    'font.serif': ['Times New Roman', 'DejaVu Serif', 'Bitstream Vera Serif', 'serif'],
+    'font.serif': ['DejaVu Serif', 'Bitstream Vera Serif', 'serif'],
     'font.size': font_size,
     'axes.titlesize': 18,
     'axes.labelsize': font_size,
