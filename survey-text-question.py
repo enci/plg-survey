@@ -435,7 +435,7 @@ def save_edge_legend(
     ax.set_ylim(0, 1)
 
     # Title
-    ax.text(0.5, 0.88, title, ha='center', va='center', fontsize=params['label_font_size'], zorder=10)
+    ax.text(0.5, 0.88, title, ha='center', va='bottom', fontsize=params['label_font_size'], zorder=10)
 
     # Draw sample lines evenly spaced
     n = len(reps)

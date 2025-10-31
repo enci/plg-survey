@@ -429,6 +429,120 @@ def plot_role_per_usage(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output
     print(f"  Saved as: {pdf_path}")
     return pdf_path
 
+# Create side-by-side comparison of role groups for designer-focused PCG usage
+def plot_role_vs_usage(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_dir: str) -> str:
+    """Plot side-by-side comparison of different role groups for designer-focused PCG usage tasks.
+    
+    Shows how different professional roles (Design vs Artist vs Programmer) use various
+    designer-focused procedural generation capabilities.
+    """
+    question_key = 'current_pcg_usage'
+    
+    print(f"Creating role vs usage comparison plot")
+    
+    # Designer tasks to compare
+    designer_tasks = [
+        'Level layout/structure generation',
+        'Enemy/NPC placement',
+        'Mission/quest generation',
+        'Puzzle generation'
+    ]
+    
+    # Map task labels to match analyzer's mapping
+    mapped_tasks = [analyzer._get_mapped_option(opt) for opt in designer_tasks]
+    
+    # Define role groups for comparison
+    design_roles = ['Level Designer', 'Game Designer']
+    artist_roles = ['Technical Artist', 'Environment Artist']
+    programmer_roles = ['Programmer/Technical Designer']
+    
+    role_groups = [design_roles, artist_roles, programmer_roles]
+    group_labels = ['Design Roles', 'Artist Roles', 'Programmer Roles']
+    
+    # Collect data for each role group
+    data_sets = []
+    for roles in role_groups:
+        analyzer.clear_filters()
+        analyzer.add_filter('professional_role', roles)
+        analyzer.apply_filters()
+        
+        counts = analyzer.get_question_counts(question_key, filtered=True)
+        
+        # Filter to only designer tasks and calculate percentages
+        # Count total respondents in this role group
+        role_counts = analyzer.get_question_counts('professional_role', filtered=False)
+        total_in_group = sum(role_counts.get(role, 0) for role in roles)
+        
+        # Calculate percentage of respondents in this group who selected each task
+        task_percentages = {}
+        for task in mapped_tasks:
+            count = counts.get(task, 0)
+            percentage = (count / total_in_group * 100) if total_in_group > 0 else 0
+            task_percentages[task] = percentage
+        
+        data_sets.append(task_percentages)
+    
+    # Reset filters
+    analyzer.clear_filters()
+    
+    # Prepare visualization
+    label_wrap_width = 30
+    wrapped_tasks = [wrap_label_smart(t, label_wrap_width) for t in mapped_tasks]
+    
+    # Calculate chart size
+    num_options = len(mapped_tasks)
+    chart_size = calculate_chart_size(num_options)
+    chart_size = (chart_size[0], chart_size[1] + 1)  # Add extra height for comparison
+    
+    # Create figure
+    fig, ax = plt.subplots(figsize=chart_size)
+    
+    # Plot settings
+    y = list(range(len(mapped_tasks)))
+    height = 0.8 / len(group_labels)  # Bar height for each group
+    colors = ['#9E2DB5', '#50A326', '#2E86AB']  # Purple for design, green for artist, blue for programmer
+    
+    # Plot bars for each role group
+    for i, (percentages, label, color) in enumerate(zip(data_sets, group_labels, colors)):
+        values = [percentages[task] for task in mapped_tasks]
+        offset = height * (i - len(group_labels)/2 + 0.5)
+        bars = ax.barh([pos + offset for pos in y], values, height, label=label, color=color)
+        
+        # Add percentage labels on bars
+        for bar in bars:
+            width_val = bar.get_width()
+            if width_val > 0:
+                label_text = f'{width_val:.1f}%'
+                ax.text(width_val + 1, bar.get_y() + bar.get_height()/2.,
+                       label_text, ha='left', va='center', fontsize=font_size-2)
+    
+    # Find max value for axis scaling
+    max_value = max(max(d.values()) for d in data_sets) if data_sets else 0
+    
+    # Styling
+    ax.set_xlim(0, max_value * 1.2)
+    ax.set_yticks(y)
+    ax.set_yticklabels(wrapped_tasks, fontsize=font_size)
+    ax.set_xlabel('% of respondents in role group', fontsize=font_size)
+    ax.invert_yaxis()  # Top task at top
+    ax.tick_params(axis='x', labelsize=font_size-2)
+    
+    # Legend
+    ax.legend(fontsize=font_size-2, loc='lower right')
+    
+    # Customize spines
+    for spine in ax.spines.values():
+        spine.set_linewidth(0.5)
+    
+    plt.tight_layout()
+    
+    pdf_path = os.path.join(output_dir, f"q5_role_vs_usage.pdf")
+    fig.savefig(pdf_path)
+    plt.close(fig)
+    
+    print(f"  Saved as: {pdf_path}")
+    return pdf_path
+
 # Create plot for level generation frequency question.
 def plot_level_generation_frequency(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_dir: str) -> str:
     question_key = 'level_generation_frequency'
@@ -1008,7 +1122,7 @@ def main() -> None:
         2: [plot_years_experience],
         3: [plot_game_engines],
         4: [plot_procedural_tools_experience],
-        5: [plot_current_pcg_usage, plot_role_per_usage],
+        5: [plot_current_pcg_usage, plot_role_per_usage, plot_role_vs_usage],
         6: [plot_level_generation_frequency, plot_level_generation_frequency_comparison],
         7: [plot_primary_concerns],
         8: [plot_tool_view],
