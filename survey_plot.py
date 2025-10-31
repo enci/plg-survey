@@ -2,7 +2,7 @@
 Survey Plot Generator
 """
 
-from survey_analyzer import SurveyAnalyzer, SurveyPlotter, wrap_label_smart
+from survey_analyzer import SurveyAnalyzer, SurveyPlotter, wrap_label_smart, font_size
 import matplotlib.pyplot as plt
 import matplotlib.backends.backend_pdf as pdf_backend
 import matplotlib.figure as mpl_figure
@@ -283,6 +283,149 @@ def plot_current_pcg_usage_artist(analyzer: SurveyAnalyzer, plotter: SurveyPlott
     fig.savefig(pdf_path)
     plt.close(fig)
     
+    print(f"  Saved as: {pdf_path}")
+    return pdf_path
+
+# Show role breakdown per designer-focused usage with selectable normalization
+def plot_role_per_usage(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_dir: str, normalize_by: str = 'role') -> str:
+    """Plot stacked bars per designer task showing role contributions.
+
+        Normalization modes:
+        - normalize_by='task': each bar (task) sums to 100% across roles.
+        - normalize_by='role' (default): each segment reflects the percentage of respondents within that role
+            who selected the task (bars do not necessarily sum to 100%).
+
+        Designer tasks considered:
+        - Level layout/structure generation
+        - Enemy/NPC placement
+        - Mission/quest generation
+        - Puzzle generation
+        """
+    question_key = 'current_pcg_usage'
+    # Original option strings from schema (we'll map them to display/keys used by counts)
+    designer_tasks = [
+        'Level layout/structure generation',
+        'Enemy/NPC placement',
+        'Mission/quest generation',
+        'Puzzle generation'
+    ]
+
+    # Map task labels using analyzer's mapping so keys match get_question_counts
+    mapped_tasks = [analyzer._get_mapped_option(opt) for opt in designer_tasks]
+
+    # Use fixed role order, but include only roles present in data; append any unexpected roles at the end
+    desired_role_order = [
+        'Level Designer',
+        'Game Designer',
+        'Technical Artist',
+        'Environment Artist',
+        'Programmer/Technical Designer',
+        'Academic/Researcher',
+        'Other'
+    ]
+    present_roles = set(analyzer.get_question_values('professional_role', filtered=False))
+    roles = [r for r in desired_role_order if r in present_roles]
+    extra_roles = sorted([r for r in present_roles if r not in desired_role_order])
+    roles.extend(extra_roles)
+    # Remove 'Other' role from plotting/legend if present
+    roles = [r for r in roles if r != 'Other']
+
+    # Helper to shorten role labels for legend
+    def shorten_role(role: str) -> str:
+        shortcuts = {
+            'Level Designer': 'LD',
+            'Game Designer': 'GD',
+            'Technical Artist': 'TA',
+            'Environment Artist': 'EA',
+            'Programmer/Technical Designer': 'PTD',
+            'Academic/Researcher': 'AR',
+            'Other': 'O'
+        }
+        return shortcuts.get(role, role[:3])
+
+    shortened_roles = [shorten_role(role) for role in roles]
+
+    # Build role-by-task counts
+    role_task_counts = {role: [0] * len(mapped_tasks) for role in roles}
+
+    for role in roles:
+        analyzer.clear_filters()
+        analyzer.add_filter('professional_role', role)
+        analyzer.apply_filters()
+        counts = analyzer.get_question_counts(question_key, filtered=True)
+        for j, task in enumerate(mapped_tasks):
+            role_task_counts[role][j] = counts.get(task, 0)
+
+    # Reset filters
+    analyzer.clear_filters()
+
+    # Compute percentages based on requested normalization
+    if normalize_by == 'task':
+        # Each task (bar) sums to 100% across roles
+        totals_per_task = [0] * len(mapped_tasks)
+        for j in range(len(mapped_tasks)):
+            totals_per_task[j] = sum(role_task_counts[role][j] for role in roles)
+
+        role_task_percent = {
+            role: [
+                (role_task_counts[role][j] / totals_per_task[j] * 100) if totals_per_task[j] > 0 else 0
+                for j in range(len(mapped_tasks))
+            ]
+            for role in roles
+        }
+    else:
+        # Default: normalize by role population size
+        # Percentage of respondents within each role who selected the task
+        role_totals = analyzer.get_question_counts('professional_role', filtered=False)
+        role_task_percent = {
+            role: [
+                (role_task_counts[role][j] / max(role_totals.get(role, 0), 1) * 100)
+                for j in range(len(mapped_tasks))
+            ]
+            for role in roles
+        }
+
+    # Figure sizing and wrapping
+    label_wrap_width = 30
+    wrapped_tasks = [wrap_label_smart(t, label_wrap_width) for t in mapped_tasks]
+    chart_size = calculate_chart_size(len(mapped_tasks))
+    # Expand width to make room for external legend
+    chart_size = (12.0, chart_size[1])
+
+    # Plot stacked horizontal bars
+    fig, ax = plt.subplots(figsize=chart_size)
+    # Increase axis tick label sizes slightly (+2pt)
+    ax.tick_params(axis='y', labelsize=font_size)
+    ax.tick_params(axis='x', labelsize=(font_size - 5))
+    left = [0] * len(mapped_tasks)
+    colors = plotter.role_colors
+
+    for i, role in enumerate(roles):
+        values = role_task_percent[role]
+        ax.barh(wrapped_tasks, values, left=left, label=shortened_roles[i], color=colors[i])
+        left = [left[k] + values[k] for k in range(len(values))]
+
+    # X-axis limits and label
+    if normalize_by == 'task':
+        # Percentage scale to 100 when normalizing per task
+        ax.set_xlim(0, 100)
+        ax.set_xlabel('% of task responses by role', fontsize=font_size)
+    else:
+        # Auto-scale based on stacked totals (may exceed 100)
+        stacked_totals = [sum(role_task_percent[role][j] for role in roles) for j in range(len(mapped_tasks))]
+        max_total = max(stacked_totals) if stacked_totals else 0
+        ax.set_xlim(0, max_total * 1.08 if max_total > 0 else 100)
+        ax.set_xlabel('Accumulated percentages per role', fontsize=font_size - 1)
+    ax.invert_yaxis()  # Top category at top
+    # Place legend inside bottom-right where there's room
+    ax.legend(loc='lower right', fontsize=20, ncol=2)
+
+    plt.tight_layout()
+
+    pdf_path = os.path.join(output_dir, f"q5_role_per_usage.pdf")
+    fig.savefig(pdf_path)
+    plt.close(fig)
+
     print(f"  Saved as: {pdf_path}")
     return pdf_path
 
@@ -842,7 +985,7 @@ def main() -> None:
     print("=== Survey Plot Generator ===\n")
     
     # Specify which questions to plot (1-20). Use None or empty list to plot all.
-    questions_to_plot = [14]
+    questions_to_plot = [5]
     # questions_to_plot = list(range(1, 21))  # Plot all questions by default
     
     # Create output directory
@@ -865,7 +1008,7 @@ def main() -> None:
         2: [plot_years_experience],
         3: [plot_game_engines],
         4: [plot_procedural_tools_experience],
-        5: [plot_current_pcg_usage],
+        5: [plot_current_pcg_usage, plot_role_per_usage],
         6: [plot_level_generation_frequency, plot_level_generation_frequency_comparison],
         7: [plot_primary_concerns],
         8: [plot_tool_view],

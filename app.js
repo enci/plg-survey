@@ -815,7 +815,6 @@ const SurveyApp = {
                 indexAxis: 'y', // horizontal stacked bars
                 responsive: true,
                 maintainAspectRatio: false,
-                devicePixelRatio: 1,
                 plugins: {
                     title: {
                         display: false,
@@ -1075,7 +1074,6 @@ const SurveyApp = {
                 cutout: '60%', // Creates the hole in the middle
                 responsive: true,
                 maintainAspectRatio: false,
-                devicePixelRatio: 1,
                 plugins: {
                     title: {
                         display: false,
@@ -1210,7 +1208,6 @@ const SurveyApp = {
                 indexAxis: 'y', // horizontal bars
                 responsive: true,
                 maintainAspectRatio: false,
-                devicePixelRatio: 1,
                 plugins: {
                     title: {
                         display: false,
@@ -1299,7 +1296,6 @@ const SurveyApp = {
                 indexAxis: 'y', // horizontal stacked bars
                 responsive: true,
                 maintainAspectRatio: false,
-                devicePixelRatio: 1,
                 scales: {
                     x: {
                         stacked: true,
