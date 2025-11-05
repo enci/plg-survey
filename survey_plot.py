@@ -153,7 +153,7 @@ def plot_procedural_tools_experience(analyzer: SurveyAnalyzer, plotter: SurveyPl
     num_options = get_question_options_count(analyzer, question_key)
     chart_size = calculate_chart_size(num_options)
     # Make the chart taller for matrix data
-    chart_size = (chart_size[0], chart_size[1] * 1.2)
+    chart_size = (chart_size[0], chart_size[1])
     
     
     # Use stacked bar chart for better readability of matrix data
@@ -430,10 +430,10 @@ def plot_role_per_usage(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output
     return pdf_path
 
 def plot_role_vs_usage_counts(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_dir: str) -> str:
-    return plot_role_vs_usage(analyzer, plotter, output_dir, use_percentages=False)
+    return plot_role_vs_usage(analyzer, plotter, output_dir, per_group=False)
 
 # Create side-by-side comparison of role groups for designer-focused PCG usage
-def plot_role_vs_usage(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_dir: str, use_percentages: bool = True) -> str:
+def plot_role_vs_usage(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_dir: str, per_group: bool = True) -> str:
     """Side-by-side comparison of designer-focused PCG usage for two groups.
 
     Groups:
@@ -444,13 +444,14 @@ def plot_role_vs_usage(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_
         analyzer: SurveyAnalyzer instance
         plotter: SurveyPlotter instance
         output_dir: Directory to save the plot
-        use_percentages: If True, display percentages; if False, display raw counts
+        per_group: If True, normalize by group size (percentage within each group); 
+                   if False, normalize by total participants (percentage of all respondents)
     
     Note: Academic/Researcher and Other responses are excluded from this comparison.
     """
     question_key = 'current_pcg_usage'
     
-    mode_str = "percentages" if use_percentages else "counts"
+    mode_str = "per group" if per_group else "per total"
     print(f"Creating role vs usage comparison plot ({mode_str})")
     
     # Designer tasks to compare
@@ -471,8 +472,13 @@ def plot_role_vs_usage(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_
     role_groups = [design_roles, technical_art_roles]
     group_labels = ['Design Roles', 'Technical/Art Roles']
     
+    # Get total number of participants across all groups for normalization
+    role_counts = analyzer.get_question_counts('professional_role', filtered=False)
+    total_participants = sum(role_counts.get(role, 0) for role in design_roles + technical_art_roles)
+    
     # Collect data for each role group
     data_sets = []
+    group_totals = []  # Store total respondents per group for reference
     for roles in role_groups:
         analyzer.clear_filters()
         analyzer.add_filter('professional_role', roles)
@@ -481,17 +487,19 @@ def plot_role_vs_usage(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_
         counts = analyzer.get_question_counts(question_key, filtered=True)
         
         # Count total respondents in this role group
-        role_counts = analyzer.get_question_counts('professional_role', filtered=False)
         total_in_group = sum(role_counts.get(role, 0) for role in roles)
+        group_totals.append(total_in_group)
         
-        # Calculate values (percentages or raw counts)
+        # Calculate percentages normalized by group size or total participants
         task_values = {}
         for task in mapped_tasks:
             count = counts.get(task, 0)
-            if use_percentages:
+            if per_group:
+                # Normalize by group size: percentage within this group
                 value = (count / total_in_group * 100) if total_in_group > 0 else 0
             else:
-                value = count
+                # Normalize by total participants: percentage of all respondents
+                value = (count / total_participants * 100) if total_participants > 0 else 0
             task_values[task] = value
         
         data_sets.append(task_values)
@@ -506,15 +514,18 @@ def plot_role_vs_usage(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_
     # Calculate chart size
     num_options = len(mapped_tasks)
     chart_size = calculate_chart_size(num_options)
-    chart_size = (chart_size[0], chart_size[1] * 1.6)  # Add extra height for comparison
+    chart_size = (chart_size[0], chart_size[1] * 1.5)  # Add extra height for comparison
     
     # Create figure
     fig, ax = plt.subplots(figsize=chart_size)
     
     # Plot settings
     y = list(range(len(mapped_tasks)))
-    height = 0.8 / len(group_labels)  # Bar height for each group
+    height = 0.43  # Bar height for each group (tight, no overlap)
     colors = ['#2E86AB', '#E67E22']  # Blue for Design, orange for Other
+    
+    # Find max value for axis scaling
+    max_value = max(max(d.values()) for d in data_sets) if data_sets else 0
     
     # Plot bars for each role group
     for i, (task_values, label, color) in enumerate(zip(data_sets, group_labels, colors)):
@@ -526,24 +537,20 @@ def plot_role_vs_usage(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_
         for bar in bars:
             width_val = bar.get_width()
             if width_val > 0:
-                if use_percentages:
-                    label_text = f'{width_val:.1f}%'
-                else:
-                    label_text = f'{int(width_val)}'
-                ax.text(width_val + 1, bar.get_y() + bar.get_height()/2.,
+                # Both modes show percentages
+                label_text = f'{width_val:.1f}%'
+                ax.text(width_val + (max_value * 0.01), bar.get_y() + bar.get_height()/2.,
                        label_text, ha='left', va='center', fontsize=font_size)
-    
-    # Find max value for axis scaling
-    max_value = max(max(d.values()) for d in data_sets) if data_sets else 0
     
     # Styling
     ax.set_xlim(0, max_value * 1.25)
-    ax.set_yticks(y)
-    ax.set_yticklabels(wrapped_tasks, fontsize=font_size)
-    if use_percentages:
+    if per_group:
         ax.set_xlabel('% of respondents in role group', fontsize=font_size)
     else:
-        ax.set_xlabel('Number of respondents', fontsize=font_size)
+        ax.set_xlabel('% of all respondents', fontsize=font_size)
+    
+    ax.set_yticks(y)
+    ax.set_yticklabels(wrapped_tasks, fontsize=font_size)
     ax.invert_yaxis()  # Top task at top
     ax.tick_params(axis='x', labelsize=font_size-2)
     
@@ -557,7 +564,7 @@ def plot_role_vs_usage(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_
     plt.tight_layout()
     
     # Generate filename with mode suffix
-    suffix = "" if use_percentages else "_counts"
+    suffix = "" if per_group else "_total"
     pdf_path = os.path.join(output_dir, f"q5_role_vs_usage{suffix}.pdf")
     fig.savefig(pdf_path)
     plt.close(fig)
@@ -639,7 +646,7 @@ def plot_role_vs_usage_3(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, outpu
     
     # Plot settings
     y = list(range(len(mapped_tasks)))
-    height = 0.8 / len(group_labels)  # Bar height for each group
+    height = 0.5  # Bar height for each group (tight, no overlap)
     colors = ['#2E86AB', '#E67E22', '#27AE60']  # Blue for Designer, orange for Tech, green for Other
     
     # Plot bars for each role group
@@ -743,7 +750,7 @@ def plot_level_generation_frequency_comparison(analyzer: SurveyAnalyzer, plotter
         filter_configs,        
         labels,
         title=title,
-        figsize=(12, 10),
+        figsize=(12, 8),
         show_percentages=True,
         label_wrap_width=18,
         colors=['#2E86AB', '#E67E22']
@@ -773,8 +780,8 @@ def plot_level_generation_frequency_comparison(analyzer: SurveyAnalyzer, plotter
     else:
         norm_labels = ['0.5']  # Single option case
     
-    ax2.set_yticklabels(norm_labels, fontsize=font_size-2)
-    ax2.set_ylabel('Assigned Value (0-1)', fontsize=font_size-2)
+    ax2.set_yticklabels(norm_labels, fontsize=font_size)
+    ax2.set_ylabel('Assigned Value (0-1)', fontsize=font_size)
     
     pdf_path = os.path.join(output_dir, f"q6_comparison_{question_key}.pdf")
     fig.savefig(pdf_path)
@@ -1341,7 +1348,7 @@ def plot_ai_conclusions(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output
     fig, ax = plt.subplots(figsize=(12, 6.8))
 
     y = np.arange(len(contexts))
-    height = 0.36
+    height = 0.5  # Bar height for each group (tight, no overlap)
 
     # Colors: blue for control, orange for automation
     control_color = '#2E86AB'
@@ -1396,7 +1403,7 @@ def main() -> None:
     print("=== Survey Plot Generator ===\n")
     
     # Specify which questions to plot (1-20). Use None or empty list to plot all.
-    questions_to_plot = [6]
+    questions_to_plot = [5, 6, 21]
     # questions_to_plot = list(range(1, 22))  # Plot all questions by default
     
     # Create output directory

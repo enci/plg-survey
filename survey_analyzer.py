@@ -718,7 +718,7 @@ class SurveyPlotter:
         
         # Prepare data for plotting
         y = np.arange(len(all_options))
-        height = 0.8 / len(data_sets) # Adjust height based on number of datasets
+        height = 0.43  # Fixed bar height for tight, non-overlapping comparison charts
         
         fig, ax = plt.subplots(figsize=figsize)
         
@@ -739,7 +739,7 @@ class SurveyPlotter:
                     else:
                         label_text = str(int(width_val))
                     ax.text(width_val + max(values) * 0.01, bar.get_y() + bar.get_height()/2.,
-                           label_text, ha='left', va='center')
+                           label_text, ha='left', va='center', fontsize=font_size)
         
         # Find the maximum value across all datasets for proper axis scaling
         all_values = []
@@ -750,10 +750,11 @@ class SurveyPlotter:
         # Set x-axis limits with extra space for percentage labels (20% padding)
         ax.set_xlim(0, max_value * 1.2)
         ax.set_yticks(y)
-        ax.set_yticklabels(wrapped_options)
+        ax.set_yticklabels(wrapped_options, fontsize=font_size)
         ax.invert_yaxis()  # Top option at top
+        ax.tick_params(axis='x', labelsize=font_size-2)
         
-        ax.legend()
+        ax.legend(fontsize=font_size-2)
         
         # Title removed for cleaner paper presentation
         
