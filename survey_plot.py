@@ -431,10 +431,12 @@ def plot_role_per_usage(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output
 
 # Create side-by-side comparison of role groups for designer-focused PCG usage
 def plot_role_vs_usage(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_dir: str) -> str:
-    """Plot side-by-side comparison of different role groups for designer-focused PCG usage tasks.
-    
-    Shows how different professional roles (Design vs Artist vs Programmer) use various
-    designer-focused procedural generation capabilities.
+    """Side-by-side comparison of designer-focused PCG usage for two groups.
+
+    Groups:
+    - Design Roles: Level Designer, Game Designer
+    - Other Roles: all remaining roles present in the data (e.g., Technical Artist, Environment Artist,
+      Programmer/Technical Designer, Academic/Researcher, Other)
     """
     question_key = 'current_pcg_usage'
     
@@ -451,13 +453,13 @@ def plot_role_vs_usage(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_
     # Map task labels to match analyzer's mapping
     mapped_tasks = [analyzer._get_mapped_option(opt) for opt in designer_tasks]
     
-    # Define role groups for comparison
+    # Define role groups for comparison: Design vs Other
     design_roles = ['Level Designer', 'Game Designer']
-    artist_roles = ['Technical Artist', 'Environment Artist']
-    programmer_roles = ['Programmer/Technical Designer']
-    
-    role_groups = [design_roles, artist_roles, programmer_roles]
-    group_labels = ['Design Roles', 'Artist Roles', 'Programmer Roles']
+    present_roles = set(analyzer.get_question_values('professional_role', filtered=False))
+    other_roles = sorted([r for r in present_roles if r not in design_roles])
+
+    role_groups = [design_roles, other_roles]
+    group_labels = ['Design Roles', 'Other Roles']
     
     # Collect data for each role group
     data_sets = []
@@ -492,7 +494,7 @@ def plot_role_vs_usage(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_
     # Calculate chart size
     num_options = len(mapped_tasks)
     chart_size = calculate_chart_size(num_options)
-    chart_size = (chart_size[0], chart_size[1] + 1)  # Add extra height for comparison
+    chart_size = (chart_size[0], chart_size[1] * 1.6)  # Add extra height for comparison
     
     # Create figure
     fig, ax = plt.subplots(figsize=chart_size)
@@ -500,7 +502,7 @@ def plot_role_vs_usage(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_
     # Plot settings
     y = list(range(len(mapped_tasks)))
     height = 0.8 / len(group_labels)  # Bar height for each group
-    colors = ['#9E2DB5', '#50A326', '#2E86AB']  # Purple for design, green for artist, blue for programmer
+    colors = ['#9E2DB5', '#2E86AB']  # Purple for Design, blue for Other
     
     # Plot bars for each role group
     for i, (percentages, label, color) in enumerate(zip(data_sets, group_labels, colors)):
@@ -514,13 +516,13 @@ def plot_role_vs_usage(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_
             if width_val > 0:
                 label_text = f'{width_val:.1f}%'
                 ax.text(width_val + 1, bar.get_y() + bar.get_height()/2.,
-                       label_text, ha='left', va='center', fontsize=font_size-2)
+                       label_text, ha='left', va='center', fontsize=font_size)
     
     # Find max value for axis scaling
     max_value = max(max(d.values()) for d in data_sets) if data_sets else 0
     
     # Styling
-    ax.set_xlim(0, max_value * 1.2)
+    ax.set_xlim(0, max_value * 1.25)
     ax.set_yticks(y)
     ax.set_yticklabels(wrapped_tasks, fontsize=font_size)
     ax.set_xlabel('% of respondents in role group', fontsize=font_size)
@@ -1093,13 +1095,143 @@ def plot_desired_solutions(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, out
     print(f"  Saved as: {pdf_path}")
     return pdf_path
 
+# Create grouped bar chart summarizing control vs automation themes across AI-related questions
+def plot_ai_conclusions(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_dir: str) -> str:
+    """Synthesize control vs automation theme across Q10, Q17, Q18, Q19.
+
+    X-axis contexts:
+    - AI Role (Q17)
+    - AI Priorities (Q18)
+    - AI Concerns (Q19)
+
+    Two bars per context:
+    - Control/Transparency
+    - Automation/Convenience
+    """
+    import numpy as np
+
+    print("Creating plot for: AI Conclusions (Control vs Automation)")
+
+    # Helper to map option text using analyzer's mappings
+    map_opt = analyzer._get_mapped_option
+
+    # Define themed option sets using mapped labels (short forms where available)
+    # Q17 (ai_role_preference - multiple choice up to 2)
+    q17_control = {"Assistant-based", "Tool-based"}
+    q17_automation = {"Full automation", "Learning-based"}
+
+    # Q18 (ai_importance_factors - multiple choice up to 2)
+    q18_control = {"Creative control", "Understanding AI decisions"}
+    q18_automation = {"Speed", "Novelty"}
+
+    # Q19 (ai_concerns - multiple choice up to 2)
+    # Control-oriented concerns (evidence of desire for control/transparency)
+    q19_control = {"Unpredictable results", "Loss of agency", "Black box nature"}
+    # Non-control concerns used to provide a contrasting bar (engineering/ops/legal)
+    q19_automation = {"Performance requirements", "Integration difficulty", "Lack of specialized tools", "Copyright/IP issues", "IP/ownership"}
+
+    # Calculation helper: percentage of respondents for a question that selected any item in target set
+    def percent_selecting_any(question_key: str, target_set: set) -> float:
+        df = analyzer.get_filtered_dataframe()
+        if question_key not in df.columns:
+            return 0.0
+        series = df[question_key].dropna()
+        if series.empty:
+            return 0.0
+        total = len(series)
+
+        hit = 0
+        for val in series:
+            # Normalize to iterable of strings
+            if isinstance(val, list):
+                items = [map_opt(v) for v in val]
+            elif isinstance(val, str):
+                items = [map_opt(val)]
+            else:
+                # Unexpected type (e.g., dict for matrix) – treat as no hit
+                items = []
+            if any(item in target_set for item in items):
+                hit += 1
+        return (hit / total) * 100.0 if total > 0 else 0.0
+
+    p17_ctrl = percent_selecting_any('ai_role_preference', q17_control)
+    p17_auto = percent_selecting_any('ai_role_preference', q17_automation)
+
+    p18_ctrl = percent_selecting_any('ai_importance_factors', q18_control)
+    p18_auto = percent_selecting_any('ai_importance_factors', q18_automation)
+
+    p19_ctrl = percent_selecting_any('ai_concerns', q19_control)
+    p19_auto = percent_selecting_any('ai_concerns', q19_automation)
+
+    contexts = [
+        "AI Role",
+        "AI Priorities",
+        "AI Concerns"
+    ]
+
+    control_vals = [p17_ctrl, p18_ctrl, p19_ctrl]
+    automation_vals = [p17_auto, p18_auto, p19_auto]
+
+    # Figure sizing and style consistent with other figures (wider to fit legend)
+    fig, ax = plt.subplots(figsize=(12, 6.8))
+
+    y = np.arange(len(contexts))
+    height = 0.36
+
+    # Colors: blue for control, orange for automation
+    control_color = '#2E86AB'
+    automation_color = '#E67E22'
+
+    bars1 = ax.barh(y - height/2, control_vals, height, label='Control/Transparency', color=control_color)
+    bars2 = ax.barh(y + height/2, automation_vals, height, label='Automation/Convenience', color=automation_color)
+
+    # Styling
+    # Provide a little room to the right beyond 100% for labels
+    right_margin = 10  # percentage points of extra space
+    ax.set_xlim(0, 100 + right_margin)
+    ax.set_xlabel('% of respondents', fontsize=font_size)
+    wrapped_ctx = [wrap_label_smart(c, 20) for c in contexts]
+    ax.set_yticks(y)
+    ax.set_yticklabels(wrapped_ctx, fontsize=font_size)
+    ax.invert_yaxis()  # Top context at top
+
+    # Reference line at 50%
+    ax.axvline(50, color='#888888', linewidth=1, linestyle='--', alpha=0.7)
+
+    # Add bar labels to the right end of bars
+    def add_labels_h(bars):
+        for b in bars:
+            width_val = b.get_width()
+            if width_val > 0:
+                ax.text(width_val + 1, b.get_y() + b.get_height()/2,
+                        f"{width_val:.1f}%", ha='left', va='center', fontsize=font_size)
+
+    add_labels_h(bars1)
+    add_labels_h(bars2)
+
+    # Legend and spines consistent with plotter style
+    # Place legend centered below the chart
+    ax.legend(loc='upper center', bbox_to_anchor=(0.45, -0.17), ncol=2, fontsize=font_size-2, frameon=True)
+    for spine in ax.spines.values():
+        spine.set_linewidth(plotter.chart_style['spine_linewidth'])
+        spine.set_color(plotter.chart_style['spine_color'])
+
+    plt.tight_layout()
+
+    pdf_path = os.path.join(output_dir, f"c2_ai_conclusions.pdf")
+    fig.savefig(pdf_path)
+    plt.close(fig)
+
+    print(f"  Saved as: {pdf_path}")
+    return pdf_path
+
 # Generate plots for all 20 survey questions.
 def main() -> None:
     
     print("=== Survey Plot Generator ===\n")
     
     # Specify which questions to plot (1-20). Use None or empty list to plot all.
-    questions_to_plot = [5]
+    questions_to_plot = [21]
     # questions_to_plot = list(range(1, 21))  # Plot all questions by default
     
     # Create output directory
@@ -1137,7 +1269,8 @@ def main() -> None:
         17: [plot_ai_role_preference],
         18: [plot_ai_importance_factors],
         19: [plot_ai_concerns],
-        20: [plot_desired_solutions]
+        20: [plot_desired_solutions],
+        21: [plot_ai_conclusions]
     }
     
     # Generate plots for selected questions
