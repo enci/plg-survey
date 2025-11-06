@@ -598,7 +598,7 @@ class SurveyPlotter:
             
             # Extend x-axis to make room for labels
             max_value = max(display_values) if display_values else 0
-            ax.set_xlim(0, max_value * 1.22)  # Add padding
+            ax.set_xlim(0, max_value * 1.26)  # Add padding
             
             # Add value labels on bars
             for i, bar in enumerate(bars):
@@ -613,7 +613,7 @@ class SurveyPlotter:
             
             # Extend y-axis to make room for labels
             max_value = max(display_values) if display_values else 0
-            ax.set_ylim(0, max_value * 1.15)  # Add 15% padding
+            ax.set_ylim(0, max_value * 1.18)  # Add 15% padding
             
             # Add value labels on bars
             for i, bar in enumerate(bars):

@@ -53,6 +53,8 @@ def plot_professional_role(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, out
     
     # Local wrapping settings for this chart
     label_wrap_width = 0
+    # Ensure no leftover filters affect this chart
+    analyzer.clear_filters()
     
     print(f"Creating plot for: {question_text}")
 
@@ -85,6 +87,8 @@ def plot_years_experience(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, outp
     
     # Local wrapping settings for this chart
     label_wrap_width = None
+    # Ensure no leftover filters affect this chart
+    analyzer.clear_filters()
         
     print(f"Creating plot for: {question_text}")
 
@@ -117,6 +121,8 @@ def plot_game_engines(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_d
 
     # Local wrapping settings for this chart
     label_wrap_width = 25   # Wrap long engine names
+    # Ensure no leftover filters affect this chart
+    analyzer.clear_filters()
     
     print(f"Creating plot for: {question_text}")
     
@@ -148,13 +154,14 @@ def plot_procedural_tools_experience(analyzer: SurveyAnalyzer, plotter: SurveyPl
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)        
     print(f"Creating plot for: {question_text}")
+    # Ensure no leftover filters affect this chart
+    analyzer.clear_filters()
     
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
     chart_size = calculate_chart_size(num_options)
     # Make the chart taller for matrix data
-    chart_size = (chart_size[0], chart_size[1])
-    
+    chart_size = (chart_size[0] - 1, chart_size[1] + 0.3)    
     
     # Use stacked bar chart for better readability of matrix data
     fig = plotter.create_matrix_stacked_bar_chart(
@@ -162,9 +169,9 @@ def plot_procedural_tools_experience(analyzer: SurveyAnalyzer, plotter: SurveyPl
         title=question_text,
         figsize=chart_size,
         colormap='plasma', 
-        label_wrap_width=25,
+        label_wrap_width=45,
         show_percentages=True,
-        legend_xoffset=-0.18
+        legend_xoffset=-0.30
     )
     
     pdf_path = os.path.join(output_dir, f"q4_{question_key}.pdf")
@@ -181,6 +188,8 @@ def plot_procedural_tools_experience_comparison(analyzer: SurveyAnalyzer, plotte
     question_text = question_info.get('question', question_key)
     
     print(f"Creating comparison plot for: {question_text}")
+    # Ensure no leftover filters affect this comparison
+    analyzer.clear_filters()
     
     # Define role groups for comparison
     artist_roles = ['Technical Artist', 'Environment Artist']
@@ -241,7 +250,7 @@ def plot_current_pcg_usage(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, out
         show_percentages=True,
         label_wrap_width=label_wrap_width,
         legend_fontsize=21,
-        xlim_padding=12,
+        xlim_padding=13,
     )
     
     pdf_path = os.path.join(output_dir, f"q5_{question_key}.pdf")
@@ -312,6 +321,9 @@ def plot_role_per_usage(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output
 
     # Map task labels using analyzer's mapping so keys match get_question_counts
     mapped_tasks = [analyzer._get_mapped_option(opt) for opt in designer_tasks]
+
+    # Ensure no leftover filters affect this chart
+    analyzer.clear_filters()
 
     # Use fixed role order, but include only roles present in data; append any unexpected roles at the end
     desired_role_order = [
@@ -453,6 +465,8 @@ def plot_role_vs_usage(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_
     
     mode_str = "per group" if per_group else "per total"
     print(f"Creating role vs usage comparison plot ({mode_str})")
+    # Ensure no leftover filters affect this chart
+    analyzer.clear_filters()
     
     # Designer tasks to compare
     designer_tasks = [
@@ -586,6 +600,8 @@ def plot_role_vs_usage_3(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, outpu
     question_key = 'current_pcg_usage'
     
     print(f"Creating 3-way role vs usage comparison plot")
+    # Ensure no leftover filters affect this chart
+    analyzer.clear_filters()
     
     # Designer tasks to compare
     designer_tasks = [
@@ -697,7 +713,8 @@ def plot_level_generation_frequency(analyzer: SurveyAnalyzer, plotter: SurveyPlo
     question_text = question_info.get('question', question_key)
     
     print(f"Creating plot for: {question_text}")
-    analyzer.clear_filters()    
+    # Ensure no leftover filters affect this chart
+    analyzer.clear_filters()
 
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
@@ -729,6 +746,8 @@ def plot_level_generation_frequency_comparison(analyzer: SurveyAnalyzer, plotter
     question_text = question_info.get('question', question_key)
     
     print(f"Creating comparison plot for: {question_text}")
+    # Ensure no leftover filters affect this comparison
+    analyzer.clear_filters()
     
     # Define role groups for comparison - design roles vs artist roles
     design_roles = ['Level Designer', 'Game Designer']
@@ -806,7 +825,7 @@ def plot_primary_concerns(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, outp
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
     chart_size = calculate_chart_size(num_options)
-    
+    # Ensure no leftover filters affect this chart
     analyzer.clear_filters()
     fig = plotter.create_role_stacked_chart(
         question_key,
@@ -816,7 +835,7 @@ def plot_primary_concerns(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, outp
         label_wrap_width=label_wrap_width,
         legend_ncol=2,
         legend_fontsize=18,
-        xlim_padding=10
+        xlim_padding=11
     )
     
     pdf_path = os.path.join(output_dir, f"q7_{question_key}.pdf")
@@ -833,6 +852,8 @@ def plot_primary_concerns_comparison(analyzer: SurveyAnalyzer, plotter: SurveyPl
     question_text = question_info.get('question', question_key)
     
     print(f"Creating comparison plot for: {question_text}")
+    # Ensure no leftover filters affect this comparison
+    analyzer.clear_filters()
 
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
@@ -884,8 +905,8 @@ def plot_tool_view(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_dir:
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
     chart_size = calculate_chart_size(num_options)
-
-    analyzer.clear_filters()    
+    # Ensure no leftover filters affect this chart
+    analyzer.clear_filters()
     fig = plotter.create_role_stacked_chart(
         question_key,
         title=question_text,
@@ -918,7 +939,9 @@ def plot_critical_factors(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, outp
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
     chart_size = calculate_chart_size(num_options)
-    
+    # Ensure no leftover filters affect this chart
+    analyzer.clear_filters()
+
     fig = plotter.create_role_stacked_chart(
         question_key,
         title=question_text,
@@ -949,6 +972,9 @@ def plot_node_tool_features(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, ou
     chart_size = calculate_chart_size(num_options)
     
     # Use position distribution visualization to show ranking patterns
+    # Ensure no leftover filters affect this chart
+    analyzer.clear_filters()
+
     fig = plotter.create_ranking_position_chart(
         question_key,
         title=question_text,
@@ -979,7 +1005,9 @@ def plot_realtime_feedback_importance(analyzer: SurveyAnalyzer, plotter: SurveyP
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
     chart_size = calculate_chart_size(num_options)
-    
+    # Ensure no leftover filters affect this chart
+    analyzer.clear_filters()
+
     fig = plotter.create_role_stacked_chart(
         question_key,
         title=question_text,
@@ -987,7 +1015,7 @@ def plot_realtime_feedback_importance(analyzer: SurveyAnalyzer, plotter: SurveyP
         show_percentages=True,
         legend_fontsize=20,
         legend_ncol=1,
-        xlim_padding=22
+        xlim_padding=25
     )
     
     pdf_path = os.path.join(output_dir, f"q11_{question_key}.pdf")
@@ -1008,7 +1036,9 @@ def plot_preferred_approach(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, ou
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
     chart_size = calculate_chart_size(num_options)
-    
+    # Ensure no leftover filters affect this chart
+    analyzer.clear_filters()
+
     fig = plotter.create_role_stacked_chart(
         question_key,
         title=question_text,
@@ -1016,7 +1046,7 @@ def plot_preferred_approach(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, ou
         show_percentages=True,
         label_wrap_width=45,
         legend_fontsize=21,
-        xlim_padding=10,
+        xlim_padding=12,
         legend_ncol=2
     )
     
@@ -1038,6 +1068,8 @@ def plot_integration_preference(analyzer: SurveyAnalyzer, plotter: SurveyPlotter
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
     chart_size = calculate_chart_size(num_options)
+    # Ensure no leftover filters affect this chart
+    analyzer.clear_filters()
 
     fig = plotter.create_role_stacked_chart(
         question_key,
@@ -1047,7 +1079,7 @@ def plot_integration_preference(analyzer: SurveyAnalyzer, plotter: SurveyPlotter
         label_wrap_width=35,
         legend_ncol=3,
         legend_fontsize=19,
-        xlim_padding=8
+        xlim_padding=9
 
     )
     
@@ -1072,8 +1104,9 @@ def plot_genre_interest(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output
      # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
     chart_size = calculate_chart_size(num_options) # Make the chart taller for matrix data  
-    chart_size = (chart_size[0], chart_size[1] * 1.2)
-
+    chart_size = (chart_size[0] - 1.0, chart_size[1])
+    # Ensure no leftover filters affect this chart
+    analyzer.clear_filters()
     # Use matrix stacked bar chart for this matrix question
     fig = plotter.create_matrix_stacked_bar_chart(
         question_key,
@@ -1103,7 +1136,8 @@ def plot_level_representation(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, 
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
     chart_size = calculate_chart_size(num_options)
-
+    # Ensure no leftover filters affect this chart
+    analyzer.clear_filters()
     fig = plotter.create_role_stacked_chart(
         question_key,
         title=question_text,
@@ -1131,14 +1165,15 @@ def plot_most_useful_approach(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, 
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
     chart_size = calculate_chart_size(num_options)
-
+    # Ensure no leftover filters affect this chart
+    analyzer.clear_filters()
     fig = plotter.create_role_stacked_chart(
         question_key,
         title=question_text,
         figsize=chart_size,
         show_percentages=True,
         label_wrap_width=35,
-        xlim_padding=15,
+        xlim_padding=17,
         legend_loc='upper right',
     )
     
@@ -1160,7 +1195,8 @@ def plot_ai_role_preference(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, ou
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
     chart_size = calculate_chart_size(num_options)
-
+    # Ensure no leftover filters affect this chart
+    analyzer.clear_filters()
     fig = plotter.create_role_stacked_chart(
         question_key,
         title=question_text,
@@ -1194,6 +1230,9 @@ def plot_ai_importance_factors(analyzer: SurveyAnalyzer, plotter: SurveyPlotter,
     num_options = get_question_options_count(analyzer, question_key)
     chart_size = calculate_chart_size(num_options)
 
+    # Ensure no leftover filters affect this chart
+    analyzer.clear_filters()
+
     fig = plotter.create_role_stacked_chart(
         question_key,
         title=question_text,
@@ -1224,6 +1263,8 @@ def plot_ai_concerns(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_di
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
     chart_size = calculate_chart_size(num_options)  # Use consistent sizing for role stacked charts
+    # Ensure no leftover filters affect this chart
+    analyzer.clear_filters()
 
     fig = plotter.create_role_stacked_chart(
         question_key,
@@ -1252,7 +1293,8 @@ def plot_desired_solutions(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, out
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
     chart_size = calculate_chart_size(num_options)
-    
+    # Ensure no leftover filters affect this chart
+    analyzer.clear_filters()
     fig = plotter.create_role_stacked_chart(
         question_key,
         title=question_text,
@@ -1426,8 +1468,8 @@ def main() -> None:
     print("=== Survey Plot Generator ===\n")
     
     # Specify which questions to plot (1-20). Use None or empty list to plot all.
-    questions_to_plot = [6, 21]
-    # questions_to_plot = list(range(1, 22))  # Plot all questions by default
+    # questions_to_plot = [6, 21]
+    questions_to_plot = list(range(1, 22))  # Plot all questions by default
     
     # Create output directory
     output_dir = "plots"
@@ -1449,7 +1491,7 @@ def main() -> None:
         2: [plot_years_experience],
         3: [plot_game_engines],
         4: [plot_procedural_tools_experience],
-        5: [plot_current_pcg_usage, plot_role_vs_usage, plot_role_vs_usage_counts],
+        5: [plot_current_pcg_usage, plot_role_vs_usage_counts],
         6: [plot_level_generation_frequency, plot_level_generation_frequency_comparison],
         7: [plot_primary_concerns],
         8: [plot_tool_view],
