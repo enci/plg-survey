@@ -640,11 +640,18 @@ class SurveyPlotter:
                                 figsize: tuple = (12, 8),
                                 show_percentages: bool = False,
                                 label_wrap_width: Optional[int] = None,
-                                colors: Optional[List] = None) -> mpl_figure.Figure:
+                                colors: Optional[List] = None,
+                                font_size: Optional[int] = None) -> mpl_figure.Figure:
         if len(filter_configs) != len(labels):
             raise ValueError("filter_configs and labels must have the same length")
         
         data_sets = []
+        # Resolve effective font size (param > chart_style > module default)
+        effective_font_size = (
+            font_size
+            if font_size is not None
+            else self.chart_style.get('font_size', globals().get('font_size', 24))
+        )
         
         # Store original state
         original_filters = self.analyzer.filters.copy()
@@ -718,7 +725,7 @@ class SurveyPlotter:
         
         # Prepare data for plotting
         y = np.arange(len(all_options))
-        height = 0.43  # Fixed bar height for tight, non-overlapping comparison charts
+        height = 0.44  # Fixed bar height for tight, non-overlapping comparison charts
         
         fig, ax = plt.subplots(figsize=figsize)
         
@@ -739,7 +746,7 @@ class SurveyPlotter:
                     else:
                         label_text = str(int(width_val))
                     ax.text(width_val + max(values) * 0.01, bar.get_y() + bar.get_height()/2.,
-                           label_text, ha='left', va='center', fontsize=font_size)
+                           label_text, ha='left', va='center', fontsize=effective_font_size)
         
         # Find the maximum value across all datasets for proper axis scaling
         all_values = []
@@ -750,11 +757,11 @@ class SurveyPlotter:
         # Set x-axis limits with extra space for percentage labels (20% padding)
         ax.set_xlim(0, max_value * 1.2)
         ax.set_yticks(y)
-        ax.set_yticklabels(wrapped_options, fontsize=font_size)
+        ax.set_yticklabels(wrapped_options, fontsize=effective_font_size)
         ax.invert_yaxis()  # Top option at top
-        ax.tick_params(axis='x', labelsize=font_size-2)
+        ax.tick_params(axis='x', labelsize=effective_font_size)
         
-        ax.legend(fontsize=font_size-2)
+        ax.legend(fontsize=effective_font_size-2)
         
         # Title removed for cleaner paper presentation
         

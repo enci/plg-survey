@@ -744,16 +744,17 @@ def plot_level_generation_frequency_comparison(analyzer: SurveyAnalyzer, plotter
     
     # Create comparison chart
     title = f"Frequency of Procedural Level Generation Usage:\nDesign vs Artist Roles"
-    
+    font_size_override = 25
     fig = plotter.create_comparison_chart(
         question_key,
         filter_configs,        
         labels,
         title=title,
-        figsize=(12, 8),
+        figsize=(12, 9),
         show_percentages=True,
         label_wrap_width=18,
-        colors=['#2E86AB', '#E67E22']
+        colors=['#2E86AB', '#E67E22'],
+        font_size=font_size_override + 5
     )
     
     # Add secondary y-axis on the right showing normalized values (0-1)
@@ -780,8 +781,9 @@ def plot_level_generation_frequency_comparison(analyzer: SurveyAnalyzer, plotter
     else:
         norm_labels = ['0.5']  # Single option case
     
-    ax2.set_yticklabels(norm_labels, fontsize=font_size)
-    ax2.set_ylabel('Assigned Value (0-1)', fontsize=font_size)
+    _fs = font_size_override if font_size_override is not None else font_size
+    ax2.set_yticklabels(norm_labels, fontsize=_fs)
+    ax2.set_ylabel('Assigned Value (0-1)', fontsize=_fs)
     
     pdf_path = os.path.join(output_dir, f"q6_comparison_{question_key}.pdf")
     fig.savefig(pdf_path)
@@ -1269,7 +1271,7 @@ def plot_desired_solutions(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, out
 
 # Create grouped bar chart summarizing control vs automation themes across AI-related questions
 def plot_ai_conclusions(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_dir: str) -> str:
-    """Synthesize control vs automation theme across Q10, Q17, Q18, Q19.
+    """Synthesize control vs automation theme across Q17, Q18, Q19.
 
     X-axis contexts:
     - AI Role (Q17)
@@ -1284,23 +1286,40 @@ def plot_ai_conclusions(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output
 
     print("Creating plot for: AI Conclusions (Control vs Automation)")
 
+    # Ensure we compute percentages over the full (unfiltered) dataset
+    # — several other plot functions call `analyzer.clear_filters()` before
+    # computing counts; failing to clear filters can silently change
+    # the percentages. Clear filters here to be explicit.
+    analyzer.clear_filters()
+
     # Helper to map option text using analyzer's mappings
     map_opt = analyzer._get_mapped_option
 
-    # Define themed option sets using mapped labels (short forms where available)
+    # Define themed option sets using raw labels, then map them with
+    # `map_opt` so comparisons use the same normalized/mapped labels
+    # as the analyzer uses for responses.
     # Q17 (ai_role_preference - multiple choice up to 2)
-    q17_control = {"Assistant-based", "Tool-based"}
-    q17_automation = {"Full automation", "Learning-based"}
+    q17_control_raw = {"Assistant-based", "Tool-based"}
+    q17_automation_raw = {"Full automation", "Learning-based"}
 
     # Q18 (ai_importance_factors - multiple choice up to 2)
-    q18_control = {"Creative control", "Understanding AI decisions"}
-    q18_automation = {"Speed", "Novelty"}
+    q18_control_raw = {"Creative control", "Understanding AI decisions"}
+    q18_automation_raw = {"Speed", "Novelty"}
 
     # Q19 (ai_concerns - multiple choice up to 2)
     # Control-oriented concerns (evidence of desire for control/transparency)
-    q19_control = {"Unpredictable results", "Loss of agency", "Black box nature"}
+    q19_control_raw = {"Unpredictable results", "Loss of agency", "Black box nature"}
     # Non-control concerns used to provide a contrasting bar (engineering/ops/legal)
-    q19_automation = {"Performance requirements", "Integration difficulty", "Lack of specialized tools", "Copyright/IP issues", "IP/ownership"}
+    q19_automation_raw = {"Performance requirements", "Integration difficulty", "Lack of specialized tools", "Copyright/IP issues", "IP/ownership"}
+
+    # Map raw target sets through analyzer mapping so comparisons are done
+    # against the same normalized strings we map responses to.
+    q17_control = set(map(map_opt, q17_control_raw))
+    q17_automation = set(map(map_opt, q17_automation_raw))
+    q18_control = set(map(map_opt, q18_control_raw))
+    q18_automation = set(map(map_opt, q18_automation_raw))
+    q19_control = set(map(map_opt, q19_control_raw))
+    q19_automation = set(map(map_opt, q19_automation_raw))
 
     # Calculation helper: percentage of respondents for a question that selected any item in target set
     def percent_selecting_any(question_key: str, target_set: set) -> float:
@@ -1311,6 +1330,10 @@ def plot_ai_conclusions(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output
         if series.empty:
             return 0.0
         total = len(series)
+        # Work with mapped target set (target_set is expected to already
+        # contain mapped labels above). Defensive: map any remaining
+        # non-mapped elements too.
+        mapped_target = set(map(map_opt, target_set))
 
         hit = 0
         for val in series:
@@ -1322,7 +1345,7 @@ def plot_ai_conclusions(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output
             else:
                 # Unexpected type (e.g., dict for matrix) – treat as no hit
                 items = []
-            if any(item in target_set for item in items):
+            if any(item in mapped_target for item in items):
                 hit += 1
         return (hit / total) * 100.0 if total > 0 else 0.0
 
@@ -1345,10 +1368,10 @@ def plot_ai_conclusions(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output
     automation_vals = [p17_auto, p18_auto, p19_auto]
 
     # Figure sizing and style consistent with other figures (wider to fit legend)
-    fig, ax = plt.subplots(figsize=(12, 6.8))
+    fig, ax = plt.subplots(figsize=(12, 6))
 
     y = np.arange(len(contexts))
-    height = 0.5  # Bar height for each group (tight, no overlap)
+    height = 0.44  # Bar height for each group (tight, no overlap)
 
     # Colors: blue for control, orange for automation
     control_color = '#2E86AB'
@@ -1403,7 +1426,7 @@ def main() -> None:
     print("=== Survey Plot Generator ===\n")
     
     # Specify which questions to plot (1-20). Use None or empty list to plot all.
-    questions_to_plot = [5, 6, 21]
+    questions_to_plot = [6, 21]
     # questions_to_plot = list(range(1, 22))  # Plot all questions by default
     
     # Create output directory
