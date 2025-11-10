@@ -31,10 +31,22 @@ os.makedirs(OUT_DIR, exist_ok=True)
 # -----------------------------
 # When True the script will only produce the final theme comparison PDF and
 # skip generating the intermediate CSVs/plots. Set to False to run full pipeline.
-ONLY_COMPARISON = True
+ONLY_COMPARISON = False
 
 # Output filename for the final comparison PDF (placed in top-level `plots/`)
 FINAL_COMPARISON_PDF = 'c3_pcgw_theme_comparison.pdf'
+
+# Module-level runtime switches. Instead of relying on command-line arguments,
+# toggle these booleans in the file when running from an editor/IDE. This makes
+# it easy to control which stages run without changing how the script is
+# invoked by the debugger or VS Code "Run" button.
+#
+# - RUN_MAIN_PIPELINE: run the full paper analysis + thematic coding + theme comparison
+# - RUN_SURVEY_BIGRAMS: compute and save TF-IDF bigrams for the survey open-texts
+# - RUN_BIGRAM_TABLE: compute (if needed) and save the LaTeX bigram comparison table
+RUN_MAIN_PIPELINE = True
+RUN_SURVEY_BIGRAMS = True
+RUN_BIGRAM_TABLE = True
 
 
 def load_papers(path=PAPERS_PATH):
@@ -149,11 +161,15 @@ def compare_themes_between_corpora(survey_docs, paper_docs, themes=THEMES, out_d
 	ax.set_yticklabels(df['theme'][::-1], fontsize=23)
 	ax.set_xlabel('Occurrences per 1000 words', fontsize=23)
 	ax.set_title('Thematic occurrence rates (normalized by words)')
-	ax.legend()
+	ax.legend(fontsize=23)
 
-	# Determine offset for labels (2% of max value)
+	# Determine offset for labels (2% of max value) and extend x-axis so labels
+	# placed to the right of bars are visible.
 	max_val = max(df['survey_per_1000_words'].max(), df['paper_per_1000_words'].max()) if len(df) > 0 else 0
 	offset = max_val * 0.02 if max_val > 0 else 0.1
+	# Add a small margin on the right for the numeric labels (12% of max_val)
+	xmax = (max_val * 1.15) if max_val > 0 else (offset + 1.0)
+	ax.set_xlim(0, xmax)
 
 	# Annotate survey bars
 	for rect, val in zip(bars_survey, df['survey_per_1000_words'][::-1]):
@@ -239,6 +255,103 @@ def compute_tfidf(docs, top_n=40, ngram_range=(1, 1)):
 	return df.head(top_n)
 
 
+def compute_and_save_survey_bigrams(survey_path='procedural-level-generation-survey.json', out_dir=OUT_DIR, top_n=200):
+	"""Compute TF-IDF for survey open-text bigrams and save CSV to out_dir.
+
+	This replicates the ad-hoc script used interactively; exposing it here
+	makes it reproducible when running the analysis script.
+	"""
+	texts = load_survey_texts(survey_path)
+	if not texts:
+		print(f"⚠ No survey texts found at: {survey_path}")
+		return None
+	df_bigrams = compute_tfidf(texts, top_n=top_n, ngram_range=(2, 2))
+	os.makedirs(out_dir, exist_ok=True)
+	out_csv = os.path.join(out_dir, 'survey_tfidf_bigrams.csv')
+	df_bigrams.to_csv(out_csv, index=False)
+	print(f"✓ Saved survey bigrams TF-IDF to: {out_csv}")
+	return out_csv
+
+
+def compute_and_save_bigram_comparison_table(paper_bigrams_csv=None, survey_bigrams_csv=None, out_dir=OUT_DIR, top_n=15, decimals=3):
+	"""Create a LaTeX table comparing the top N bigrams from papers and survey.
+
+	If the CSVs are not present, the function will compute the bigrams first.
+	The resulting .tex file is saved to out_dir/bigram_comparison_table.tex.
+	"""
+	# ensure bigram CSVs exist (compute if necessary)
+	if paper_bigrams_csv is None:
+		paper_bigrams_csv = os.path.join(out_dir, 'pcg_papers_tfidf_bigrams.csv')
+	if survey_bigrams_csv is None:
+		survey_bigrams_csv = os.path.join(out_dir, 'survey_tfidf_bigrams.csv')
+
+	# compute paper bigrams if missing
+	if not os.path.exists(paper_bigrams_csv):
+		# need papers
+		papers = load_papers()
+		docs, _ = corpus_from_papers(papers)
+		df_p = compute_tfidf(docs, top_n=200, ngram_range=(2, 2))
+		os.makedirs(out_dir, exist_ok=True)
+		df_p.to_csv(paper_bigrams_csv, index=False)
+	else:
+		df_p = pd.read_csv(paper_bigrams_csv)
+
+	# compute survey bigrams if missing
+	if not os.path.exists(survey_bigrams_csv):
+		compute_and_save_survey_bigrams(out_dir=out_dir)
+		df_s = pd.read_csv(survey_bigrams_csv)
+	else:
+		df_s = pd.read_csv(survey_bigrams_csv)
+
+	df_p_top = df_p.head(top_n).reset_index(drop=True)
+	df_s_top = df_s.head(top_n).reset_index(drop=True)
+
+	def latex_escape(s: str) -> str:
+		if not isinstance(s, str):
+			return s
+		replacements = {
+			'&':'\\&', '%':'\\%', '$':'\\$', '#':'\\#', '_':'\\_', '{':'\\{',
+			'}':'\\}', '~':'\\textasciitilde{}', '^':'\\textasciicircum{}', '\\':'\\textbackslash{}'
+		}
+		for k,v in replacements.items():
+			s = s.replace(k,v)
+		return ' '.join(s.split())
+
+	out_tex = os.path.join(out_dir, 'bigram_comparison_table.tex')
+	header = rf"""\begin{{table}}[h]
+\centering
+\caption{{Top {top_n} TF--IDF bigrams from PCG workshop papers (left) and survey responses (right).}}
+\label{{tab:bigram-comparison}}
+\begin{{tabular}}{{p{{0.46\columnwidth}} p{{0.46\columnwidth}}}}
+\hline
+	extbf{{PCG papers (bigram (tf-idf))}} & \textbf{{Survey (bigram (tf-idf))}} \\\
+\hline
+"""
+
+	rows = []
+	for i in range(top_n):
+		p_term = latex_escape(str(df_p_top.iloc[i]['term'])) if i < len(df_p_top) else ''
+		p_tfidf = df_p_top.iloc[i]['tfidf'] if i < len(df_p_top) else 0.0
+		s_term = latex_escape(str(df_s_top.iloc[i]['term'])) if i < len(df_s_top) else ''
+		s_tfidf = df_s_top.iloc[i]['tfidf'] if i < len(df_s_top) else 0.0
+		left = f"{p_term} ({p_tfidf:.{decimals}f})"
+		right = f"{s_term} ({s_tfidf:.{decimals}f})"
+		rows.append(f"{left} & {right} \\\\")
+
+	footer = r"""\hline
+\end{tabular}
+\end{table}
+"""
+
+	content = header + '\n'.join(rows) + '\n' + footer
+	os.makedirs(out_dir, exist_ok=True)
+	with open(out_tex, 'w', encoding='utf-8') as f:
+		f.write(content)
+
+	print(f"✓ Saved LaTeX bigram comparison table to: {out_tex}")
+	return out_tex
+
+
 # ---------------------------------------------------------------------------
 # Thematic coding (adapted from survey-text-question.py)
 # ---------------------------------------------------------------------------
@@ -256,7 +369,7 @@ THEMES = {
 	'Integration & \n Workflow': [
 		'integration', 'integrate', 'workflow', 'pipeline', 'existing tools',
 		'compatible', 'compatibility', 'seamless', 'export', 'import', 'engine',
-		'work with', 'fit into', 'alongside', 'existing workflow', 'blend'
+		'work with', 'fit into', 'alongside', 'existing workflow', 'blend', 'tool'
 	],
 	'Technical \n Barriers': [
 		'technical', 'complexity', 'complex', 'complicated', 'difficult',
@@ -282,7 +395,18 @@ THEMES = {
 	'Content \n Mixing': [
 		'mix', 'mixing', 'combine', 'hybrid', 'procedural and manual',
 		'procedural and hand-crafted', 'handcrafted', 'hand-authored',
-		'blend', 'merge', 'together with'
+		'blend', 'merge', 'together with'		
+	],
+	'Algorithms & \n Models': [
+		'model', 'models', 'algorithm', 'algorithms', 'wfc',
+		'wave function collapse', 'ml', 'machine learning', 'neural', 'network', 'automated',
+		'spatial', 'evolutionary', 'search-based', 'constraint-based', 'evolution', 'wfc',
+		'learning', 'constraint', 'semantic'
+	],		
+	'Methods & \n Tools': [
+		'method', 'methods', 'approach', 'approaches', 'technique', 'techniques',
+		'tool', 'tools', 'framework', 'implementation', 'generator', 'generators',
+		'generative', 'procedurally', 'pcg', 'framework', 'language', 'levels', 'mixed'
 	],
 	'Documentation & \n Learning': [
 		'documentation', 'tutorial', 'tutorials', 'guide', 'examples',
@@ -471,7 +595,21 @@ def main(only_comparison=False):
 
 
 if __name__ == '__main__':
-	# Run using variables defined at top of this file (suitable when running from
-	# source/VS Code). Set ONLY_COMPARISON = True/False above to control behavior.
-	main(only_comparison=ONLY_COMPARISON)
+	# Module-level control: toggle the booleans at the top of this file to
+	# decide which stages run. This is convenient when running from an IDE
+	# or the debugger and avoids dealing with CLI argument parsing.
+	print("pcg_workshop_analysis starting with configuration:")
+	print(f"  RUN_MAIN_PIPELINE={RUN_MAIN_PIPELINE}")
+	print(f"  RUN_SURVEY_BIGRAMS={RUN_SURVEY_BIGRAMS}")
+	print(f"  RUN_BIGRAM_TABLE={RUN_BIGRAM_TABLE}")
+	print(f"  ONLY_COMPARISON={ONLY_COMPARISON}")
+
+	if RUN_SURVEY_BIGRAMS:
+		compute_and_save_survey_bigrams(survey_path='procedural-level-generation-survey.json', out_dir=OUT_DIR, top_n=200)
+
+	if RUN_BIGRAM_TABLE:
+		compute_and_save_bigram_comparison_table(out_dir=OUT_DIR, top_n=15, decimals=3)
+
+	if RUN_MAIN_PIPELINE:
+		main(only_comparison=ONLY_COMPARISON)
 
