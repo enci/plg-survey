@@ -151,9 +151,9 @@ def compare_themes_between_corpora(survey_docs, paper_docs, themes=THEMES, out_d
     
 	# Plot side-by-side bars for each theme (survey vs papers)
 	# Make the figure taller to accommodate long theme labels and improve readability
-	fig, ax = plt.subplots(figsize=(10, max(6, len(rows) * 1.2)))
+	fig, ax = plt.subplots(figsize=(12, max(6, len(rows) * 1.1)))
 	ind = np.arange(len(df))
-	width = 0.43
+	width = 0.44
 	# Draw bars and capture the bar containers so we can annotate them
 	bars_survey = ax.barh(ind - width/2, df['survey_per_1000_words'][::-1], height=width, label='Survey Data')
 	bars_papers = ax.barh(ind + width/2, df['paper_per_1000_words'][::-1], height=width, label='PCG Workshop')
@@ -403,7 +403,7 @@ THEMES = {
 		'spatial', 'evolutionary', 'search-based', 'constraint-based', 'evolution', 'wfc',
 		'learning', 'constraint', 'semantic'
 	],		
-	'Methods & \n Tools': [
+	'Tooling & \n Methods' : [
 		'method', 'methods', 'approach', 'approaches', 'technique', 'techniques',
 		'tool', 'tools', 'framework', 'implementation', 'generator', 'generators',
 		'generative', 'procedurally', 'pcg', 'framework', 'language', 'levels', 'mixed'
