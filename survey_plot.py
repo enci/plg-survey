@@ -86,7 +86,7 @@ def plot_years_experience(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, outp
     question_text = question_info.get('question', question_key)
     
     # Local wrapping settings for this chart
-    label_wrap_width = None
+    label_wrap_width = 20
     # Ensure no leftover filters affect this chart
     analyzer.clear_filters()
         
@@ -95,15 +95,16 @@ def plot_years_experience(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, outp
     # Calculate dynamic chart size based on number of response options
     num_options = get_question_options_count(analyzer, question_key)
     chart_size = calculate_chart_size(num_options)
-    
-    fig = plotter.create_bar_chart(
+    # Use role-stacked majority style (stacked bars by professional role)
+    fig = plotter.create_role_stacked_chart(
         question_key,
         title=question_text,
-        horizontal=True,
         figsize=chart_size,
         show_percentages=True,
         label_wrap_width=label_wrap_width,
-        colormap='tab20b'
+        legend_ncol=1,        
+        xlim_padding=15,
+        legend_fontsize=20
     )
     
     pdf_path = os.path.join(output_dir, f"q2_{question_key}.pdf")
@@ -1468,8 +1469,8 @@ def main() -> None:
     print("=== Survey Plot Generator ===\n")
     
     # Specify which questions to plot (1-20). Use None or empty list to plot all.
-    # questions_to_plot = [6, 21]
-    questions_to_plot = list(range(1, 22))  # Plot all questions by default
+    questions_to_plot = [2]
+    # questions_to_plot = list(range(1, 22))  # Plot all questions by default
     
     # Create output directory
     output_dir = "plots"

@@ -47,7 +47,12 @@ FINAL_COMPARISON_PDF = 'c3_pcgw_theme_comparison.pdf'
 RUN_MAIN_PIPELINE = True
 RUN_SURVEY_BIGRAMS = True
 RUN_BIGRAM_TABLE = True
+RUN_UNIGRAM_TABLE = False
+RUN_UNIGRAM_MULTICOL = True
 
+
+PAPERS_BAR_COLOR = '#2E86AB'
+SURVEY_BAR_COLOR = '#E67E22'
 
 def load_papers(path=PAPERS_PATH):
 	with open(path, 'r', encoding='utf-8') as f:
@@ -153,10 +158,10 @@ def compare_themes_between_corpora(survey_docs, paper_docs, themes=THEMES, out_d
 	# Make the figure taller to accommodate long theme labels and improve readability
 	fig, ax = plt.subplots(figsize=(12, max(6, len(rows) * 1.1)))
 	ind = np.arange(len(df))
-	width = 0.44
+	width = 0.45
 	# Draw bars and capture the bar containers so we can annotate them
-	bars_survey = ax.barh(ind - width/2, df['survey_per_1000_words'][::-1], height=width, label='Survey Data')
-	bars_papers = ax.barh(ind + width/2, df['paper_per_1000_words'][::-1], height=width, label='PCG Workshop')
+	bars_survey = ax.barh(ind - width/2, df['survey_per_1000_words'][::-1], height=width, label='Survey Data', color=globals().get('SURVEY_BAR_COLOR', 'tab:orange'))
+	bars_papers = ax.barh(ind + width/2, df['paper_per_1000_words'][::-1], height=width, label='PCG Workshop', color=globals().get('PAPERS_BAR_COLOR', 'tab:blue'))
 	ax.set_yticks(ind)
 	ax.set_yticklabels(df['theme'][::-1], fontsize=23)
 	ax.set_xlabel('Occurrences per 1000 words', fontsize=23)
@@ -352,6 +357,152 @@ def compute_and_save_bigram_comparison_table(paper_bigrams_csv=None, survey_bigr
 	return out_tex
 
 
+def compute_and_save_unigram_table(unigram_csv=None, out_dir=OUT_DIR, decimals=6):
+	"""Create a LaTeX longtable with rank, unigram term and tf-idf for the
+	PCG papers unigram TF-IDF CSV. If the CSV is missing the function will
+	compute TF-IDF unigrams first.
+
+	The resulting .tex file is saved to out_dir/pcg_papers_unigrams_table.tex
+	and uses the longtable environment so it can span multiple pages in the
+	appendix.
+	"""
+	if unigram_csv is None:
+		unigram_csv = os.path.join(out_dir, 'pcg_papers_tfidf_unigrams.csv')
+
+	# compute unigram TF-IDF if missing
+	if not os.path.exists(unigram_csv):
+		papers = load_papers()
+		docs, _ = corpus_from_papers(papers)
+		df_u = compute_tfidf(docs, top_n=5000, ngram_range=(1, 1))
+		os.makedirs(out_dir, exist_ok=True)
+		df_u.to_csv(unigram_csv, index=False)
+	else:
+		df_u = pd.read_csv(unigram_csv)
+
+	# helper to escape problematic LaTeX characters
+	def latex_escape(s: str) -> str:
+		if not isinstance(s, str):
+			return s
+		replacements = {
+			'&':'\\&', '%':'\\%', '$':'\\$', '#':'\\#', '_':'\\_', '{':'\\{',
+			'}':'\\}', '~':'\\textasciitilde{}', '^':'\\textasciicircum{}', '\\':'\\textbackslash{}'
+		}
+		for k,v in replacements.items():
+			s = s.replace(k,v)
+		return ' '.join(s.split())
+
+	out_tex = os.path.join(out_dir, 'pcg_papers_unigrams_table.tex')
+
+	header = """% Auto-generated unigram TF-IDF table for Appendix
+\\begin{center}
+\\begin{longtable}{r l r}
+\\caption{Unigram TF--IDF ranks for PCG workshop papers (term, mean TF--IDF).}\\\\
+\\toprule
+Rank & Term & TF--IDF\\\\
+\\midrule
+\\endfirsthead
+\\multicolumn{3}{c}{\\tablename\\ \\thetable{} -- continued from previous page}\\\\
+\\toprule
+Rank & Term & TF--IDF\\\\
+\\midrule
+\\endhead
+\\midrule\\multicolumn{3}{r}{continued on next page}\\\\
+\\endfoot
+\\bottomrule
+\\endlastfoot
+"""
+
+	rows = []
+	# iterate all rows in df_u
+	for idx, row in df_u.reset_index(drop=True).iterrows():
+		rank = int(row.get('rank', idx + 1))
+		term = latex_escape(str(row.get('term', '')))
+		tfidf = row.get('tfidf', 0.0)
+		# each LaTeX row must end with '\\' so the table renders correctly
+		rows.append(f"{rank} & {term} & {tfidf:.{decimals}f} \\\\")
+
+	footer = r"""
+\end{longtable}
+\end{center}
+"""
+
+	content = header + '\n'.join(rows) + '\n' + footer
+	os.makedirs(out_dir, exist_ok=True)
+	with open(out_tex, 'w', encoding='utf-8') as f:
+		f.write(content)
+
+	print(f"✓ Saved LaTeX unigram table to: {out_tex}")
+	return out_tex
+
+
+
+def compute_and_save_unigram_multicol_table(unigram_csv=None, out_dir=OUT_DIR, cols=4, decimals=6):
+	"""Create a multi-column LaTeX table (no longtable) that lays out the
+	unigram TF-IDF list across `cols` side-by-side. This is intended for a
+	dedicated appendix page (table* or onecolumn page) rather than an inline
+	longtable.
+	"""
+	if unigram_csv is None:
+		unigram_csv = os.path.join(out_dir, 'pcg_papers_tfidf_unigrams.csv')
+
+	if not os.path.exists(unigram_csv):
+		papers = load_papers()
+		docs, _ = corpus_from_papers(papers)
+		df_u = compute_tfidf(docs, top_n=5000, ngram_range=(1, 1))
+		os.makedirs(out_dir, exist_ok=True)
+		df_u.to_csv(unigram_csv, index=False)
+	else:
+		df_u = pd.read_csv(unigram_csv)
+
+	terms = df_u[['term', 'tfidf', 'rank']].reset_index(drop=True)
+	n = len(terms)
+	rows_per_col = (n + cols - 1) // cols
+
+	out_tex = os.path.join(out_dir, 'pcg_papers_unigrams_multicol.tex')
+
+	header = (
+		"% Auto-generated multi-column unigram TF-IDF table for Appendix\n"
+		"\\begin{table*}[p]\n"
+		"\\centering\n"
+		"\\caption{Unigram TF--IDF ranks for PCG workshop papers (term, mean TF--IDF).}\n"
+	)
+
+	# Build tabular specification: for each column we want 'r l r' (rank, term, tfidf)
+	col_spec = ' '.join(['r l r'] * cols)
+	header += f"\\begin{{tabular}}{{{col_spec}}}\n"
+	header += "\\toprule\n"
+
+	rows = []
+	for r in range(rows_per_col):
+		cells = []
+		for c in range(cols):
+			idx = c * rows_per_col + r
+			if idx < n:
+				row = terms.iloc[idx]
+				term = str(row['term']).replace('&', '\\&')
+				tfidf = float(row['tfidf'])
+				rank = int(row['rank']) if 'rank' in row else idx + 1
+				cells.append(f"{rank} & {term} & {tfidf:.{decimals}f}")
+			else:
+				# empty triple for missing cells
+				cells.append(" &  & ")
+		rows.append(' & '.join(cells) + ' \\\\')
+
+	footer = (
+		"\\bottomrule\n"
+		"\\end{tabular}\n"
+		"\\end{table*}\n"
+	)
+
+	content = header + '\n'.join(rows) + '\n' + footer
+	os.makedirs(out_dir, exist_ok=True)
+	with open(out_tex, 'w', encoding='utf-8') as f:
+		f.write(content)
+
+	print(f"✓ Saved multi-column unigram table to: {out_tex}")
+	return out_tex
+
+
 # ---------------------------------------------------------------------------
 # Thematic coding (adapted from survey-text-question.py)
 # ---------------------------------------------------------------------------
@@ -501,7 +652,9 @@ def save_barplot(df, value_col, title, out_path, top_n=25):
 	fig_w = 12.0
 	fig_h = max(4, top_n * 0.18)
 	fig, ax = plt.subplots(figsize=(fig_w, fig_h))
-	ax.barh(df_plot['term'], df_plot[value_col], color='steelblue')
+	# Use module-level default color for paper plots unless overridden by caller
+	default_color = globals().get('PAPERS_BAR_COLOR', 'steelblue')
+	ax.barh(df_plot['term'], df_plot[value_col], color=default_color)
 	# Use survey font sizes where appropriate
 	base_font = getattr(survey_analyzer, 'font_size', 24)
 	ax.set_xlabel(value_col, fontsize=max(10, base_font - 6))
@@ -612,4 +765,6 @@ if __name__ == '__main__':
 
 	if RUN_MAIN_PIPELINE:
 		main(only_comparison=ONLY_COMPARISON)
+	if globals().get('RUN_UNIGRAM_TABLE', False):
+		compute_and_save_unigram_table(out_dir=OUT_DIR, decimals=6)
 
