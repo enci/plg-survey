@@ -699,6 +699,216 @@ def generate_report(coded_data, theme_stats, cooccurrence_matrix, G, output_late
     return latex_content
 
 # ============================================================================
+# Text Answers by Theme - LaTeX Table
+# ============================================================================
+
+def get_theme_color(theme_index, total_themes):
+    """Generate a color for a theme using the same colormap as the network.
+    
+    Args:
+        theme_index: Index of the theme (0-based)
+        total_themes: Total number of themes
+    
+    Returns:
+        RGB tuple (r, g, b) with values 0-255
+    """
+    cmap = plt.get_cmap('tab10')
+    color = cmap(theme_index % 10)  # tab10 has 10 colors
+    return tuple(int(c * 255) for c in color[:3])
+
+def escape_latex(text):
+    """Escape special LaTeX characters in text."""
+    if not isinstance(text, str):
+        return str(text)
+    text = text.replace('\\', '\\textbackslash{}')
+    text = text.replace('_', '\\_')
+    text = text.replace('{', '\\{')
+    text = text.replace('}', '\\}')
+    text = text.replace('$', '\\$')
+    text = text.replace('&', '\\&')
+    text = text.replace('#', '\\#')
+    text = text.replace('%', '\\%')
+    text = text.replace('^', '\\textasciicircum{}')
+    text = text.replace('~', '\\textasciitilde{}')
+    return text
+
+def generate_text_answers_table(coded_data, themes=THEMES, output_latex='plots/q21_text_answers_by_theme.tex', standalone=True):
+    """Generate LaTeX table with all text answers and their assigned themes as color squares.
+    
+    Creates a table where each row is:
+    - Text Answer | Color squares for all applicable themes
+    
+    Args:
+        coded_data: List of coded response dictionaries
+        themes: Dictionary of theme definitions
+        output_latex: Path to save the LaTeX file
+        standalone: If True, wraps output in complete \\documentclass structure
+    
+    Returns:
+        Path to the generated LaTeX file
+    """
+    
+    # Get theme colors (matching network visualization)
+    sorted_themes = sorted(themes.keys())
+    theme_colors = {theme: get_theme_color(i, len(themes)) 
+                   for i, theme in enumerate(sorted_themes)}
+    
+    # Build LaTeX output
+    latex_lines = []
+    
+    # Add document preamble if standalone
+    if standalone:
+        latex_lines.append("\\documentclass[11pt]{article}")
+        latex_lines.append("\\usepackage[margin=1in]{geometry}")
+        latex_lines.append("\\usepackage{tabularx}")
+        latex_lines.append("\\usepackage{array}")
+        latex_lines.append("\\usepackage{xcolor}")
+        latex_lines.append("\\usepackage{booktabs}")
+        latex_lines.append("\\usepackage{float}")
+        latex_lines.append("\\usepackage{longtable}")
+        latex_lines.append("")
+    
+    # Define color squares in preamble using xcolor
+    latex_lines.append("% Color definitions for theme squares")
+    for theme in sorted_themes:
+        r, g, b = theme_colors[theme]
+        color_name = f"theme{sorted_themes.index(theme)}"
+        latex_lines.append(f"\\definecolor{{{color_name}}}{{RGB}}{{{r},{g},{b}}}")
+    
+    # Add document title if standalone
+    if standalone:
+        latex_lines.append("")
+        latex_lines.append("\\title{Coding Survery Answers}")
+        latex_lines.append("")
+        latex_lines.append("\\begin{document}")
+        latex_lines.append("\\maketitle")
+        latex_lines.append("")
+    
+    # Calculate theme counts from responses (needed for early placement)
+    sorted_themes = sorted(themes.keys())
+    theme_counts = {theme: 0 for theme in sorted_themes}
+    for entry in coded_data:
+        for theme in entry.get('themes', []):
+            theme_counts[theme] += 1
+    
+    # Add summary statistics table at the top
+    latex_lines.append("% Summary by Theme")
+    latex_lines.append("\\begin{table}[H]")
+    latex_lines.append("\\centering")
+    latex_lines.append("\\caption{Number of Responses per Code}")
+    latex_lines.append("\\label{tab:code_answer_counts}")
+    latex_lines.append("\\begin{tabular}{c>{\\raggedright\\arraybackslash}p{5.5cm}r}")
+    latex_lines.append("\\toprule")
+    latex_lines.append("\\textbf{Color} & \\textbf{Code} & \\textbf{Count} \\\\")
+    latex_lines.append("\\midrule")
+    
+    for theme in sorted_themes:
+        color_name = f"theme{sorted_themes.index(theme)}"
+        theme_escaped = theme.replace("&", "\\&")
+        latex_lines.append(f"\\colorbox{{{color_name}}}{{\\phantom{{X}}}} & {theme_escaped} & {theme_counts[theme]} \\\\")
+    
+    latex_lines.append("\\bottomrule")
+    latex_lines.append("\\end{tabular}")
+    latex_lines.append("\\end{table}")
+    latex_lines.append("")
+    
+    latex_lines.append("\\begin{longtable}{p{0.75\\textwidth} r}")
+    latex_lines.append("\\caption{Text Answers with Assigned Codes} \\\\")
+    latex_lines.append("\\label{tab:text_answers_with_codes}")
+    latex_lines.append("\\\\")
+    latex_lines.append("\\toprule")
+    latex_lines.append("\\textbf{Text Answer} & \\textbf{Codes} \\\\")
+    latex_lines.append("\\midrule")
+    latex_lines.append("\\endhead")  # Repeat header on new pages
+    latex_lines.append("\\midrule \\multicolumn{2}{r}{\\textit{continued on next page}} \\\\")
+    latex_lines.append("\\endfoot")  # Footer for continuing pages
+    latex_lines.append("\\bottomrule")
+    latex_lines.append("\\endlastfoot")  # Final footer
+    latex_lines.append("\\small")
+    latex_lines.append("\\setlength{\\tabcolsep}{6pt}")
+    latex_lines.append("")
+    
+    # Process all responses and their themes
+    for entry in coded_data:
+        response = entry.get('response', '').strip()
+        assigned_themes = entry.get('themes', [])
+        
+        if response and assigned_themes:  # Only include responses with at least one theme
+            response_clean = escape_latex(response)
+            
+            # Build color squares for assigned themes
+            theme_squares = []
+            for theme in sorted_themes:
+                if theme in assigned_themes:
+                    color_name = f"theme{sorted_themes.index(theme)}"
+                    theme_squares.append(f"\\colorbox{{{color_name}}}{{\\phantom{{X}}}}")
+            
+            # Join squares with small spacing
+            squares_str = " ".join(theme_squares)
+            
+            latex_lines.append(f"{response_clean} & {squares_str} \\\\")
+            latex_lines.append("\\hline")  # Add thin line after each row
+    
+    latex_lines.append("\\end{longtable}")
+    latex_lines.append("\\normalsize")
+    
+    # Add closing document tag if standalone
+    if standalone:
+        latex_lines.append("")
+        latex_lines.append("\\end{document}")
+    
+    # Write to file
+    latex_content = '\n'.join(latex_lines)
+    with open(output_latex, 'w', encoding='utf-8') as f:
+        f.write(latex_content)
+    
+    print(f"✓ Text answers table saved to: {output_latex}")
+    if standalone:
+        print(f"  Standalone document ready to compile with: pdflatex {output_latex}")
+    else:
+        print(f"  Include in your LaTeX document with: \\input{{{output_latex}}}")
+    
+    # Print summary to console
+    print("\n  Summary of answers by code:")
+    for theme in sorted_themes:
+        count = theme_counts[theme]
+        print(f"    • {theme}: {count} responses")
+    
+    return output_latex
+
+def export_answers_for_coding(responses, output_path='thematic_coding/answers_input.json'):
+    """Export all responses as a simple JSON file for manual coding.
+    
+    Args:
+        responses: List of response dictionaries
+        output_path: Path to save the JSON file
+    
+    Returns:
+        Path to the saved JSON file
+    """
+    # Create thematic_coding folder if it doesn't exist
+    import os
+    os.makedirs(os.path.dirname(output_path) or '.', exist_ok=True)
+    
+    # Prepare data with hash for tracking
+    export_data = []
+    for resp in responses:
+        import hashlib
+        response_hash = hashlib.md5(resp['response'].encode()).hexdigest()[:8]
+        export_data.append({
+            'hash': response_hash,
+            'response': resp['response'],
+            'role': resp.get('role'),
+            'experience': resp.get('experience')
+        })
+    
+    with open(output_path, 'w', encoding='utf-8') as f:
+        json.dump(export_data, f, indent=2, ensure_ascii=False)
+    
+    print(f"✓ Answers exported for manual coding to: {output_path}")
+    return output_path
+
+# ============================================================================
 # Main Pipeline
 # ============================================================================
 
@@ -734,7 +944,18 @@ def main():
     
     generate_report(coded_data, theme_stats, cooccurrence_matrix, G)
     
-    print("\n✅ COMPLETE! Network PDF saved to plots/theme_network.pdf")
+    print("\n[6/6] Generating text answers table...")
+    generate_text_answers_table(coded_data, output_latex='plots/q21_text_answers_by_theme.tex', standalone=True)
+    
+    print("[7/7] Exporting answers for manual coding...")
+    export_answers_for_coding(responses)
+    
+    print("\n✅ COMPLETE! All outputs generated:")
+    print("   - Network visualization: plots/q21_problem_theme_network.pdf")
+    print("   - Network with legend: plots/q21_problem_theme_network_with_legend.pdf")
+    print("   - Statistics tables: plots/q21_theme_statistics.tex")
+    print("   - Text answers by theme: plots/q21_text_answers_by_theme.tex")
+    print("   - Answers for manual coding: thematic_coding/answers_input.json")
     print("\n💡 TIP: Adjust 'label_font_size' in VIZ_PARAMS to change text size")
     print("="*80 + "\n")
 

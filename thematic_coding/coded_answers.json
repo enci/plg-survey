@@ -1,0 +1,548 @@
+[
+  {
+    "hash": "3e50e0aa",
+    "response": "It always look very repeated.",
+    "role": "Environment Artist",
+    "experience": "0-2 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "52f0a65d",
+    "response": "Time saving",
+    "role": "Technical Artist",
+    "experience": "3-5 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "b37b6054",
+    "response": "Large scale level production speed",
+    "role": "Technical Artist",
+    "experience": "3-5 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "950985eb",
+    "response": "Solve the medial tasks and maximize time spent on creative work",
+    "role": "Technical Artist",
+    "experience": "3-5 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "aadd0a06",
+    "response": "Reduce time and resources spent in Content Creation as a small Indie Dev",
+    "role": "Programmer/Technical Designer",
+    "experience": "3-5 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "a7b6b7d4",
+    "response": "Iteration times",
+    "role": "Technical Artist",
+    "experience": "6-10 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "8152dd86",
+    "response": "Platform and Environment Agnosticism",
+    "role": "Programmer/Technical Designer",
+    "experience": "3-5 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "3bfad8fa",
+    "response": "time and iteration",
+    "role": "Technical Artist",
+    "experience": "0-2 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "a76d4ef5",
+    "response": "Time",
+    "role": "Game Design Student",
+    "experience": "0-2 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "75b0a9a4",
+    "response": "Help speed up the design of large worlds.",
+    "role": "Technical Artist",
+    "experience": "6-10 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "7f7cc626",
+    "response": "democratize PCG",
+    "role": "Programmer/Technical Designer",
+    "experience": "6-10 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "cdc60920",
+    "response": "Parameterisation of structure for exploration of variation space",
+    "role": "Programmer/Technical Designer",
+    "experience": "10+ years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "11a5acb8",
+    "response": "Less grinding for artists, keep artists in the flow, more time to focus on actual creativity",
+    "role": "Programmer/Technical Designer",
+    "experience": "10+ years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "49355cf9",
+    "response": "Mentioned above, the time-saving of exponentially larger games.  I might use it as a novelty for smaller projects, but for something with eg big cities or just anything with a smaller team, there is no alternative.",
+    "role": "Technical Artist",
+    "experience": "10+ years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "23c8b2e3",
+    "response": "Having to hardcode your PLG, which will be much less flexible to change. Also, when it is coded designers won't be able to play with it as easily. Having an external tool that exports (customizable) level data would be great. Especially if designers are able to work with it more easily.",
+    "role": "Programmer/Technical Designer",
+    "experience": "6-10 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "4c286d5c",
+    "response": "Being able to have more content in my game",
+    "role": "Programmer/Technical Designer",
+    "experience": "6-10 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "18aa9d87",
+    "response": "Assist with level design and generation with linking story and quest content with environment",
+    "role": "Programmer/Technical Designer",
+    "experience": "10+ years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "34d3393c",
+    "response": "Do quick defaults&templates to be edited later, but not in a game context *I do computational urban design",
+    "role": "Academic/Researcher",
+    "experience": "0-2 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "5af43742",
+    "response": "Populating a world with content (quests, encounters, side activities etc.)",
+    "role": "Level Designer",
+    "experience": "3-5 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "e49079b1",
+    "response": "If I need a diverse and rich world",
+    "role": "Programmer/Technical Designer",
+    "experience": "0-2 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "65d42450",
+    "response": "Creating more content of the same quality in the same time as handcrafted",
+    "role": "Game Designer",
+    "experience": "10+ years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "89e7ba2d",
+    "response": "It is very genre-dependent, but procedural live generation can help keep games balanced during gameplay. Essentially, in what I do, it'd be extremely helpful to have procedural generation support subtle rubber-banding",
+    "role": "Programmer/Technical Designer",
+    "experience": "6-10 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "3b1bdcf2",
+    "response": "I design games where the level is consumed once. I would like the level generation to alter the existing and designed by hand level to introduce variability with playthrough/player excursion in the level",
+    "role": "Most of the above because indie :(",
+    "experience": "0-2 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "fc0be94a",
+    "response": "Accelerating my workflow",
+    "role": "Game Designer",
+    "experience": "10+ years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "749e7369",
+    "response": "Ease of integration to game engines",
+    "role": "Programmer/Technical Designer",
+    "experience": "6-10 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "616e6804",
+    "response": "time Saver : boiler code already done (don't want to implement known algorithms), fast, saves time for polish balancing etc",
+    "role": "Programmer/Technical Designer",
+    "experience": "3-5 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "cd2319e2",
+    "response": "Creativity",
+    "role": "Academic/Researcher",
+    "experience": "10+ years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "3c3b4b7f",
+    "response": "Generating meaningful content which can engage users while maintaining an authored feel",
+    "role": "Game Designer",
+    "experience": "10+ years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "a4e24d63",
+    "response": "Timesaving for repetitive and time consuming tasks such as set dressing which unlocks more scope possibilities",
+    "role": "Level Designer",
+    "experience": "0-2 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "d7b00568",
+    "response": "a new random map being generated for every play customised to specific settings",
+    "role": "Programmer/Technical Designer",
+    "experience": "10+ years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "60682979",
+    "response": "Provide infinite levels that retain the 'essence' of what makes a level fun/interesting in the first place.",
+    "role": "Programmer/Technical Designer",
+    "experience": "3-5 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "d403ce4c",
+    "response": "Make lots of unique fun levels",
+    "role": "Technical Artist",
+    "experience": "10+ years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "c4bfb3b1",
+    "response": "Reduce development cost ($) to create content.",
+    "role": "Game Designer",
+    "experience": "10+ years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "ad2c9976",
+    "response": "Avoid manually placed objects",
+    "role": "Technical Artist",
+    "experience": "6-10 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "1ab23311",
+    "response": "Consistent asset quality that makes sense in the rest of the artistic context",
+    "role": "Programmer/Technical Designer",
+    "experience": "10+ years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "1d64a16b",
+    "response": "More freedom in the level sections, so I could set the exit and have more organic results with the tool",
+    "role": "Level Designer",
+    "experience": "6-10 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "bb36e115",
+    "response": "To save time, that way we can work on more assets to add additional variation.",
+    "role": "Character / General Artist",
+    "experience": "6-10 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "97afb6b2",
+    "response": "To get some base or groundwork to start from, or ideate from",
+    "role": "Level Designer",
+    "experience": "3-5 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "27635ffa",
+    "response": "Quickly adding variation to similar assets and easily populating a scene.",
+    "role": "Technical Artist",
+    "experience": "3-5 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "e3f1fa30",
+    "response": "Enabling creative control on a large scale",
+    "role": "Technical Artist",
+    "experience": "6-10 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "c4cb975c",
+    "response": "Speed from what I imagine to what's on the screen",
+    "role": "Technical Artist",
+    "experience": "10+ years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "aac7b5cb",
+    "response": "I don't think we need more tools, we need more knowledge. I like what BorisTheBrave & Oskar Stalberg do: explaining generation techniques. I think the knowledge should be readily available, but folks should design their own systems aligned with their own projects.",
+    "role": "Programmer/Technical Designer",
+    "experience": "3-5 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "0c7ff406",
+    "response": "Show processes of how solution made decisions per asset.",
+    "role": "Technical Artist",
+    "experience": "10+ years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "0f1cbc0f",
+    "response": "Base its creation on existing level designs fed into it, to create variations or new layouts that speed up workflow whole remaining tonally consistent",
+    "role": "Game Designer",
+    "experience": "10+ years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "1f02b362",
+    "response": "Creating a gameplay space I can build of off. A generated piece of level could be used as a sketch for a challenge in a level, this would speed up the process of prototyping challenges in-game.",
+    "role": "Game Designer",
+    "experience": "3-5 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "8e2fefae",
+    "response": "Difficulty for artists to use",
+    "role": "Programmer/Technical Designer",
+    "experience": "0-2 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "40d9b7c5",
+    "response": "replayable content workload",
+    "role": "Game Designer",
+    "experience": "0-2 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "9b9206e3",
+    "response": "Making engaging levels when I don't consider myself a good level designer",
+    "role": "Game Designer",
+    "experience": "3-5 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "399054ea",
+    "response": "Skip the setup steps that I have to do in each project just because the project slightly differs from the previous (in terms of tech used, pipeline or design constraints)",
+    "role": "Programmer/Technical Designer",
+    "experience": "3-5 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "008b833a",
+    "response": "Take away the initial risk of dedicating time for setting up a PCG system.",
+    "role": "Programmer/Technical Designer",
+    "experience": "0-2 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "cafbe330",
+    "response": "Monotonous tasks.",
+    "role": "Level Designer",
+    "experience": "0-2 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "a8a59070",
+    "response": "More rapid and flexible implementation of art assets",
+    "role": "Level Designer",
+    "experience": "3-5 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "0ecad20a",
+    "response": "High quality coverage of the basics (e.g. 'make a hospital ward') with easy customisation for me to build unique assets onto.",
+    "role": "Academic/Researcher",
+    "experience": "10+ years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "ea830f0c",
+    "response": "I want a PCG tool to help bridge the gap between the worlds and levels I imagine and my skill in bringing those worlds to life",
+    "role": "Level Designer",
+    "experience": "3-5 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "3598a8dc",
+    "response": "Variation",
+    "role": "Technical Artist",
+    "experience": "3-5 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "e76784de",
+    "response": "Flexibility and control over level creation during quick iteration",
+    "role": "Technical Artist",
+    "experience": "0-2 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "03304854",
+    "response": "Testing viability by running analytics. Combining elements into a level isn't what I'd use an of-the-shelf solution for. But something that could help test if a level is good, or at least works, that would be awesome.",
+    "role": "Game Designer",
+    "experience": "10+ years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "c2b780df",
+    "response": "I have artistic vision, but not necessarily the artistic/practical skills to implement that vision. I do have extensive programming and some design skills. So I can build a game, but I will struggle to make it look eye-catching unless I simplify the art style a lot. I would love a proc-gen tool that can cleverly add detail and decorate a basic block-out (in e.g. a 3D first-person shooter) such that it looks like a fully fledged level. So input: basic (BSP) geometry, perhaps with some mark-up that indicates design/semantic intentions - output: level that is decorated with details such as slants, trims, pipes, walls with depth, bridges that start and end properly, other procedural geometry, etc. That way, I can stay in control over the overall design of the level, and have the artistic details be figured out by a tool, much like an art director making a request. That way, I do not need to be dependent on finding a (specific) artist to fully implement my vision, or at the very least I can get something very decent looking already, which also helps with inspiration and motivation.",
+    "role": "Programmer/Technical Designer",
+    "experience": "6-10 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "ee6c4047",
+    "response": "Reduce time on complex / boring stuff. Increase agency of level designer by suggesting content. Example: Create a world procedurally, create content more hand tailored.",
+    "role": "Programmer/Technical Designer",
+    "experience": "6-10 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "e381ab42",
+    "response": "Creating a large foundation for artists to manually tweak and iterate with.",
+    "role": "Academic/Researcher",
+    "experience": "6-10 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "cb0c9502",
+    "response": "Quick iteration on the algorithms themselves",
+    "role": "Programmer/Technical Designer",
+    "experience": "6-10 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "3cc0d740",
+    "response": "Creating bigger worlds with less work (fewer people).",
+    "role": "Technical Artist",
+    "experience": "10+ years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "d9fed81b",
+    "response": "Tool simplicity combined with output variation",
+    "role": "Programmer/Technical Designer",
+    "experience": "10+ years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "336d5ebc",
+    "response": "-",
+    "role": "Technical Artist",
+    "experience": "3-5 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "2649b3f3",
+    "response": "Create high quality content",
+    "role": "Technical Artist",
+    "experience": "10+ years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "7a78df83",
+    "response": "Generating runtime based geometry that can also be generated in editor.",
+    "role": "Academic/Researcher",
+    "experience": "10+ years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "ec193e42",
+    "response": "Making tools accessible to users unlocks massive UGC potential.",
+    "role": "Technical Artist",
+    "experience": "3-5 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "bfe5afd5",
+    "response": "Speed of iterations/testing with gameplay",
+    "role": "Game Designer",
+    "experience": "6-10 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "df3f94dc",
+    "response": "Make levels that fit well with the game.",
+    "role": "Programmer/Technical Designer",
+    "experience": "10+ years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "e67dd836",
+    "response": "Rich detailed worlds",
+    "role": "Programmer/Technical Designer",
+    "experience": "10+ years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "057abce3",
+    "response": "Ability to properly modify by hand the results",
+    "role": "Technical Artist",
+    "experience": "3-5 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "921ddab4",
+    "response": "I think a good PCG system forces me to introspect on implicit design constraints, and thereby help me expand the design space and variety of gameplay.",
+    "role": "Game Designer",
+    "experience": "10+ years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "72ce1fa8",
+    "response": "Ease of iteration and time reduced between itterations",
+    "role": "Level Designer",
+    "experience": "3-5 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "9673bbab",
+    "response": "Understand my generation process of creating levels and propose a generator graph that I can edit with the AI",
+    "role": "Game Designer",
+    "experience": "10+ years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "225d8727",
+    "response": "Make intresting play spaces.",
+    "role": "Technical Artist",
+    "experience": "6-10 years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "c0f05daf",
+    "response": "Adaptable generators",
+    "role": "Programmer/Technical Designer",
+    "experience": "10+ years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "409e25fe",
+    "response": "An easy solution to generate and blend well with landscapes",
+    "role": "Level Designer",
+    "experience": "10+ years",
+    "assigned_codes": []
+  },
+  {
+    "hash": "5aa69489",
+    "response": "Create huge environments without doing all the manual labor (so a time (and budget) optimization)",
+    "role": "Game Designer",
+    "experience": "10+ years",
+    "assigned_codes": []
+  }
+]
