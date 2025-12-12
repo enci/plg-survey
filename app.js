@@ -94,23 +94,38 @@ const SurveyApp = {
     // Load survey data and schema
     async loadData() {
         try {
-            // Load both files concurrently
-            const [responsesResponse, schemaResponse] = await Promise.all([
-                fetch('procedural-level-generation-survey.json'),
-                fetch('survey-questions-schema.json')
-            ]);
+            let responsesData, schemaData;
             
-            // Check if both requests were successful
-            if (!responsesResponse.ok) {
-                throw new Error(`Failed to load survey responses: ${responsesResponse.status}`);
+            // Check if data is embedded (for offline/file:// usage)
+            if (window.__EMBEDDED_DATA__) {
+                console.log('Loading embedded data...');
+                responsesData = window.__EMBEDDED_DATA__['procedural-level-generation-survey.json'];
+                schemaData = window.__EMBEDDED_DATA__['survey-questions-schema.json'];
+                
+                // Validate loaded data
+                if (!responsesData || !schemaData) {
+                    throw new Error('Embedded data is incomplete');
+                }
+            } else {
+                // Fall back to fetching from files (for server hosting)
+                console.log('Loading data from files...');
+                const [responsesResponse, schemaResponse] = await Promise.all([
+                    fetch('procedural-level-generation-survey.json'),
+                    fetch('survey-questions-schema.json')
+                ]);
+                
+                // Check if both requests were successful
+                if (!responsesResponse.ok) {
+                    throw new Error(`Failed to load survey responses: ${responsesResponse.status}`);
+                }
+                if (!schemaResponse.ok) {
+                    throw new Error(`Failed to load survey schema: ${schemaResponse.status}`);
+                }
+                
+                // Parse JSON data
+                responsesData = await responsesResponse.json();
+                schemaData = await schemaResponse.json();
             }
-            if (!schemaResponse.ok) {
-                throw new Error(`Failed to load survey schema: ${schemaResponse.status}`);
-            }
-            
-            // Parse JSON data
-            const responsesData = await responsesResponse.json();
-            const schemaData = await schemaResponse.json();
             
             // Store data
             this.data.responses = responsesData;
