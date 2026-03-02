@@ -487,37 +487,71 @@ def plot_role_vs_usage(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_
     role_groups = [design_roles, technical_art_roles]
     group_labels = ['Design Roles', 'Technical/Art Roles']
     
+    # Create group-based color mapping with hue variations
+    # Blue variants for Design Roles
+    design_colors = {
+        'Level Designer': '#2E86AB',      # Original blue
+        'Game Designer': '#5BA3C5'        # Lighter blue
+    }
+    # Orange variants for Technical/Art Roles
+    technical_art_colors = {
+        'Programmer/Technical Designer': '#E67E22',  # Original orange
+        'Technical Artist': '#F39C12',               # Golden orange
+        'Environment Artist': '#F8B26A'              # Light orange
+    }
+    
+    # Combine color mappings
+    role_colors_map = {**design_colors, **technical_art_colors}
+    
+    # Create shortened role names for legend
+    def shorten_role(role):
+        role_shortcuts = {
+            'Level Designer': 'LD',
+            'Game Designer': 'GD',
+            'Technical Artist': 'TA',
+            'Environment Artist': 'EA',
+            'Programmer/Technical Designer': 'PTD',
+            'Academic/Researcher': 'AR',
+            'Other': 'O'
+        }
+        return role_shortcuts.get(role, role[:3])
+    
     # Get total number of participants across all groups for normalization
     role_counts = analyzer.get_question_counts('professional_role', filtered=False)
     total_participants = sum(role_counts.get(role, 0) for role in design_roles + technical_art_roles)
     
-    # Collect data for each role group
-    data_sets = []
+    # Collect data for each individual role within each group
+    # Structure: role_data_by_group[group_idx][role][task] = percentage
+    role_data_by_group = []
     group_totals = []  # Store total respondents per group for reference
+    
     for roles in role_groups:
-        analyzer.clear_filters()
-        analyzer.add_filter('professional_role', roles)
-        analyzer.apply_filters()
-        
-        counts = analyzer.get_question_counts(question_key, filtered=True)
-        
-        # Count total respondents in this role group
+        group_data = {}
         total_in_group = sum(role_counts.get(role, 0) for role in roles)
         group_totals.append(total_in_group)
         
-        # Calculate percentages normalized by group size or total participants
-        task_values = {}
-        for task in mapped_tasks:
-            count = counts.get(task, 0)
-            if per_group:
-                # Normalize by group size: percentage within this group
-                value = (count / total_in_group * 100) if total_in_group > 0 else 0
-            else:
-                # Normalize by total participants: percentage of all respondents
-                value = (count / total_participants * 100) if total_participants > 0 else 0
-            task_values[task] = value
+        for role in roles:
+            analyzer.clear_filters()
+            analyzer.add_filter('professional_role', role)
+            analyzer.apply_filters()
+            
+            counts = analyzer.get_question_counts(question_key, filtered=True)
+            
+            # Calculate percentages for this role
+            task_values = {}
+            for task in mapped_tasks:
+                count = counts.get(task, 0)
+                if per_group:
+                    # Normalize by group size: percentage within this group
+                    value = (count / total_in_group * 100) if total_in_group > 0 else 0
+                else:
+                    # Normalize by total participants: percentage of all respondents
+                    value = (count / total_participants * 100) if total_participants > 0 else 0
+                task_values[task] = value
+            
+            group_data[role] = task_values
         
-        data_sets.append(task_values)
+        role_data_by_group.append(group_data)
     
     # Reset filters
     analyzer.clear_filters()
@@ -537,24 +571,45 @@ def plot_role_vs_usage(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_
     # Plot settings
     y = list(range(len(mapped_tasks)))
     height = 0.43  # Bar height for each group (tight, no overlap)
-    colors = ['#2E86AB', '#E67E22']  # Blue for Design, orange for Other
     
     # Find max value for axis scaling
-    max_value = max(max(d.values()) for d in data_sets) if data_sets else 0
+    max_value = 0
+    for group_data in role_data_by_group:
+        for task_idx, task in enumerate(mapped_tasks):
+            total = sum(role_data[task] for role_data in group_data.values())
+            max_value = max(max_value, total)
     
-    # Plot bars for each role group
-    for i, (task_values, label, color) in enumerate(zip(data_sets, group_labels, colors)):
-        values = [task_values[task] for task in mapped_tasks]
-        offset = height * (i - len(group_labels)/2 + 0.5)
-        bars = ax.barh([pos + offset for pos in y], values, height, label=label, color=color)
+    # Track legend handles to avoid duplicates
+    legend_handles = {}
+    
+    # Plot stacked bars for each role group
+    for group_idx, (roles, group_label, group_data) in enumerate(zip(role_groups, group_labels, role_data_by_group)):
+        offset = height * (group_idx - len(group_labels)/2 + 0.5)
         
-        # Add labels on bars
-        for bar in bars:
-            width_val = bar.get_width()
-            if width_val > 0:
-                # Both modes show percentages
-                label_text = f'{width_val:.1f}%'
-                ax.text(width_val + (max_value * 0.01), bar.get_y() + bar.get_height()/2.,
+        # Stack bars horizontally for each role within the group
+        left = [0] * len(mapped_tasks)
+        
+        for role in roles:
+            role_data = group_data[role]
+            values = [role_data[task] for task in mapped_tasks]
+            role_color = role_colors_map[role]
+            role_label = shorten_role(role)
+            
+            bars = ax.barh([pos + offset for pos in y], values, height, 
+                          left=left, color=role_color, edgecolor='none', linewidth=0, snap=False)
+            
+            # Add to legend only once per role
+            if role_label not in legend_handles:
+                legend_handles[role_label] = plt.Rectangle((0,0),1,1, fc=role_color)
+            
+            # Update left positions for stacking
+            left = [l + v for l, v in zip(left, values)]
+        
+        # Add total labels at the end of each stacked bar
+        for bar_idx, total_val in enumerate(left):
+            if total_val > 0:
+                label_text = f'{total_val:.1f}%'
+                ax.text(total_val + (max_value * 0.01), bar_idx + offset,
                        label_text, ha='left', va='center', fontsize=font_size)
     
     # Styling
@@ -569,8 +624,9 @@ def plot_role_vs_usage(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_
     ax.invert_yaxis()  # Top task at top
     ax.tick_params(axis='x', labelsize=font_size-2)
     
-    # Legend
-    ax.legend(fontsize=font_size-2, loc='lower right')
+    # Legend with role colors
+    ax.legend(legend_handles.values(), legend_handles.keys(), 
+             fontsize=font_size-2, loc='lower right', ncol=2)
     
     # Customize spines
     for spine in ax.spines.values():
@@ -754,35 +810,155 @@ def plot_level_generation_frequency_comparison(analyzer: SurveyAnalyzer, plotter
     design_roles = ['Level Designer', 'Game Designer']
     artist_roles = ['Technical Artist', 'Environment Artist']
     
-    # Create filter configurations for comparison
-    filter_configs = [
-        {'filters': [{'question': 'professional_role', 'value': design_roles}]},
-        {'filters': [{'question': 'professional_role', 'value': artist_roles}]}
-    ]
+    role_groups = [design_roles, artist_roles]
+    group_labels = ['Design Roles', 'Artist Roles']
     
-    labels = ['Design Roles', 'Artist Roles']
+    # Create group-based color mapping with hue variations
+    # Blue variants for Design Roles
+    design_colors = {
+        'Level Designer': '#2E86AB',      # Original blue
+        'Game Designer': '#5BA3C5'        # Lighter blue
+    }
+    # Orange variants for Artist Roles
+    artist_colors = {
+        'Technical Artist': '#F39C12',    # Golden orange
+        'Environment Artist': '#F8B26A'   # Light orange
+    }
     
-    # Create comparison chart
-    title = f"Frequency of Procedural Level Generation Usage:\nDesign vs Artist Roles"
-    font_size_override = 25
-    fig = plotter.create_comparison_chart(
-        question_key,
-        filter_configs,        
-        labels,
-        title=title,
-        figsize=(12, 9),
-        show_percentages=True,
-        label_wrap_width=18,
-        colors=['#2E86AB', '#E67E22'],
-        font_size=font_size_override + 5
-    )
+    # Combine color mappings
+    role_colors_map = {**design_colors, **artist_colors}
+    
+    # Create shortened role names for legend
+    def shorten_role(role):
+        role_shortcuts = {
+            'Level Designer': 'LD',
+            'Game Designer': 'GD',
+            'Technical Artist': 'TA',
+            'Environment Artist': 'EA',
+            'Programmer/Technical Designer': 'PTD',
+            'Academic/Researcher': 'AR',
+            'Other': 'O'
+        }
+        return role_shortcuts.get(role, role[:3])
+    
+    # Get question options in original order
+    schema_options = question_info.get('options', [])
+    mapped_options = [analyzer._get_mapped_option(o) for o in schema_options]
+    
+    # Collect data for each individual role within each group
+    role_data_by_group = []
+    
+    for roles in role_groups:
+        group_data = {}
+        
+        # Calculate group total for percentage calculation
+        group_total = 0
+        for role in roles:
+            analyzer.clear_filters()
+            analyzer.add_filter('professional_role', role)
+            analyzer.apply_filters()
+            counts = analyzer.get_question_counts(question_key, filtered=True)
+            group_total += sum(counts.values())
+        
+        # Now get percentage breakdown by role
+        for role in roles:
+            analyzer.clear_filters()
+            analyzer.add_filter('professional_role', role)
+            analyzer.apply_filters()
+            
+            counts = analyzer.get_question_counts(question_key, filtered=True)
+            
+            # Calculate percentages for this role
+            option_percentages = {}
+            for option in mapped_options:
+                count = counts.get(option, 0)
+                percentage = (count / group_total * 100) if group_total > 0 else 0
+                option_percentages[option] = percentage
+            
+            group_data[role] = option_percentages
+        
+        role_data_by_group.append(group_data)
+    
+    # Reset filters
+    analyzer.clear_filters()
+    
+    # Prepare visualization
+    label_wrap_width = 18
+    wrapped_options = [wrap_label_smart(opt, label_wrap_width) for opt in mapped_options]
+    
+    # Calculate chart size based on number of options
+    num_options = len(mapped_options)
+    chart_size = calculate_chart_size(num_options)
+    chart_size = (chart_size[0], chart_size[1] * 1.3)  # Add extra height for comparison
+    
+    # Create figure
+    fig, ax = plt.subplots(figsize=chart_size)
+    
+    # Plot settings
+    y = list(range(len(mapped_options)))
+    height = 0.44  # Bar height for each group
+    
+    # Find max value for axis scaling
+    max_value = 0
+    for group_data in role_data_by_group:
+        for option_idx, option in enumerate(mapped_options):
+            total = sum(role_data[option] for role_data in group_data.values())
+            max_value = max(max_value, total)
+    
+    # Track legend handles to avoid duplicates
+    legend_handles = {}
+    
+    # Plot stacked bars for each role group
+    for group_idx, (roles, group_label, group_data) in enumerate(zip(role_groups, group_labels, role_data_by_group)):
+        offset = height * (group_idx - len(group_labels)/2 + 0.5)
+        
+        # Stack bars horizontally for each role within the group
+        left = [0] * len(mapped_options)
+        
+        for role in roles:
+            role_data = group_data[role]
+            values = [role_data[option] for option in mapped_options]
+            role_color = role_colors_map[role]
+            role_label = shorten_role(role)
+            
+            bars = ax.barh([pos + offset for pos in y], values, height, 
+                          left=left, color=role_color, edgecolor='none', linewidth=0, snap=False)
+            
+            # Add to legend only once per role
+            if role_label not in legend_handles:
+                legend_handles[role_label] = plt.Rectangle((0,0),1,1, fc=role_color)
+            
+            # Update left positions for stacking
+            left = [l + v for l, v in zip(left, values)]
+        
+        # Add total percentage labels at the end of each stacked bar
+        for bar_idx, total_val in enumerate(left):
+            if total_val > 0:
+                label_text = f'{total_val:.1f}%'
+                ax.text(total_val + (max_value * 0.01), bar_idx + offset,
+                       label_text, ha='left', va='center', fontsize=font_size)
+    
+    # Styling
+    ax.set_xlim(0, max_value * 1.25)
+    ax.set_xlabel('Percentage', fontsize=font_size)
+    
+    ax.set_yticks(y)
+    ax.set_yticklabels(wrapped_options, fontsize=font_size)
+    ax.invert_yaxis()  # Top option at top
+    ax.tick_params(axis='x', labelsize=font_size-2)
+    
+    # Legend with role colors
+    ax.legend(legend_handles.values(), legend_handles.keys(), 
+             fontsize=font_size-2, loc='lower right', ncol=2)
+    
+    # Customize spines
+    for spine in ax.spines.values():
+        spine.set_linewidth(0.5)
     
     # Add secondary y-axis on the right showing normalized values (0-1)
-    # aligned with the response option ticks on the left
-    ax = fig.axes[0]
     ax2 = ax.twinx()
     
-    # Get the tick positions from the left y-axis (where response options are)
+    # Get the tick positions from the left y-axis
     left_ticks = ax.get_yticks()
     
     # Set the same limits and tick positions for the secondary axis
@@ -790,20 +966,18 @@ def plot_level_generation_frequency_comparison(analyzer: SurveyAnalyzer, plotter
     ax2.set_yticks(left_ticks)
     
     # Assign normalized values (0.0, 0.25, 0.5, 0.75, 1.0) to the response options
-    # Assuming response options go from best to worst (top to bottom)
     num_ticks = len(left_ticks)
     if num_ticks == 5:
-        # Perfect case: 5 response options map to 5 values
         norm_labels = ['1.0', '0.75', '0.5', '0.25', '0.0']
     elif num_ticks > 1:
-        # General case: distribute values evenly
         norm_labels = [f'{1.0 - i/(num_ticks-1):.2f}' for i in range(num_ticks)]
     else:
-        norm_labels = ['0.5']  # Single option case
+        norm_labels = ['0.5']
     
-    _fs = font_size_override if font_size_override is not None else font_size
-    ax2.set_yticklabels(norm_labels, fontsize=_fs)
-    ax2.set_ylabel('Assigned Value (0-1)', fontsize=_fs)
+    ax2.set_yticklabels(norm_labels, fontsize=font_size)
+    ax2.set_ylabel('Assigned Value (0-1)', fontsize=font_size)
+    
+    plt.tight_layout()
     
     pdf_path = os.path.join(output_dir, f"q6_comparison_{question_key}.pdf")
     fig.savefig(pdf_path)
@@ -1469,7 +1643,7 @@ def main() -> None:
     print("=== Survey Plot Generator ===\n")
     
     # Specify which questions to plot (1-20). Use None or empty list to plot all.
-    questions_to_plot = [2]
+    questions_to_plot = [5,6]
     # questions_to_plot = list(range(1, 22))  # Plot all questions by default
     
     # Create output directory
