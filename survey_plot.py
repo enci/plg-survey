@@ -9,6 +9,30 @@ import matplotlib.figure as mpl_figure
 import os
 from typing import List, Tuple, Optional, Union
 
+# Shared role abbreviations for compact legends.
+ROLE_SHORTCUTS = {
+    'Level Designer': 'LD',
+    'Game Designer': 'GD',
+    'Technical Artist': 'TA',
+    'Environment Artist': 'EA',
+    'Programmer/Technical Designer': 'PTD',
+    'Academic/Researcher': 'AR',
+    'Other': 'O'
+}
+
+# Shared custom palette used by role-comparison charts.
+def shorten_role_label(role: str) -> str:
+    return ROLE_SHORTCUTS.get(role, role[:3])
+
+
+def get_standard_role_color_map(analyzer: SurveyAnalyzer, plotter: SurveyPlotter) -> dict:
+    """Map each professional role to the default survey palette color."""
+    role_order = list(analyzer.get_question_counts('professional_role', filtered=False).keys())
+    return {
+        role: plotter.role_colors[i % len(plotter.role_colors)]
+        for i, role in enumerate(role_order)
+    }
+
 # Calculate chart size to ensure consistent bar heights. 
 def calculate_chart_size(num_options: int) -> Tuple[float, float]:
     width = 12.0
@@ -487,34 +511,8 @@ def plot_role_vs_usage(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_
     role_groups = [design_roles, technical_art_roles]
     group_labels = ['Design Roles', 'Technical/Art Roles']
     
-    # Create group-based color mapping with hue variations
-    # Blue variants for Design Roles
-    design_colors = {
-        'Level Designer': '#2E86AB',      # Original blue
-        'Game Designer': '#5BA3C5'        # Lighter blue
-    }
-    # Orange variants for Technical/Art Roles
-    technical_art_colors = {
-        'Programmer/Technical Designer': '#E67E22',  # Original orange
-        'Technical Artist': '#F39C12',               # Golden orange
-        'Environment Artist': '#F8B26A'              # Light orange
-    }
-    
-    # Combine color mappings
-    role_colors_map = {**design_colors, **technical_art_colors}
-    
-    # Create shortened role names for legend
-    def shorten_role(role):
-        role_shortcuts = {
-            'Level Designer': 'LD',
-            'Game Designer': 'GD',
-            'Technical Artist': 'TA',
-            'Environment Artist': 'EA',
-            'Programmer/Technical Designer': 'PTD',
-            'Academic/Researcher': 'AR',
-            'Other': 'O'
-        }
-        return role_shortcuts.get(role, role[:3])
+    # Use the same role palette as the rest of the survey charts.
+    role_colors_map = get_standard_role_color_map(analyzer, plotter)
     
     # Get total number of participants across all groups for normalization
     role_counts = analyzer.get_question_counts('professional_role', filtered=False)
@@ -592,8 +590,8 @@ def plot_role_vs_usage(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_
         for role in roles:
             role_data = group_data[role]
             values = [role_data[task] for task in mapped_tasks]
-            role_color = role_colors_map[role]
-            role_label = shorten_role(role)
+            role_color = role_colors_map.get(role, '#CCCCCC')
+            role_label = shorten_role_label(role)
             
             bars = ax.barh([pos + offset for pos in y], values, height, 
                           left=left, color=role_color, edgecolor='none', linewidth=0, snap=False)
@@ -813,33 +811,8 @@ def plot_level_generation_frequency_comparison(analyzer: SurveyAnalyzer, plotter
     role_groups = [design_roles, artist_roles]
     group_labels = ['Design Roles', 'Artist Roles']
     
-    # Create group-based color mapping with hue variations
-    # Blue variants for Design Roles
-    design_colors = {
-        'Level Designer': '#2E86AB',      # Original blue
-        'Game Designer': '#5BA3C5'        # Lighter blue
-    }
-    # Orange variants for Artist Roles
-    artist_colors = {
-        'Technical Artist': '#F39C12',    # Golden orange
-        'Environment Artist': '#F8B26A'   # Light orange
-    }
-    
-    # Combine color mappings
-    role_colors_map = {**design_colors, **artist_colors}
-    
-    # Create shortened role names for legend
-    def shorten_role(role):
-        role_shortcuts = {
-            'Level Designer': 'LD',
-            'Game Designer': 'GD',
-            'Technical Artist': 'TA',
-            'Environment Artist': 'EA',
-            'Programmer/Technical Designer': 'PTD',
-            'Academic/Researcher': 'AR',
-            'Other': 'O'
-        }
-        return role_shortcuts.get(role, role[:3])
+    # Use the same role palette as the rest of the survey charts.
+    role_colors_map = get_standard_role_color_map(analyzer, plotter)
     
     # Get question options in original order
     schema_options = question_info.get('options', [])
@@ -918,8 +891,8 @@ def plot_level_generation_frequency_comparison(analyzer: SurveyAnalyzer, plotter
         for role in roles:
             role_data = group_data[role]
             values = [role_data[option] for option in mapped_options]
-            role_color = role_colors_map[role]
-            role_label = shorten_role(role)
+            role_color = role_colors_map.get(role, '#CCCCCC')
+            role_label = shorten_role_label(role)
             
             bars = ax.barh([pos + offset for pos in y], values, height, 
                           left=left, color=role_color, edgecolor='none', linewidth=0, snap=False)
