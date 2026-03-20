@@ -2,10 +2,11 @@
 Survey Plot Generator
 """
 
-from survey_analyzer import SurveyAnalyzer, SurveyPlotter, wrap_label_smart, font_size
+from survey_analyzer import SurveyAnalyzer, SurveyPlotter, wrap_label_smart, font_size, get_colors
 import matplotlib.pyplot as plt
 import matplotlib.backends.backend_pdf as pdf_backend
 import matplotlib.figure as mpl_figure
+import numpy as np
 import os
 from typing import List, Tuple, Optional, Union
 
@@ -203,6 +204,135 @@ def plot_procedural_tools_experience(analyzer: SurveyAnalyzer, plotter: SurveyPl
     fig.savefig(pdf_path)
     plt.close(fig)
     
+    print(f"  Saved as: {pdf_path}")
+    return pdf_path
+
+# Grouped stacked bars: for each tool, one stacked bar per role side-by-side.
+def plot_procedural_tools_grouped_roles(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_dir: str) -> str:
+    import colorsys
+
+    question_key = 'procedural_tools_experience'
+    question_info = analyzer.get_question_info(question_key)
+    question_text = question_info.get('question', question_key)
+    print(f"Creating grouped-roles plot for: {question_text}")
+    analyzer.clear_filters()
+
+    # Get roles and schema metadata
+    role_data = analyzer.get_question_counts('professional_role', filtered=False)
+    roles = list(role_data.keys())
+    schema_scale = question_info.get('scale', [])
+    schema_items = question_info.get('items', [])
+    role_color_map = get_standard_role_color_map(analyzer, plotter)
+
+    # Build per-role gradient: same hue, varying value (light→dark for None→Extensive)
+    def make_role_gradient(base_rgba, n_levels):
+        r, g, b, _ = base_rgba
+        h, s, v = colorsys.rgb_to_hsv(r, g, b)
+        # Lightest for "None", darkest for "Extensive"
+        min_v, max_v = 0.92, max(0.35, v * 0.55)
+        return [
+            (*colorsys.hsv_to_rgb(h, s * (0.3 + 0.7 * i / (n_levels - 1)),
+                                  min_v - (min_v - max_v) * i / (n_levels - 1)), 1.0)
+            for i in range(n_levels)
+        ]
+
+    role_gradients = {
+        role: make_role_gradient(role_color_map[role], len(schema_scale))
+        for role in roles
+    }
+
+    # Resolve actual item keys (may be mapped/shortened by option mappings)
+    all_matrix = analyzer.get_matrix_counts(question_key, filtered=False)
+    mapped_items_set = set(all_matrix.keys())
+    items = []
+    for item in schema_items:
+        if item in mapped_items_set:
+            items.append(item)
+            mapped_items_set.discard(item)
+    items.extend(sorted(mapped_items_set))  # catch mapped names not matching schema
+
+    # Collect per-role matrix counts
+    role_matrix = {}  # role -> {item -> {rating -> count}}
+    for role in roles:
+        analyzer.clear_filters()
+        analyzer.add_filter('professional_role', role)
+        analyzer.apply_filters()
+        role_matrix[role] = analyzer.get_matrix_counts(question_key, filtered=True)
+    analyzer.clear_filters()
+
+    n_items = len(items)
+    n_roles = len(roles)
+    bar_h = 0.11  # height of each individual bar
+    group_gap = 0.35  # extra space between tool groups
+
+    # Y positions: group tools, with sub-bars per role inside each group
+    y_positions = []  # (item_idx, role_idx) -> y
+    group_centers = []
+    for i in range(n_items):
+        group_start = i * (n_roles * bar_h + group_gap)
+        centers = []
+        for j in range(n_roles):
+            y = group_start + j * bar_h
+            y_positions.append(y)
+            centers.append(y)
+        group_centers.append(np.mean(centers))
+
+    fig_h = max(6, n_items * (n_roles * bar_h + group_gap) * 1.1 + 1.5)
+    fig, ax = plt.subplots(figsize=(11, fig_h))
+
+    # Draw bars — each role uses its own hue gradient
+    for i, item in enumerate(items):
+        for j, role in enumerate(roles):
+            y = y_positions[i * n_roles + j]
+            counts = role_matrix[role].get(item, {})
+            total = sum(counts.values()) if counts else 1
+            gradient = role_gradients[role]
+            left = 0.0
+            for si, rating in enumerate(schema_scale):
+                pct = (counts.get(rating, 0) / total) * 100 if total else 0
+                ax.barh(y, pct, left=left, height=bar_h * 0.9,
+                        color=gradient[si])
+                left += pct
+
+    # Y-axis: tool names at group centers
+    wrapped_items = [wrap_label_smart(item, 35) for item in items]
+    ax.set_yticks(group_centers)
+    ax.set_yticklabels(wrapped_items, fontsize=10)
+    ax.set_xlim(0, 105)
+    ax.set_xlabel('Percentage (%)', fontsize=10)
+    ax.invert_yaxis()
+
+    # --- Two-part legend ---
+    from matplotlib.patches import Patch
+
+    # 1. Role legend (one swatch per role, using mid-gradient color)
+    role_handles = [
+        Patch(facecolor=role_gradients[role][len(schema_scale) // 2], label=shorten_role_label(role))
+        for role in roles
+    ]
+    # 2. Experience-level legend (grayscale gradient to show light→dark pattern)
+    level_handles = [
+        Patch(facecolor=str(0.92 - 0.57 * i / (len(schema_scale) - 1)), label=rating)
+        for i, rating in enumerate(schema_scale)
+    ]
+
+    leg1 = ax.legend(handles=role_handles, loc='upper left',
+                     bbox_to_anchor=(-0.30, -0.04),
+                     ncol=len(roles), fontsize=8, frameon=True, title='Role', title_fontsize=9)
+    ax.add_artist(leg1)
+    ax.legend(handles=level_handles, loc='upper left',
+              bbox_to_anchor=(-0.30, -0.10),
+              ncol=len(schema_scale), fontsize=8, frameon=True, title='Experience', title_fontsize=9)
+
+    for spine in ax.spines.values():
+        spine.set_linewidth(0.6)
+        spine.set_color('#4D4D4D')
+
+    fig.tight_layout()
+
+    pdf_path = os.path.join(output_dir, f"q4_grouped_roles_{question_key}.pdf")
+    fig.savefig(pdf_path, bbox_inches='tight')
+    plt.close(fig)
     print(f"  Saved as: {pdf_path}")
     return pdf_path
 
@@ -1616,7 +1746,7 @@ def main() -> None:
     print("=== Survey Plot Generator ===\n")
     
     # Specify which questions to plot (1-20). Use None or empty list to plot all.
-    questions_to_plot = [5,6]
+    questions_to_plot = [4]
     # questions_to_plot = list(range(1, 22))  # Plot all questions by default
     
     # Create output directory
@@ -1638,7 +1768,7 @@ def main() -> None:
         1: [plot_professional_role],
         2: [plot_years_experience],
         3: [plot_game_engines],
-        4: [plot_procedural_tools_experience],
+        4: [plot_procedural_tools_experience, plot_procedural_tools_grouped_roles],
         5: [plot_current_pcg_usage, plot_role_vs_usage_counts],
         6: [plot_level_generation_frequency, plot_level_generation_frequency_comparison],
         7: [plot_primary_concerns],
