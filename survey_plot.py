@@ -207,33 +207,29 @@ def plot_procedural_tools_experience(analyzer: SurveyAnalyzer, plotter: SurveyPl
     print(f"  Saved as: {pdf_path}")
     return pdf_path
 
-# Grouped stacked bars: for each tool, one stacked bar per role side-by-side.
+# Pie-chart grid: rows = tools, columns = roles, each pie shows experience distribution.
 def plot_procedural_tools_grouped_roles(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_dir: str) -> str:
     import colorsys
 
     question_key = 'procedural_tools_experience'
     question_info = analyzer.get_question_info(question_key)
     question_text = question_info.get('question', question_key)
-    print(f"Creating grouped-roles plot for: {question_text}")
+    print(f"Creating pie-grid plot for: {question_text}")
     analyzer.clear_filters()
 
     # Get roles and schema metadata
     role_data = analyzer.get_question_counts('professional_role', filtered=False)
     roles = list(role_data.keys())
     schema_scale = question_info.get('scale', [])
-    schema_items = question_info.get('items', [])
     role_color_map = get_standard_role_color_map(analyzer, plotter)
 
-    # Build per-role gradient: same hue, varying value (light→dark for None→Extensive)
+    # Build per-role gradient (light→dark for None→Extensive)
+    # Blend base color with white to simulate alpha (pie charts don't support per-wedge alpha)
     def make_role_gradient(base_rgba, n_levels):
         r, g, b, _ = base_rgba
-        h, s, v = colorsys.rgb_to_hsv(r, g, b)
-        # Lightest for "None", darkest for "Extensive"
-        min_v, max_v = 0.92, max(0.35, v * 0.55)
         return [
-            (*colorsys.hsv_to_rgb(h, s * (0.3 + 0.7 * i / (n_levels - 1)),
-                                  min_v - (min_v - max_v) * i / (n_levels - 1)), 1.0)
-            for i in range(n_levels)
+            (r * t + 1.0 * (1 - t), g * t + 1.0 * (1 - t), b * t + 1.0 * (1 - t), 1.0)
+            for t in [0.2 + 0.8 * i / (n_levels - 1) for i in range(n_levels)]
         ]
 
     role_gradients = {
@@ -243,16 +239,17 @@ def plot_procedural_tools_grouped_roles(analyzer: SurveyAnalyzer, plotter: Surve
 
     # Resolve actual item keys (may be mapped/shortened by option mappings)
     all_matrix = analyzer.get_matrix_counts(question_key, filtered=False)
+    schema_items = question_info.get('items', [])
     mapped_items_set = set(all_matrix.keys())
     items = []
     for item in schema_items:
         if item in mapped_items_set:
             items.append(item)
             mapped_items_set.discard(item)
-    items.extend(sorted(mapped_items_set))  # catch mapped names not matching schema
+    items.extend(sorted(mapped_items_set))
 
     # Collect per-role matrix counts
-    role_matrix = {}  # role -> {item -> {rating -> count}}
+    role_matrix = {}
     for role in roles:
         analyzer.clear_filters()
         analyzer.add_filter('professional_role', role)
@@ -262,73 +259,48 @@ def plot_procedural_tools_grouped_roles(analyzer: SurveyAnalyzer, plotter: Surve
 
     n_items = len(items)
     n_roles = len(roles)
-    bar_h = 0.11  # height of each individual bar
-    group_gap = 0.35  # extra space between tool groups
+    cell_size = 1.0
+    fig, axes = plt.subplots(n_items, n_roles,
+                             figsize=(cell_size * n_roles + 2.0, cell_size * n_items + 0.6))
+    fig.subplots_adjust(wspace=0.05, hspace=0.15)
 
-    # Y positions: group tools, with sub-bars per role inside each group
-    y_positions = []  # (item_idx, role_idx) -> y
-    group_centers = []
-    for i in range(n_items):
-        group_start = i * (n_roles * bar_h + group_gap)
-        centers = []
-        for j in range(n_roles):
-            y = group_start + j * bar_h
-            y_positions.append(y)
-            centers.append(y)
-        group_centers.append(np.mean(centers))
-
-    fig_h = max(6, n_items * (n_roles * bar_h + group_gap) * 1.1 + 1.5)
-    fig, ax = plt.subplots(figsize=(11, fig_h))
-
-    # Draw bars — each role uses its own hue gradient
     for i, item in enumerate(items):
         for j, role in enumerate(roles):
-            y = y_positions[i * n_roles + j]
+            ax = axes[i][j]
             counts = role_matrix[role].get(item, {})
-            total = sum(counts.values()) if counts else 1
+            values = [counts.get(rating, 0) for rating in schema_scale]
             gradient = role_gradients[role]
-            left = 0.0
-            for si, rating in enumerate(schema_scale):
-                pct = (counts.get(rating, 0) / total) * 100 if total else 0
-                ax.barh(y, pct, left=left, height=bar_h * 0.9,
-                        color=gradient[si])
-                left += pct
 
-    # Y-axis: tool names at group centers
-    wrapped_items = [wrap_label_smart(item, 35) for item in items]
-    ax.set_yticks(group_centers)
-    ax.set_yticklabels(wrapped_items, fontsize=10)
-    ax.set_xlim(0, 105)
-    ax.set_xlabel('Percentage (%)', fontsize=10)
-    ax.invert_yaxis()
+            if sum(values) == 0:
+                ax.text(0.5, 0.5, '—', ha='center', va='center',
+                        fontsize=10, color='#999', transform=ax.transAxes)
+                ax.set_xlim(0, 1)
+                ax.set_ylim(0, 1)
+            else:
+                ax.pie(values, colors=gradient, startangle=90,
+                       wedgeprops={'linewidth': 0.3, 'edgecolor': 'white'})
 
-    # --- Two-part legend ---
+            ax.set_aspect('equal')
+            # Column headers (role abbreviations)
+            if i == 0:
+                ax.set_title(shorten_role_label(role), fontsize=9, pad=2)
+            # Row labels (tool names) on left column
+            if j == 0:
+                ax.set_ylabel(wrap_label_smart(item, 22), fontsize=8,
+                              rotation=0, labelpad=55, ha='right', va='center')
+
+    # Experience-level legend at the bottom (grayscale to show light→dark pattern)
     from matplotlib.patches import Patch
-
-    # 1. Role legend (one swatch per role, using mid-gradient color)
-    role_handles = [
-        Patch(facecolor=role_gradients[role][len(schema_scale) // 2], label=shorten_role_label(role))
-        for role in roles
-    ]
-    # 2. Experience-level legend (grayscale gradient to show light→dark pattern)
     level_handles = [
-        Patch(facecolor=str(0.92 - 0.57 * i / (len(schema_scale) - 1)), label=rating)
-        for i, rating in enumerate(schema_scale)
+        Patch(facecolor=str(0.92 - 0.57 * si / (len(schema_scale) - 1)), label=rating)
+        for si, rating in enumerate(schema_scale)
     ]
+    fig.legend(handles=level_handles, loc='lower center',
+              ncol=len(schema_scale), fontsize=8, frameon=True,
+              title='Experience Level', title_fontsize=9,
+              bbox_to_anchor=(0.55, -0.01))
 
-    leg1 = ax.legend(handles=role_handles, loc='upper left',
-                     bbox_to_anchor=(-0.30, -0.04),
-                     ncol=len(roles), fontsize=8, frameon=True, title='Role', title_fontsize=9)
-    ax.add_artist(leg1)
-    ax.legend(handles=level_handles, loc='upper left',
-              bbox_to_anchor=(-0.30, -0.10),
-              ncol=len(schema_scale), fontsize=8, frameon=True, title='Experience', title_fontsize=9)
-
-    for spine in ax.spines.values():
-        spine.set_linewidth(0.6)
-        spine.set_color('#4D4D4D')
-
-    fig.tight_layout()
+    fig.tight_layout(rect=[0.10, 0.03, 1, 1], h_pad=0.3, w_pad=0.2)
 
     pdf_path = os.path.join(output_dir, f"q4_grouped_roles_{question_key}.pdf")
     fig.savefig(pdf_path, bbox_inches='tight')
