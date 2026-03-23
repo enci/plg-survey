@@ -56,7 +56,9 @@
       "Pre-built common PCG patterns/techniques (WFC, graph grammars, etc.)": "Pre-built patterns",
       "Ability to mix procedural and hand-crafted content": "Mix procedural/handcrafted",
       "Control over generation constraints and rules": "Control over constraints",
-      "Limited or no programming required": "Limited programming"
+      "Limited or no programming required": "Limited programming",
+      "Runtime vs. offline generation options": "Runtime vs. offline",
+      "Support for mission/gameplay integration": "Mission/gameplay integration"
     },
     "preferred_approach": {
       "Building generators from programming primitives (maximum flexibility)": "Programming primitives",

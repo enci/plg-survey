@@ -307,6 +307,105 @@ def plot_procedural_tools_grouped_roles(analyzer: SurveyAnalyzer, plotter: Surve
     print(f"  Saved as: {pdf_path}")
     return pdf_path
 
+# Bar-chart grid: rows = tools, columns = roles, each cell a small stacked bar showing experience distribution.
+def plot_procedural_tools_grouped_roles_bars(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_dir: str) -> str:
+    question_key = 'procedural_tools_experience'
+    question_info = analyzer.get_question_info(question_key)
+    question_text = question_info.get('question', question_key)
+    print(f"Creating bar-grid plot for: {question_text}")
+    analyzer.clear_filters()
+
+    role_data = analyzer.get_question_counts('professional_role', filtered=False)
+    roles = list(role_data.keys())
+    schema_scale = question_info.get('scale', [])
+    role_color_map = get_standard_role_color_map(analyzer, plotter)
+
+    def make_role_gradient(base_rgba, n_levels):
+        r, g, b, _ = base_rgba
+        return [
+            (r * t + 1.0 * (1 - t), g * t + 1.0 * (1 - t), b * t + 1.0 * (1 - t), 1.0)
+            for t in [0.2 + 0.8 * i / (n_levels - 1) for i in range(n_levels)]
+        ]
+
+    role_gradients = {
+        role: make_role_gradient(role_color_map[role], len(schema_scale))
+        for role in roles
+    }
+
+    all_matrix = analyzer.get_matrix_counts(question_key, filtered=False)
+    schema_items = question_info.get('items', [])
+    mapped_items_set = set(all_matrix.keys())
+    items = [it for it in schema_items if it in mapped_items_set]
+    items += sorted(mapped_items_set - set(items))
+
+    role_matrix = {}
+    for role in roles:
+        analyzer.clear_filters()
+        analyzer.add_filter('professional_role', role)
+        analyzer.apply_filters()
+        role_matrix[role] = analyzer.get_matrix_counts(question_key, filtered=True)
+    analyzer.clear_filters()
+
+    n_items = len(items)
+    n_roles = len(roles)
+    cell_w, cell_h = 0.9, 0.65
+    fig, axes = plt.subplots(
+        n_items, n_roles,
+        figsize=(cell_w * n_roles + 2.2, cell_h * n_items + 0.6),
+        squeeze=False
+    )
+
+    for i, item in enumerate(items):
+        for j, role in enumerate(roles):
+            ax = axes[i][j]
+            counts = role_matrix[role].get(item, {})
+            values = [counts.get(rating, 0) for rating in schema_scale]
+            total = sum(values)
+            gradient = role_gradients[role]
+
+            ax.set_xlim(0, 1)
+            ax.set_ylim(0, 1)
+            ax.set_xticks([])
+            ax.set_yticks([])
+            for spine in ax.spines.values():
+                spine.set_visible(False)
+
+            if total == 0:
+                ax.text(0.5, 0.5, '—', ha='center', va='center',
+                        fontsize=19, color='#aaa', transform=ax.transAxes)
+            else:
+                percents = [v / total for v in values]
+                left = 0.0
+                for pct, color in zip(percents, gradient):
+                    ax.barh([0.5], [pct], left=left, height=0.8,
+                            color=color, linewidth=0)
+                    left += pct
+
+            if i == 0:
+                ax.set_title(shorten_role_label(role), fontsize=19, pad=2)
+            if j == 0:
+                ax.set_ylabel(wrap_label_smart(item, 22), fontsize=19,
+                              rotation=0, labelpad=4, ha='right', va='center')
+
+    from matplotlib.patches import Patch
+    level_handles = [
+        Patch(facecolor=str(0.92 - 0.57 * si / (len(schema_scale) - 1)), label=rating)
+        for si, rating in enumerate(schema_scale)
+    ]
+    fig.legend(handles=level_handles, loc='lower center',
+               ncol=len(schema_scale), fontsize=17, frameon=True,
+               title='Experience Level', title_fontsize=17,
+               bbox_to_anchor=(0.5, 0.0))
+
+    fig.subplots_adjust(left=0.18, right=0.99, top=0.97, bottom=0.23, wspace=0.02, hspace=0.05)
+
+    pdf_path = os.path.join(output_dir, f"q4_grouped_roles_bars_{question_key}.pdf")
+    fig.savefig(pdf_path, bbox_inches='tight')
+    plt.close(fig)
+    print(f"  Saved as: {pdf_path}")
+    return pdf_path
+
+
 # Create comparison plot for procedural tools experience between artist and designer/programmer roles.
 def plot_procedural_tools_experience_comparison(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_dir: str) -> str:
     question_key = 'procedural_tools_experience'
@@ -1243,6 +1342,101 @@ def plot_node_tool_features(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, ou
     print(f"  Saved as: {pdf_path}")
     return pdf_path
 
+# Bar-chart grid for q10: rows = features, columns = roles, cells = stacked rank-position bars.
+def plot_node_tool_features_grouped_roles(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_dir: str) -> str:
+    """Ranking chart for q10: one horizontal bar per feature, stacked by role × rank.
+
+    For each role the bar is further sub-divided by rank position using a gradient:
+    darkest shade = rank 1 (most important), lightest = rank 3.
+    Bars do NOT normalize — longer bar = more total mentions.
+    """
+    question_key = 'node_tool_features'
+    question_info = analyzer.get_question_info(question_key)
+    question_text = question_info.get('question', question_key)
+    max_rank = question_info.get('max_selections', 3)
+    print(f"Creating role-stacked ranking plot for: {question_text}")
+    analyzer.clear_filters()
+
+    role_data = analyzer.get_question_counts('professional_role', filtered=False)
+    roles = list(role_data.keys())
+    role_color_map = get_standard_role_color_map(analyzer, plotter)
+
+    # Same gradient helper as q4: darkest=most important (rank 1), lightest=rank N
+    def make_role_gradient(base_rgba, n_levels):
+        r, g, b, _ = base_rgba
+        return [
+            (r * t + 1.0 * (1 - t), g * t + 1.0 * (1 - t), b * t + 1.0 * (1 - t), 1.0)
+            for t in [0.2 + 0.8 * i / (n_levels - 1) for i in range(n_levels)]
+        ]
+
+    role_gradients = {
+        role: make_role_gradient(role_color_map[role], max_rank)
+        for role in roles
+    }
+
+    # Collect per-role ranking positions (count per rank per feature)
+    role_positions = {}
+    for role in roles:
+        analyzer.clear_filters()
+        analyzer.add_filter('professional_role', role)
+        analyzer.apply_filters()
+        role_positions[role] = analyzer.get_ranking_positions(question_key, filtered=True, max_rank=max_rank)
+    analyzer.clear_filters()
+
+    # Feature order: sort by total mentions descending
+    all_seen = set()
+    for pos_data in role_positions.values():
+        all_seen.update(pos_data.keys())
+    total_mentions = {
+        item: sum(sum(role_positions[role].get(item, {}).values()) for role in roles)
+        for item in all_seen
+    }
+    items = sorted(all_seen, key=lambda x: total_mentions[x], reverse=True)
+    wrapped_items = [wrap_label_smart(item, 26) for item in items]
+
+    num_options = len(items)
+    chart_size = calculate_chart_size(num_options)
+
+    fig, ax = plt.subplots(figsize=chart_size)
+    ax.tick_params(axis='y', labelsize=font_size)
+    ax.tick_params(axis='x', labelsize=font_size - 5)
+
+    left = np.zeros(len(items))
+    # Iterate role × rank, drawing one sub-segment per combination
+    for role in roles:
+        gradient = role_gradients[role]
+        for rank_idx, rank in enumerate(range(1, max_rank + 1)):
+            values = np.array([
+                role_positions[role].get(item, {}).get(rank, 0)
+                for item in items
+            ], dtype=float)
+            color = gradient[rank_idx]
+            # No label — we'll build legend manually with saturated colors
+            ax.barh(wrapped_items, values, left=left, color=color,
+                    linewidth=0)
+            left += values
+
+    ax.set_xlabel('Number of times ranked (by role & rank position)', fontsize=font_size - 2)
+    ax.invert_yaxis()
+
+    from matplotlib.patches import Patch
+    legend_handles = [
+        Patch(facecolor=role_color_map[role], label=shorten_role_label(role))
+        for role in roles
+    ]
+    ax.legend(handles=legend_handles, loc='lower right', fontsize=19, ncol=2,
+              title='Role (dark=rank 1, light=rank 3)', title_fontsize=15)
+
+    plt.tight_layout()
+
+    pdf_path = os.path.join(output_dir, f"q10_grouped_roles_bars_{question_key}.pdf")
+    fig.savefig(pdf_path, bbox_inches='tight')
+    plt.close(fig)
+    print(f"  Saved as: {pdf_path}")
+    return pdf_path
+
+
+
 # Create plot for realtime feedback importance question.
 def plot_realtime_feedback_importance(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_dir: str) -> str:
     question_key = 'realtime_feedback_importance'
@@ -1373,6 +1567,105 @@ def plot_genre_interest(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output
     
     print(f"  Saved as: {pdf_path}")
     return pdf_path
+
+
+# Bar-chart grid for q14: rows = genres, columns = roles, cells = stacked interest-level bars.
+def plot_genre_interest_grouped_roles(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_dir: str) -> str:
+    question_key = 'genre_interest'
+    question_info = analyzer.get_question_info(question_key)
+    question_text = question_info.get('question', question_key)
+    print(f"Creating bar-grid plot for: {question_text}")
+    analyzer.clear_filters()
+
+    role_data = analyzer.get_question_counts('professional_role', filtered=False)
+    roles = list(role_data.keys())
+    schema_scale = question_info.get('scale', [])
+    role_color_map = get_standard_role_color_map(analyzer, plotter)
+
+    def make_role_gradient(base_rgba, n_levels):
+        r, g, b, _ = base_rgba
+        return [
+            (r * t + 1.0 * (1 - t), g * t + 1.0 * (1 - t), b * t + 1.0 * (1 - t), 1.0)
+            for t in [0.2 + 0.8 * i / (n_levels - 1) for i in range(n_levels)]
+        ]
+
+    role_gradients = {
+        role: make_role_gradient(role_color_map[role], len(schema_scale))
+        for role in roles
+    }
+
+    all_matrix = analyzer.get_matrix_counts(question_key, filtered=False)
+    schema_items = question_info.get('items', [])
+    mapped_items_set = set(all_matrix.keys())
+    items = [it for it in schema_items if it in mapped_items_set]
+    items += sorted(mapped_items_set - set(items))
+
+    role_matrix = {}
+    for role in roles:
+        analyzer.clear_filters()
+        analyzer.add_filter('professional_role', role)
+        analyzer.apply_filters()
+        role_matrix[role] = analyzer.get_matrix_counts(question_key, filtered=True)
+    analyzer.clear_filters()
+
+    n_items = len(items)
+    n_roles = len(roles)
+    cell_w, cell_h = 0.9, 0.65
+    fig, axes = plt.subplots(
+        n_items, n_roles,
+        figsize=(cell_w * n_roles + 2.2, cell_h * n_items + 0.6),
+        squeeze=False
+    )
+
+    for i, item in enumerate(items):
+        for j, role in enumerate(roles):
+            ax = axes[i][j]
+            counts = role_matrix[role].get(item, {})
+            values = [counts.get(rating, 0) for rating in schema_scale]
+            total = sum(values)
+            gradient = role_gradients[role]
+
+            ax.set_xlim(0, 1)
+            ax.set_ylim(0, 1)
+            ax.set_xticks([])
+            ax.set_yticks([])
+            for spine in ax.spines.values():
+                spine.set_visible(False)
+
+            if total == 0:
+                ax.text(0.5, 0.5, '—', ha='center', va='center',
+                        fontsize=19, color='#aaa', transform=ax.transAxes)
+            else:
+                percents = [v / total for v in values]
+                left = 0.0
+                for pct, color in zip(percents, gradient):
+                    ax.barh([0.5], [pct], left=left, height=0.8, color=color, linewidth=0)
+                    left += pct
+
+            if i == 0:
+                ax.set_title(shorten_role_label(role), fontsize=19, pad=2)
+            if j == 0:
+                ax.set_ylabel(wrap_label_smart(item, 22), fontsize=19,
+                              rotation=0, labelpad=4, ha='right', va='center')
+
+    from matplotlib.patches import Patch
+    level_handles = [
+        Patch(facecolor=str(0.92 - 0.57 * si / (len(schema_scale) - 1)), label=rating)
+        for si, rating in enumerate(schema_scale)
+    ]
+    fig.legend(handles=level_handles, loc='lower center',
+               ncol=len(schema_scale), fontsize=17, frameon=True,
+               title='Interest Level', title_fontsize=17,
+               bbox_to_anchor=(0.5, 0.0))
+
+    fig.subplots_adjust(left=0.18, right=0.99, top=0.97, bottom=0.10, wspace=0.02, hspace=0.05)
+
+    pdf_path = os.path.join(output_dir, f"q14_grouped_roles_bars_{question_key}.pdf")
+    fig.savefig(pdf_path, bbox_inches='tight')
+    plt.close(fig)
+    print(f"  Saved as: {pdf_path}")
+    return pdf_path
+
 
 # Create plot for level representation question.
 def plot_level_representation(analyzer: SurveyAnalyzer, plotter: SurveyPlotter, output_dir: str) -> str:
@@ -1717,7 +2010,7 @@ def main() -> None:
     print("=== Survey Plot Generator ===\n")
     
     # Specify which questions to plot (1-20). Use None or empty list to plot all.
-    questions_to_plot = [4]
+    questions_to_plot = [14]
     # questions_to_plot = list(range(1, 22))  # Plot all questions by default
     
     # Create output directory
@@ -1739,17 +2032,17 @@ def main() -> None:
         1: [plot_professional_role],
         2: [plot_years_experience],
         3: [plot_game_engines],
-        4: [plot_procedural_tools_experience, plot_procedural_tools_grouped_roles],
+        4: [plot_procedural_tools_experience, plot_procedural_tools_grouped_roles, plot_procedural_tools_grouped_roles_bars],
         5: [plot_current_pcg_usage, plot_role_vs_usage_counts],
         6: [plot_level_generation_frequency, plot_level_generation_frequency_comparison],
         7: [plot_primary_concerns],
         8: [plot_tool_view],
         9: [plot_critical_factors],
-        10: [plot_node_tool_features],
+        10: [plot_node_tool_features, plot_node_tool_features_grouped_roles],
         11: [plot_realtime_feedback_importance],
         12: [plot_preferred_approach],
         13: [plot_integration_preference],
-        14: [plot_genre_interest],
+        14: [plot_genre_interest, plot_genre_interest_grouped_roles],
         15: [plot_level_representation],
         16: [plot_most_useful_approach],
         17: [plot_ai_role_preference],

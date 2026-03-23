@@ -31,10 +31,10 @@ def wrap_label_smart(label: str, width: Optional[int], max_length: int = 78) -> 
         return label
     elif width == 0:
         # Special case: wrap at slashes only
-        # return label.replace('/', '/\n')
-        return label
+        return label.replace('/', '/\n')
     else:
-        # Normal width-based wrapping
+        # Normal width-based wrapping — also break at '/' for readability
+        label = label.replace('/', '/\n')
         wrapped = textwrap.fill(label, width=width, break_long_words=False)
         # Check if we have 3 or more lines, if so keep only first two and add "..." to second
         lines = wrapped.split('\n')
