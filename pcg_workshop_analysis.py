@@ -152,7 +152,7 @@ def compare_themes_between_corpora(survey_docs, paper_docs, themes=THEMES, out_d
 			'paper_per_1000_words': p_rate
 		})
 
-	df = pd.DataFrame(rows).sort_values('survey_per_1000_words', ascending=False)
+	df = pd.DataFrame(rows).sort_values('paper_per_1000_words', ascending=False)
     
 	# Plot side-by-side bars for each theme (survey vs papers)
 	# Make the figure taller to accommodate long theme labels and improve readability

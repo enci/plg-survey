@@ -259,10 +259,11 @@ def plot_procedural_tools_grouped_roles(analyzer: SurveyAnalyzer, plotter: Surve
 
     n_items = len(items)
     n_roles = len(roles)
-    cell_size = 1.0
+    cell_size = 0.7
     fig, axes = plt.subplots(n_items, n_roles,
-                             figsize=(cell_size * n_roles + 2.0, cell_size * n_items + 0.6))
-    fig.subplots_adjust(wspace=0.05, hspace=0.15)
+                             figsize=(cell_size * n_roles + 2.0, cell_size * n_items + 0.6),
+                             subplot_kw={'aspect': 'equal'})
+    fig.subplots_adjust(wspace=0.0, hspace=0.0)
 
     for i, item in enumerate(items):
         for j, role in enumerate(roles):
@@ -277,17 +278,15 @@ def plot_procedural_tools_grouped_roles(analyzer: SurveyAnalyzer, plotter: Surve
                 ax.set_xlim(0, 1)
                 ax.set_ylim(0, 1)
             else:
-                ax.pie(values, colors=gradient, startangle=90,
-                       wedgeprops={'linewidth': 0.3, 'edgecolor': 'white'})
-
-            ax.set_aspect('equal')
+                ax.pie(values, colors=gradient, startangle=90, radius=1.0,
+                       wedgeprops={'linewidth': 0, 'edgecolor': 'none'})
             # Column headers (role abbreviations)
             if i == 0:
-                ax.set_title(shorten_role_label(role), fontsize=9, pad=2)
+                ax.set_title(shorten_role_label(role), fontsize=18, pad=0)
             # Row labels (tool names) on left column
             if j == 0:
-                ax.set_ylabel(wrap_label_smart(item, 22), fontsize=8,
-                              rotation=0, labelpad=55, ha='right', va='center')
+                ax.set_ylabel(wrap_label_smart(item, 22), fontsize=18,
+                              rotation=0, labelpad=4, ha='right', va='center')
 
     # Experience-level legend at the bottom (grayscale to show light→dark pattern)
     from matplotlib.patches import Patch
@@ -300,7 +299,7 @@ def plot_procedural_tools_grouped_roles(analyzer: SurveyAnalyzer, plotter: Surve
               title='Experience Level', title_fontsize=9,
               bbox_to_anchor=(0.55, -0.01))
 
-    fig.tight_layout(rect=[0.10, 0.03, 1, 1], h_pad=0.3, w_pad=0.2)
+    fig.subplots_adjust(left=0.18, right=1, top=1, bottom=0.06, wspace=0.0, hspace=0.0)
 
     pdf_path = os.path.join(output_dir, f"q4_grouped_roles_{question_key}.pdf")
     fig.savefig(pdf_path, bbox_inches='tight')
